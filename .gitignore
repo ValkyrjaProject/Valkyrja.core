@@ -2,7 +2,6 @@
 
 ## Botwinder specific:
 config.json
-project.lock.json
 bin/
 obj/
 
