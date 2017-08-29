@@ -19,19 +19,19 @@ namespace Botwinder.core
 			this.GlobalDb = GlobalContext.Create(this.DbConfig.GetDbConnectionString());
 		}
 
-#pragma warning disable 1998
 		public async Task<string> TestDb()
 		{
+			await Connect();
+
 			return "Loaded global config: " + this.GlobalConfig.ConfigName;
 		}
-#pragma warning restore 1998
 
 		public void Dispose()
 		{
 			//todo
 		}
 
-		public void Connect()
+		public async Task Connect()
 		{
 			ReloadConfig();
 
@@ -39,6 +39,12 @@ namespace Botwinder.core
 
 		public void ReloadConfig()
 		{
+			if( !this.GlobalDb.GlobalConfigs.Any() )
+			{
+				this.GlobalDb.GlobalConfigs.Add(new GlobalConfig());
+				this.GlobalDb.SaveChanges();
+			}
+
 			this.GlobalConfig = this.GlobalDb.GlobalConfigs.First();
 		}
 	}
