@@ -100,6 +100,7 @@ namespace Botwinder.core
 			this.Events.Exception += Log;
 			this.Events.Connected += async () => await this.DiscordClient.SetGameAsync(GameStatusUrl);
 			this.Events.Initialize += InitCommands;
+			this.Events.Initialize += InitModules;
 
 			await this.DiscordClient.LoginAsync(TokenType.Bot, this.GlobalConfig.DiscordToken);
 			await this.DiscordClient.StartAsync();
@@ -256,8 +257,53 @@ namespace Botwinder.core
 					await LogException(exception, "--Update");
 				}
 
+				await UpdateModules();
+
 				TimeSpan deltaTime = DateTime.Now - frameTime;
 				await Task.Delay(TimeSpan.FromSeconds(1f / this.GlobalConfig.TargetFps) - deltaTime);
+			}
+		}
+
+		private async Task InitModules()
+		{
+			List<Command> newCommands;
+			foreach( IModule module in this.Modules )
+			{
+				try
+				{
+					module.HandleException += async (e, d, id) => await LogException(e, "--ModuleInit." + module.ToString() + " | " + d, id);
+					newCommands = await module.Init(this);
+
+					foreach( Command cmd in newCommands )
+					{
+						if( this.Commands.ContainsKey(cmd.Id) )
+						{
+							this.Commands[cmd.Id] = cmd;
+							continue;
+						}
+
+						this.Commands.Add(cmd.Id, cmd);
+					}
+				}
+				catch(Exception exception)
+				{
+					await LogException(exception, "--ModuleInit." + module.ToString());
+				}
+			}
+		}
+
+		private async Task UpdateModules()
+		{
+			foreach( IModule module in this.Modules )
+			{
+				try
+				{
+					await module.Update(this);
+				}
+				catch(Exception exception)
+				{
+					await LogException(exception, "--ModuleUpdate." + module.ToString());
+				}
 			}
 		}
 	}
