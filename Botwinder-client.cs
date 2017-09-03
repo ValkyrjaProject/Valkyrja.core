@@ -20,6 +20,9 @@ namespace Botwinder.core
 		private DiscordSocketClient DiscordClient;
 		public Events Events;
 
+		private CancellationTokenSource MainUpdateCancel;
+		private Task MainUpdateTask;
+
 		private const string GameStatusConnecting = "Connecting...";
 		private const string GameStatusUrl = "at http://botwinder.info";
 		private string CurrentGameStatus = GameStatusConnecting;
@@ -130,6 +133,12 @@ namespace Botwinder.core
 		{
 			Console.WriteLine("BotwinderClient: Ready.");
 
+			if( this.MainUpdateTask == null )
+			{
+				this.MainUpdateCancel = new CancellationTokenSource();
+				this.MainUpdateTask = Task.Factory.StartNew(MainUpdate, this.MainUpdateCancel.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+			}
+
 			return Task.CompletedTask;
 		}
 
@@ -161,6 +170,33 @@ namespace Botwinder.core
 			this.GlobalDb.Log.Add(logEntry);
 			this.GlobalDb.SaveChanges();
 			return Task.CompletedTask;
+		}
+
+//Update
+		private async Task MainUpdate()
+		{
+			while( !this.MainUpdateCancel.IsCancellationRequested )
+			{
+				DateTime frameTime = DateTime.Now;
+
+				if( this.DiscordClient.ConnectionState != ConnectionState.Connected ||
+				    this.DiscordClient.LoginState != LoginState.LoggedIn )
+					continue;
+
+				try
+				{
+					await Update();
+				}
+				catch(Exception exception)
+				{
+					await LogException(exception, "--Update");
+				}
+
+				//todo - call individual module updates in a loop, handling exceptions individually.
+
+				TimeSpan deltaTime = DateTime.Now - frameTime;
+				await Task.Delay(TimeSpan.FromSeconds(1f / this.GlobalConfig.TargetFps) - deltaTime);
+			}
 		}
 	}
 }

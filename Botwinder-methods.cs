@@ -17,5 +17,10 @@ namespace Botwinder.core
 			};
 			await this.Events.Exception(exceptionEntry);
 		}
+
+		private async Task Update()
+		{
+			//todo
+		}
 	}
 }
