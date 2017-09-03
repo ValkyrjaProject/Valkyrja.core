@@ -1,17 +1,23 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Botwinder.entities;
 using Discord;
 using Discord.WebSocket;
 
-namespace Botwinder.core
+namespace Botwinder.entities
 {
 	public class Events
 	{
+		/// <summary> Triggers only once, after the client was connected for the first time. Consider using IModule.Init instead. </summary>
+		public Func<Task> Initialize = null;
+		/// <summary> Triggers after every re-connect (including the first connect) </summary>
 		public Func<Task> Connected = null;
+		/// <summary> Triggers every disconnect </summary>
 		public Func<Exception, Task> Disconnected = null;
-		public Func<Task> Ready = null;
+		// This is probably useless and doesn't have to be public, we have the above...
+		internal Func<Task> Ready = null;
+		/// <summary> Log entry was added. </summary>
 		public Func<LogEntry, Task> LogEntryAdded = null;
+		/// <summary> Exception was added. Don't call this event directly, call BotwinderClient.LogException </summary>
 		public Func<ExceptionEntry, Task> Exception = null;
 
 		public Func<SocketGuild, Task> JoinedGuild = null;

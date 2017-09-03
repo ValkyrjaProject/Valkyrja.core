@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Botwinder.entities;
 using Discord;
 using Discord.WebSocket;
@@ -10,22 +11,40 @@ using guid = System.Int64;
 
 namespace Botwinder.core
 {
-	public partial class BotwinderClient<TUser> : IDisposable where TUser : UserData, new()
+	public partial class BotwinderClient<TUser> : IBotwinderClient<TUser>,IDisposable where TUser : UserData, new()
 	{
 		private readonly DbConfig DbConfig;
 		private GlobalContext GlobalDb;
-		private GlobalConfig GlobalConfig;
+		public GlobalConfig GlobalConfig;
 		private Shard CurrentShard;
 
 		private DiscordSocketClient DiscordClient;
 		public Events Events;
 
+		public readonly DateTime TimeStarted = DateTime.Now;
+		private DateTime TimeConnected = DateTime.MaxValue;
+
+		private bool IsInitialized = false;
+		public bool IsConnected{
+			get{
+				return this.DiscordClient.LoginState == LoginState.LoggedIn &&
+				       this.DiscordClient.ConnectionState == ConnectionState.Connected &&
+				       _Connected;
+			}
+			private set{ _Connected = value; }
+		}
+		private bool _Connected = false;
+
 		private CancellationTokenSource MainUpdateCancel;
 		private Task MainUpdateTask;
 
+		public readonly List<IModule> Modules = new List<IModule>();
+
 		private const string GameStatusConnecting = "Connecting...";
 		private const string GameStatusUrl = "at http://botwinder.info";
-		private string CurrentGameStatus = GameStatusConnecting;
+
+		private readonly Dictionary<string, Command> Commands = new Dictionary<string, Command>();
+
 
 		public BotwinderClient()
 		{
@@ -79,10 +98,11 @@ namespace Botwinder.core
 			this.Events.MessageUpdated += OnMessageUpdated;
 			this.Events.LogEntryAdded += Log;
 			this.Events.Exception += Log;
+			this.Events.Connected += async () => await this.DiscordClient.SetGameAsync(GameStatusUrl);
+			this.Events.Initialize += InitCommands;
 
 			await this.DiscordClient.LoginAsync(TokenType.Bot, this.GlobalConfig.DiscordToken);
 			await this.DiscordClient.StartAsync();
-			await this.DiscordClient.SetGameAsync(this.CurrentGameStatus);
 		}
 
 		private void LoadConfig()
@@ -105,28 +125,34 @@ namespace Botwinder.core
 //Events
 		private async Task OnConnecting()
 		{
-			Console.WriteLine("BotwinderClient: Waiting for other shards...");
-
 			//Some other node is already connecting, wait.
+			bool awaited = false;
 			while( this.GlobalDb.Shards.Any(s => s.IsConnecting) )
 			{
+				if( !awaited )
+					Console.WriteLine("BotwinderClient: Waiting for other shards...");
+
+				awaited = true;
 				await Task.Delay(10000);
 			}
 
 			this.CurrentShard.IsConnecting = true;
 			this.GlobalDb.SaveChanges();
+			if( awaited )
+				await Task.Delay(5000); //Ensure sufficient delay between connecting shards.
 
 			Console.WriteLine("BotwinderClient: Connecting...");
 		}
 
-		private Task OnConnected()
+		private async Task OnConnected()
 		{
 			Console.WriteLine("BotwinderClient: Connected.");
 
 			this.CurrentShard.IsConnecting = false;
 			this.GlobalDb.SaveChanges();
 
-			return Task.CompletedTask;
+			this.TimeConnected = DateTime.Now;
+			await this.DiscordClient.SetGameAsync(GameStatusConnecting);
 		}
 
 		private Task OnReady()
@@ -145,9 +171,19 @@ namespace Botwinder.core
 		private async Task OnDisconnected(Exception exception)
 		{
 			Console.WriteLine("BotwinderClient: Disconnected.");
-			this.CurrentGameStatus = GameStatusConnecting;
+			this.IsConnected = false;
 
 			await LogException(exception, "--D.NET Client Disconnected");
+
+			try
+			{
+				if( this.Events.Disconnected != null )
+					await this.Events.Disconnected(exception);
+			}
+			catch(Exception e)
+			{
+				await LogException(e, "--Events.Disconnected");
+			}
 		}
 
 		private async Task OnMessageReceived(SocketMessage message)
@@ -180,8 +216,36 @@ namespace Botwinder.core
 				DateTime frameTime = DateTime.Now;
 
 				if( this.DiscordClient.ConnectionState != ConnectionState.Connected ||
-				    this.DiscordClient.LoginState != LoginState.LoggedIn )
+				    this.DiscordClient.LoginState != LoginState.LoggedIn ||
+				    this.TimeConnected - DateTime.Now < TimeSpan.FromSeconds(this.GlobalConfig.InitialUpdateDelay) )
 					continue;
+
+				if( !this.IsInitialized )
+				{
+					try
+					{
+						this.IsInitialized = true;
+						await this.Events.Initialize();
+					}
+					catch(Exception exception)
+					{
+						await LogException(exception, "--Events.Initialize");
+					}
+				}
+				if( !this.IsConnected )
+				{
+					try
+					{
+						this.IsConnected = true;
+						await this.Events.Connected();
+					}
+					catch(Exception exception)
+					{
+						await LogException(exception, "--Events.Connected");
+					}
+
+					continue; //Don't run update in the same loop as init.
+				}
 
 				try
 				{
@@ -191,8 +255,6 @@ namespace Botwinder.core
 				{
 					await LogException(exception, "--Update");
 				}
-
-				//todo - call individual module updates in a loop, handling exceptions individually.
 
 				TimeSpan deltaTime = DateTime.Now - frameTime;
 				await Task.Delay(TimeSpan.FromSeconds(1f / this.GlobalConfig.TargetFps) - deltaTime);

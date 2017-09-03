@@ -8,19 +8,35 @@ namespace Botwinder.core
 {
 	public partial class BotwinderClient<TUser> : IDisposable where TUser : UserData, new()
 	{
-		public async Task LogException(Exception exception, string data)
+		public async Task SendMessage(string message) //todo
 		{
-			ExceptionEntry exceptionEntry = new ExceptionEntry(){
-				Message = exception.Message,
-				Stack = exception.StackTrace,
-				Data = data
+			LogEntry logEntry = new LogEntry(){
+				Type = LogType.Response,
+				//ChannelId = 0,//todo
+				//ServerId = 0, //todo
+				Message = message
 			};
-			await this.Events.Exception(exceptionEntry);
+			this.GlobalDb.Log.Add(logEntry);
+			this.GlobalDb.SaveChanges();
+
+			//todo
 		}
 
 		private async Task Update()
 		{
+
 			//todo
+		}
+
+		public async Task LogException(Exception exception, string data, guid serverId = 0)
+		{
+			ExceptionEntry exceptionEntry = new ExceptionEntry(){
+				Message = exception.Message,
+				Stack = exception.StackTrace,
+				Data = data,
+				ServerId = serverId
+			};
+			await this.Events.Exception(exceptionEntry);
 		}
 	}
 }
