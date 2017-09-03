@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Botwinder.entities;
 using Discord;
@@ -14,6 +15,7 @@ namespace Botwinder.core
 		private readonly DbConfig DbConfig;
 		private GlobalContext GlobalDb;
 		private GlobalConfig GlobalConfig;
+		private Shard CurrentShard;
 
 		private DiscordSocketClient DiscordClient;
 		public Events Events;
@@ -26,13 +28,6 @@ namespace Botwinder.core
 		{
 			this.DbConfig = DbConfig.Load();
 			this.GlobalDb = GlobalContext.Create(this.DbConfig.GetDbConnectionString());
-		}
-
-		public async Task<string> TestDb()
-		{
-			await Connect();
-
-			return "Loaded global config: " + this.GlobalConfig.ConfigName;
 		}
 
 		public void Dispose()
@@ -48,29 +43,19 @@ namespace Botwinder.core
 
 		public async Task Connect()
 		{
-			ReloadConfig();
-			Shard shard = null;
+			LoadConfig();
 
 			//Find a shard for grabs.
-			while( (shard = this.GlobalDb.Shards.FirstOrDefault(s =>s.IsTaken == false)) == null )
+			while( (this.CurrentShard = this.GlobalDb.Shards.FirstOrDefault(s =>s.IsTaken == false)) == null )
 			{
 				await Task.Delay(10000);
 			}
 
-			shard.IsTaken = true;
-			this.GlobalDb.SaveChanges();
-
-			//Some other node is already connecting, wait.
-			while( this.GlobalDb.Shards.Any(s => s.IsConnecting) )
-			{
-				await Task.Delay(10000);
-			}
-
-			shard.IsConnecting = true; //todo - don't forget to set it back to false somewhere later heh...
+			this.CurrentShard.IsTaken = true;
 			this.GlobalDb.SaveChanges();
 
 			DiscordSocketConfig config = new DiscordSocketConfig();
-			config.ShardId = (int) shard.Id;
+			config.ShardId = (int) this.CurrentShard.Id;
 			config.TotalShards = (int) this.GlobalConfig.TotalShards;
 			config.LogLevel = this.GlobalConfig.LogDebug ? LogSeverity.Debug : LogSeverity.Warning;
 			config.DefaultRetryMode = RetryMode.Retry502 & RetryMode.RetryRatelimit & RetryMode.RetryTimeouts;
@@ -78,10 +63,11 @@ namespace Botwinder.core
 			config.LargeThreshold = 100;
 			config.HandlerTimeout = null;
 			config.MessageCacheSize = 100;
-			//config.ConnectionTimeout
+			config.ConnectionTimeout = int.MaxValue; //todo - figure out something reasonable?
 
 			this.DiscordClient = new DiscordSocketClient(config);
 
+			this.DiscordClient.Connecting += OnConnecting;
 			this.DiscordClient.Connected += OnConnected;
 			this.DiscordClient.Ready += OnReady;
 			this.DiscordClient.Disconnected += OnDisconnected;
@@ -96,8 +82,10 @@ namespace Botwinder.core
 			await this.DiscordClient.SetGameAsync(this.CurrentGameStatus);
 		}
 
-		private void ReloadConfig()
+		private void LoadConfig()
 		{
+			Console.WriteLine("BotwinderClient: Loading configuration.");
+
 			bool save = false;
 			if( !this.GlobalDb.GlobalConfigs.Any() )
 			{
@@ -112,36 +100,53 @@ namespace Botwinder.core
 		}
 
 //Events
+		private async Task OnConnecting()
+		{
+			Console.WriteLine("BotwinderClient: Waiting for other shards...");
+
+			//Some other node is already connecting, wait.
+			while( this.GlobalDb.Shards.Any(s => s.IsConnecting) )
+			{
+				await Task.Delay(10000);
+			}
+
+			this.CurrentShard.IsConnecting = true;
+			this.GlobalDb.SaveChanges();
+
+			Console.WriteLine("BotwinderClient: Connecting...");
+		}
+
 		private Task OnConnected()
 		{
+			Console.WriteLine("BotwinderClient: Connected.");
+
+			this.CurrentShard.IsConnecting = false;
+			this.GlobalDb.SaveChanges();
+
 			return Task.CompletedTask;
 		}
 
 		private Task OnReady()
 		{
+			Console.WriteLine("BotwinderClient: Ready.");
+
 			return Task.CompletedTask;
 		}
 
-		private Task OnDisconnected(Exception exception)
+		private async Task OnDisconnected(Exception exception)
 		{
+			Console.WriteLine("BotwinderClient: Disconnected.");
 			this.CurrentGameStatus = GameStatusConnecting;
 
-			ExceptionEntry e = new ExceptionEntry();
-			e.Message += exception.Message;
-			e.Stack += exception.StackTrace;
-			e.Data += "--D.NET Client Disconnected";
-			this.Events.Exception(e);
-			return Task.CompletedTask;
+			await LogException(exception, "--D.NET Client Disconnected");
 		}
 
-		private Task OnMessageReceived(SocketMessage message)
+		private async Task OnMessageReceived(SocketMessage message)
 		{
-			return Task.CompletedTask;
 		}
 
-		private Task OnMessageUpdated(SocketMessage originalMessage, SocketMessage updatedMessage, ISocketMessageChannel channel)
+		private async Task OnMessageUpdated(SocketMessage originalMessage, SocketMessage updatedMessage, ISocketMessageChannel channel)
 		{
-			return Task.CompletedTask;
 		}
 
 		private Task Log(ExceptionEntry exceptionEntry)
