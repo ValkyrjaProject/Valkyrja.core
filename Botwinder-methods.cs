@@ -28,6 +28,9 @@ namespace Botwinder.core
 			//todo
 		}
 
+		public async Task LogException(Exception exception, CommandArguments<TUser> args) =>
+			await LogException(exception, "--Command: "+ args.Command.Id + " | Parameters: " + args.TrimmedMessage, args.Server.Id);
+
 		public async Task LogException(Exception exception, string data, guid serverId = 0)
 		{
 			ExceptionEntry exceptionEntry = new ExceptionEntry(){
