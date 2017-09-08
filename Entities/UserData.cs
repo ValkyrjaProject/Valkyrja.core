@@ -21,7 +21,41 @@ namespace Botwinder.entities
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public guid UserId{ get; set; } = 0;
 
-		//todo
+		[Column("verified")]
+		public bool Verified{ get; set: } = false;
+		
+		[Column("karma_count")]
+		public Int64 KarmaCount{ get; set; } = 0;
+		
+		[Column("warning_count")]
+		public Int64 WarningCount{ get; set; } = 0;
+		
+		[Column("notes", TypeName = "text")]
+		public string Notes{ get; set; } = "";
+		
+		[Column("last_thanks_time")]
+		public DateTime LastThanksTime{ get; set; } = DateTime.MinValue;
+		
+		[Column("banned_until")]
+		public DateTime BannedUntil{ get; set; } = DateTime.MinValue;
+		
+		[Column("muted_until")]
+		public DateTime MutedUntil{ get; set; } = DateTime.MinValue;
+
+		[Column("ignored")]
+		public bool Ignored{ get; set: } = false;
+		
+		[Column("count_messages")]
+		public Int64 CountMessages{ get; set; } = 0;
+		
+		[Column("count_attachments")]
+		public Int64 CountAttachments{ get; set; } = 0;
+		
+		[Column("level_relative")]
+		public Int64 LevelRelative{ get; set; } = 0;
+		
+		[Column("exp_relative")]
+		public Int64 ExpRelative{ get; set; } = 0;
 
 		public List<Username> Usernames;
 		public List<Nickname> Nicknames;
