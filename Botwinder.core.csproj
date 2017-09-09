@@ -12,7 +12,6 @@
     <PackageReference Include="Discord.Net.Core" Version="2.0.0-alpha-build-00824" />
     <PackageReference Include="Discord.Net.Rest" Version="2.0.0-alpha-build-00824" />
     <PackageReference Include="Discord.Net.WebSocket" Version="2.0.0-alpha-build-00824" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.1.1" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.0.0-rtm-10062" />
   </ItemGroup>
 </Project>

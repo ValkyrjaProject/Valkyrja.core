@@ -1,10 +1,8 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
-using MySQL.Data.EntityFrameworkCore.Extensions;
+using Pomelo.EntityFrameworkCore.MySql;
+
 using guid = System.UInt64;
 
 namespace Botwinder.entities
@@ -43,7 +41,7 @@ namespace Botwinder.entities
 		public static GlobalContext Create(string connectionString)
 		{
 			DbContextOptionsBuilder<GlobalContext> optionsBuilder = new DbContextOptionsBuilder<GlobalContext>();
-			optionsBuilder.UseMySQL(connectionString);
+			optionsBuilder.UseMySql(connectionString);
 
 			GlobalContext newContext = new GlobalContext(optionsBuilder.Options);
 			newContext.Database.EnsureCreated();

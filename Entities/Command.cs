@@ -108,7 +108,7 @@ namespace Botwinder.entities
 
 		/// <summary> Returns true if the User has permission to execute this command. </summary>
 		/// <param name="commandChannelOptions"> List of all the channel options for specific command. </param>
-		public bool CanExecute<TUser>(IBotwinderClient<TUser> client, Server<TUser> server, ISocketMessageChannel channel, SocketGuildUser user, CommandOptions commandOptions, List<CommandChannelOptions> commandChannelOptions) where TUser: UserData, new()
+		public bool CanExecute<TUser>(IBotwinderClient<TUser> client, Server<TUser> server, SocketGuildChannel channel, SocketGuildUser user, CommandOptions commandOptions, List<CommandChannelOptions> commandChannelOptions) where TUser: UserData, new()
 		{
 			if( client.IsGlobalAdmin(user.Id) )
 				return true;
@@ -214,9 +214,6 @@ namespace Botwinder.entities
 		/// <summary> Custom server-side options, can be null! </summary>
 		public CommandOptions CommandOptions{ get; private set; }
 
-		/// <summary> Custom server-side options, can be null! </summary>
-		public CommandChannelOptions CommandChannelOptions{ get; private set; }
-
 		/// <summary> Server, where this command was executed. Null for PM. </summary>
 		public Server<TUser> Server{ get; private set; }
 
@@ -233,12 +230,11 @@ namespace Botwinder.entities
 		public string[] MessageArgs{ get; private set; }
 
 
-		public CommandArguments(IBotwinderClient<TUser> client, Command<TUser> command, Server<TUser> server, SocketTextChannel channel, SocketMessage message, string trimmedMessage, string[] messageArgs, CommandOptions options = null, CommandChannelOptions channelOptions = null)
+		public CommandArguments(IBotwinderClient<TUser> client, Command<TUser> command, Server<TUser> server, SocketTextChannel channel, SocketMessage message, string trimmedMessage, string[] messageArgs, CommandOptions options = null)
 		{
 			this.Client = client;
 			this.Command = command;
 			this.CommandOptions = options;
-			this.CommandChannelOptions = channelOptions;
 			this.Server = server;
 			this.Channel = channel;
 			this.Message = message;

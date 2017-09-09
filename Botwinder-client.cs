@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Botwinder.entities;
 using Discord;
 using Discord.WebSocket;
@@ -42,7 +44,9 @@ namespace Botwinder.core
 
 		private const string GameStatusConnecting = "Connecting...";
 		private const string GameStatusUrl = "at http://botwinder.info";
+		private readonly Regex RegexCommandParams = new Regex("\"[^\"]+\"|\\S+", RegexOptions.Compiled);
 
+		private readonly ConcurrentDictionary<guid, Server<TUser>> Servers = new ConcurrentDictionary<guid, Server<TUser>>();
 		private readonly Dictionary<string, Command<TUser>> Commands = new Dictionary<string, Command<TUser>>();
 
 
@@ -189,10 +193,38 @@ namespace Botwinder.core
 
 		private async Task OnMessageReceived(SocketMessage message)
 		{
+			SocketTextChannel channel = message.Channel as SocketTextChannel;
+			if( channel == null || !this.Servers.ContainsKey(channel.Guild.Id) )
+				return;
+
+			Server<TUser> server = this.Servers[channel.Guild.Id];
+			if( server.Config.IgnoreBots && message.Author.IsBot ||
+			    server.Config.IgnoreEveryone && message.MentionedRoles.Any(r => r.IsEveryone) )
+				return;
+
+			bool commandExecuted = false;
+			string prefix;
+			if( (!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) && message.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
+			    (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) && message.Content.StartsWith(prefix = server.Config.CommandPrefixAlt)) )
+				commandExecuted = await HandleCommand(server, channel, message, prefix);
 		}
 
-		private async Task OnMessageUpdated(SocketMessage originalMessage, SocketMessage updatedMessage, ISocketMessageChannel channel)
+		private async Task OnMessageUpdated(SocketMessage originalMessage, SocketMessage updatedMessage, ISocketMessageChannel iChannel)
 		{
+			SocketTextChannel channel = iChannel as SocketTextChannel;
+			if( channel == null || !this.Servers.ContainsKey(channel.Guild.Id) )
+				return;
+
+			Server<TUser> server = this.Servers[channel.Guild.Id];
+			if( server.Config.IgnoreBots && updatedMessage.Author.IsBot ||
+			    server.Config.IgnoreEveryone && updatedMessage.MentionedRoles.Any(r => r.IsEveryone) )
+				return;
+
+			bool commandExecuted = false;
+			string prefix;
+			if( (!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) && updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
+			    (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) && updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefixAlt)) )
+				commandExecuted = await HandleCommand(server, channel, updatedMessage, prefix);
 		}
 
 		private Task Log(ExceptionEntry exceptionEntry)
@@ -312,6 +344,105 @@ namespace Botwinder.core
 					await LogException(exception, "--ModuleUpdate." + module.ToString());
 				}
 			}
+		}
+
+//Commands
+		private void GetCommandAndParams(string message, out string commandString, out string trimmedMessage,
+			out string[] parameters)
+		{
+			trimmedMessage = "";
+			parameters = null;
+
+			MatchCollection regexMatches = this.RegexCommandParams.Matches(message);
+			if( regexMatches.Count == 0 )
+			{
+				commandString = message.Trim();
+				return;
+			}
+
+			commandString = regexMatches[0].Value;
+
+			if( regexMatches.Count > 1 )
+			{
+				trimmedMessage = message.Substring(regexMatches[1].Index).Trim('\"', ' ', '\n');
+				Match[] matches = new Match[regexMatches.Count];
+				regexMatches.CopyTo(matches, 0);
+				parameters = matches.Skip(1).Select(p => p.Value).ToArray();
+				for(int i = 0; i < parameters.Length; i++)
+					parameters[i] = parameters[i].Trim('"');
+			}
+		}
+
+		private async Task<bool> HandleCommand(Server<TUser> server, SocketTextChannel channel, SocketMessage message, string prefix)
+		{
+			GetCommandAndParams(message.Content.Substring(prefix.Length), out string commandString, out string trimmedMessage, out string[] parameters);
+
+			Command<TUser> command = null;
+			if( server.Commands.ContainsKey(commandString) ||
+			    (server.CustomAliases.ContainsKey(commandString) &&
+			     server.Commands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId)) )
+			{
+				command = server.Commands[commandString];
+				CommandOptions commandOptions = CommandOptions.Get(server, commandString);
+				List<CommandChannelOptions> commandChannelOptions = CommandChannelOptions.Get(server, commandString);
+
+				CommandArguments<TUser> args = new CommandArguments<TUser>(this, command, server, channel, message, trimmedMessage, parameters, commandOptions);
+
+				if( command.CanExecute(this, server, channel, message.Author as SocketGuildUser, commandOptions,
+					commandChannelOptions) )
+					return await command.Execute(args);
+				return true;
+			}
+			else if( server.CustomCommands.ContainsKey(commandString) ||
+			         (server.CustomAliases.ContainsKey(commandString) &&
+			          server.CustomCommands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId)) )
+			{
+				CommandOptions commandOptions = CommandOptions.Get(server, commandString);
+				List<CommandChannelOptions> commandChannelOptions = CommandChannelOptions.Get(server, commandString);
+
+				return await HandleCustomCommand(server.CustomCommands[commandString], channel, message);
+			}
+
+			return false;
+		}
+
+		private async Task<bool> HandleCustomCommand(CustomCommand cmd, SocketTextChannel channel, SocketMessage message)
+		{
+			//todo - implement support for CommandOptions and CommandChannelOptions.
+
+			string msg = cmd.Response;
+
+			if( msg.Contains("{sender}") || msg.Contains("{{sender}}") )
+			{
+				msg = msg.Replace("{{sender}}", "<@{0}>").Replace("{sender}", "<@{0}>");
+				msg = string.Format(msg, message.Author.Id);
+			}
+
+			if( (msg.Contains("{mentioned}") || msg.Contains("{{mentioned}}")) && message.MentionedUsers != null )
+			{
+				string mentions = "";
+				SocketUser[] mentionedUsers = message.MentionedUsers.ToArray();
+				for( int i = 0; i < mentionedUsers.Length; i++ )
+				{
+					if( i != 0 )
+						mentions += (i == mentionedUsers.Length - 1) ? " and " : ", ";
+
+					mentions += "<@" + mentionedUsers[i].Id + ">";
+				}
+
+				if( string.IsNullOrEmpty(mentions) )
+				{
+					msg = msg.Replace("{{mentioned}}", "Nobody").Replace("{mentioned}", "Nobody");
+				}
+				else
+				{
+					msg = msg.Replace("{{mentioned}}", "{0}").Replace("{mentioned}", "{0}");
+					msg = string.Format(msg, mentions);
+				}
+			}
+
+			//todo send `msg` to `channel` and rewrite using string builder...
+			return true;
 		}
 	}
 }

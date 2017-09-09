@@ -23,9 +23,6 @@ namespace Botwinder.entities
 
 		[Column("description", TypeName = "text")]
 		public string Description{ get; set; } = "This is custom command on this server.";
-
-		[Column("delete_request")]
-		public bool DeleteRequest{ get; set; } = false;
 	}
 
 	[Table("custom_aliases")]

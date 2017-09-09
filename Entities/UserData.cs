@@ -22,7 +22,7 @@ namespace Botwinder.entities
 		public guid UserId{ get; set; } = 0;
 
 		[Column("verified")]
-		public bool Verified{ get; set: } = false;
+		public bool Verified{ get; set; } = false;
 
 		[Column("karma_count")]
 		public Int64 KarmaCount{ get; set; } = 0;
@@ -43,7 +43,7 @@ namespace Botwinder.entities
 		public DateTime MutedUntil{ get; set; } = DateTime.MinValue;
 
 		[Column("ignored")]
-		public bool Ignored{ get; set: } = false;
+		public bool Ignored{ get; set; } = false;
 
 		[Column("count_messages")]
 		public Int64 CountMessages{ get; set; } = 0;
