@@ -5,7 +5,7 @@ using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using MySQL.Data.EntityFrameworkCore.Extensions;
-using guid = System.Int64;
+using guid = System.UInt64;
 
 namespace Botwinder.entities
 {

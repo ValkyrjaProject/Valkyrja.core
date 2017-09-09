@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-using guid = System.Int64;
+using guid = System.UInt64;
 
 namespace Botwinder.entities
 {
@@ -27,97 +27,97 @@ namespace Botwinder.entities
 
 		[Column("ignore_bots")]
 		public bool IgnoreBots{ get; set; } = true;
-		
+
 		[Column("ignore_everyone")]
 		public bool IgnoreEveryone{ get; set; } = true;
-				
+
 		[Column("command_prefix", TypeName = "varchar(255)")]
 		public string CommandPrefix{ get; set; } = "!";
 
 		[Column("command_prefix_alt", TypeName = "varchar(255)")]
 		public string CommandPrefixAlt{ get; set; } = "";
-		
+
 		[Column("execute_on_edit")]
 		public bool ExecuteOnEdit{ get; set; } = true;
-		
+
 		[Column("antispam_priority")]
 		public bool AntispamPriority{ get; set; } = false;
-		
+
 		[Column("antispam_invites")]
 		public bool AntispamInvites{ get; set; } = false;
-		
+
 		[Column("antispam_invites_ban")]
 		public bool AntispamInvitesBan{ get; set; } = false;
-		
+
 		[Column("antispam_duplicate")]
 		public bool AntispamDuplicate{ get; set; } = false;
-		
+
 		[Column("antispam_duplicate_crossserver")]
 		public bool AntispamDuplicateCrossserver{ get; set; } = false;
-		
+
 		[Column("antispam_duplicate_ban")]
 		public bool AntispamDuplicateBan{ get; set; } = false;
 
 		[Column("antispam_mentions_max")]
 		public Int64 AntispamMentionsMax{ get; set; } = 0;
-		
+
 		[Column("antispam_mentions_ban")]
 		public bool AntispamMentionsBan{ get; set; } = false;
-		
+
 		[Column("antispam_mute")]
 		public bool AntispamMute{ get; set; } = false;
 
 		[Column("antispam_mute_duration")]
 		public Int64 AntispamMuteDuration{ get; set; } = 5;
-		
+
 		[Column("antispam_links_extended")]
 		public bool AntispamLinksExtended{ get; set; } = false;
-		
+
 		[Column("antispam_links_extended_ban")]
 		public bool AntispamLinksExtendedBan{ get; set; } = false;
-		
+
 		[Column("antispam_links_standard")]
 		public bool AntispamLinksStandard{ get; set; } = false;
-		
+
 		[Column("antispam_links_standard_ban")]
 		public bool AntispamStandardStandardBan{ get; set; } = false;
-		
+
 		[Column("antispam_links_youtube")]
 		public bool AntispamLinksYoutube{ get; set; } = false;
-		
+
 		[Column("antispam_links_youtube_ban")]
 		public bool AntispamLinksYoutubeBan{ get; set; } = false;
-		
+
 		[Column("antispam_links_twitch")]
 		public bool AntispamLinksTwitch{ get; set; } = false;
-		
+
 		[Column("antispam_links_twitch_ban")]
 		public bool AntispamLinksTwitchBan{ get; set; } = false;
-		
+
 		[Column("antispam_links_hitbox")]
 		public bool AntispamLinksHitbox{ get; set; } = false;
-		
+
 		[Column("antispam_links_hitbox_ban")]
 		public bool AntispamLinksHitboxBan{ get; set; } = false;
-		
+
 		[Column("antispam_links_beam")]
 		public bool AntispamLinksBeam{ get; set; } = false;
-		
+
 		[Column("antispam_links_beam_ban")]
 		public bool AntispamLinksBeamBan{ get; set; } = false;
-		
+
 		[Column("antispam_links_imgur")]
 		public bool AntispamLinksImgur{ get; set; } = false;
-		
+
 		[Column("antispam_links_imgur_ban")]
 		public bool AntispamLinksImgurBan{ get; set; } = false;
 
 		[Column("antispam_tolerance")]
 		public Int64 AntispamTolerance{ get; set; } = 7;
-		
+
 		[Column("antispam_ignore_members")]
 		public bool AntispamIgnoreMembers{ get; set; } = false;
-		
+
 		[Column("operator_roleid")]
 		public guid OperatorRoleId{ get; set; } = 0;
 
@@ -126,13 +126,13 @@ namespace Botwinder.entities
 
 		[Column("quickban_reason", TypeName = "text")]
 		public string QuickbanReason{ get; set; } = "";
-		
+
 		[Column("mute_roleid")]
 		public guid MuteRoleId{ get; set; } = 0;
-		
+
 		[Column("mute_ignore_channelid")]
 		public guid MuteIgnoreChannelId{ get; set; } = 0;
-		
+
 		[Column("karma_enabled")]
 		public bool KarmaEnabled{ get; set; } = false;
 
@@ -141,7 +141,7 @@ namespace Botwinder.entities
 
 		[Column("karma_limit_minutes")]
 		public Int64 KarmaLimitMinutes{ get; set; } = 60;
-		
+
 		[Column("karma_limit_response")]
 		public bool KarmaLimitResponse{ get; set; } = true;
 
@@ -156,31 +156,31 @@ namespace Botwinder.entities
 
 		[Column("karma_consume_verb", TypeName = "varchar(255)")]
 		public string KarmaConsumeVerb{ get; set; } = "nommed";
-		
+
 		[Column("log_Channelid")]
 		public guid LogChannelId{ get; set; } = 0;
-		
+
 		[Column("mod_channelid")]
 		public guid ModChannelId{ get; set; } = 0;
-		
+
 		[Column("log_bans")]
 		public bool LogBans{ get; set; } = false;
-		
+
 		[Column("log_promotions")]
 		public bool LogPromotions{ get; set; } = false;
-		
+
 		[Column("log_deletedmessages")]
 		public bool LogDeletedmessages{ get; set; } = false;
-		
+
 		[Column("log_editedmessages")]
 		public bool LogEditedmessages{ get; set; } = false;
-		
+
 		[Column("activity_channelid")]
 		public guid ActivityChannelId{ get; set; } = 0;
-		
+
 		[Column("log_join")]
 		public bool LogJoin{ get; set; } = false;
-		
+
 		[Column("log_leave")]
 		public bool LogLeave{ get; set; } = false;
 
@@ -189,28 +189,28 @@ namespace Botwinder.entities
 
 		[Column("log_message_leave", TypeName = "text")]
 		public string LogMessageLeave{ get; set; } = "{0} left.";
-		
+
 		[Column("log_mention_join")]
 		public bool LogMentionJoin{ get; set; } = false;
-		
+
 		[Column("log_mention_leave")]
 		public bool LogMentionLeave{ get; set; } = false;
-		
+
 		[Column("welcome_pm")]
 		public bool WelcomeMessageEnabled{ get; set; } = false;
 
 		[Column("welcome_message", TypeName = "text")]
 		public string WelcomeMessage{ get; set; } = "Hi {0}, welcome to our server!";
-		
+
 		[Column("welcome_roleid")]
 		public guid WelcomeRoleId{ get; set; } = 0;
-		
+
 		[Column("verify")]
 		public bool VerificationEnabled{ get; set; } = false;
-		
+
 		[Column("verify_on_welcome")]
 		public bool VerifyOnWelcome{ get; set; } = false;
-		
+
 		[Column("verify_roleid")]
 		public guid VerifyRoleId{ get; set; } = 0;
 
@@ -228,13 +228,13 @@ namespace Botwinder.entities
 			                "**8.** Respect authority, and do not troll moderators on duty. Do not impersonate Admins or Mods, or anyone else.\n" +
 			                "**9.** Don't join just to advertise your stuff, it's rude. If you have something worthy, get in touch with us, and we can maybe give you a place in the news channel. This includes discord invite links, which will be automatically removed - get in touch with the Mods.\n" +
 			                "**10.** Use common sense together with everything above.";
-		
+
 		[Column("exp_enabled")]
 		public bool ExpEnabled{ get; set; } = false;
 
 		[Column("base_exp_to_levelup")]
 		public Int64 BaseExpToLevelup{ get; set; } = 0;
-		
+
 		[Column("exp_announce_levelup")]
 		public bool ExpAnnounceLevelup{ get; set; } = false;
 
@@ -243,7 +243,7 @@ namespace Botwinder.entities
 
 		[Column("exp_per_attachment")]
 		public Int64 ExpPerAttachment{ get; set; } = 0;
-		
+
 		[Column("exp_cumulative_roles")]
 		public bool ExpCumulativeRoles{ get; set; } = false;
 	}

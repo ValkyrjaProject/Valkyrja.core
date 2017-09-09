@@ -3,13 +3,19 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using guid = System.Int64;
+using System.Net.Sockets;
+using System.Runtime.CompilerServices;
+using Discord.WebSocket;
+using guid = System.UInt64;
 
 namespace Botwinder.entities
 {
 	public class Server<TUser> where TUser: UserData, new()
 	{
 		public readonly guid Id;
+
+		public readonly SocketGuild Guild;
+
 		public readonly Dictionary<string, Command<TUser>> Commands;
 		public Dictionary<string, CustomCommand> CustomCommands;
 		public Dictionary<string, CustomAlias> CustomAliases;
@@ -24,9 +30,10 @@ namespace Botwinder.entities
 		public Dictionary<guid, RoleConfig> Roles;
 
 
-		public Server(guid id, Dictionary<string, Command<TUser>> allCommands, ServerContext db)
+		public Server(SocketGuild guild, Dictionary<string, Command<TUser>> allCommands, ServerContext db)
 		{
-			this.Id = id;
+			this.Id = guild.Id;
+			this.Guild = guild;
 			this.Commands = new Dictionary<string, Command<TUser>>(allCommands);
 			ReloadConfig(db);
 		}
@@ -61,6 +68,36 @@ namespace Botwinder.entities
 			this.MutedChannels = db.Channels.Where(c => c.ServerId == this.Id && c.MutedUntil > DateTime.MinValue).Select(c => c.ChannelId).ToList();
 
 			ReloadConfig(db);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool IsOwner(SocketGuildUser user)
+		{
+			return this.Guild.OwnerId == user.Id || (user.GuildPermissions.ManageGuild && user.GuildPermissions.Administrator);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool IsAdmin(SocketGuildUser user)
+		{
+			return user.Roles.Any(r => this.Roles.Any(p => p.Value.PermissionLevel == RolePermissionLevel.Admin && p.Value.RoleId == r.Id));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool IsModerator(SocketGuildUser user)
+		{
+			return user.Roles.Any(r => this.Roles.Any(p => p.Value.PermissionLevel == RolePermissionLevel.Moderator && p.Value.RoleId == r.Id));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool IsSubModerator(SocketGuildUser user)
+		{
+			return user.Roles.Any(r => this.Roles.Any(p => p.Value.PermissionLevel == RolePermissionLevel.SubModerator && p.Value.RoleId == r.Id));
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool IsMember(SocketGuildUser user)
+		{
+			return user.Roles.Any(r => this.Roles.Any(p => p.Value.PermissionLevel == RolePermissionLevel.Member && p.Value.RoleId == r.Id));
 		}
 	}
 }

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-using guid = System.Int64;
+using guid = System.UInt64;
 
 namespace Botwinder.entities
 {
@@ -13,7 +13,7 @@ namespace Botwinder.entities
 
 		/// <summary> Initialise the module, startup call only. </summary>
 		/// <returns> Return a list of Commands for this module. </returns>
-		Task<List<Command>> Init<TUser>(IBotwinderClient<TUser> client) where TUser: UserData, new();
+		Task<List<Command<TUser>>> Init<TUser>(IBotwinderClient<TUser> client) where TUser: UserData, new();
 
 		/// <summary> Main Update loop for this module. Do whatever you want. </summary>
 		Task Update<TUser>(IBotwinderClient<TUser> client) where TUser: UserData, new();

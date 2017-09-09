@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Botwinder.entities;
 
-using guid = System.Int64;
+using guid = System.UInt64;
 
 namespace Botwinder.core
 {

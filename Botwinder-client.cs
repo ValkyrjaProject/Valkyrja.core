@@ -7,7 +7,7 @@ using Botwinder.entities;
 using Discord;
 using Discord.WebSocket;
 
-using guid = System.Int64;
+using guid = System.UInt64;
 
 namespace Botwinder.core
 {
@@ -15,7 +15,7 @@ namespace Botwinder.core
 	{
 		private readonly DbConfig DbConfig;
 		private GlobalContext GlobalDb;
-		public GlobalConfig GlobalConfig;
+		public GlobalConfig GlobalConfig{ get; set; }
 		private Shard CurrentShard;
 
 		private DiscordSocketClient DiscordClient;
@@ -43,7 +43,7 @@ namespace Botwinder.core
 		private const string GameStatusConnecting = "Connecting...";
 		private const string GameStatusUrl = "at http://botwinder.info";
 
-		private readonly Dictionary<string, Command> Commands = new Dictionary<string, Command>();
+		private readonly Dictionary<string, Command<TUser>> Commands = new Dictionary<string, Command<TUser>>();
 
 
 		public BotwinderClient()
@@ -264,9 +264,16 @@ namespace Botwinder.core
 			}
 		}
 
+		private async Task Update()
+		{
+
+			//todo
+		}
+
+//Modules
 		private async Task InitModules()
 		{
-			List<Command> newCommands;
+			List<Command<TUser>> newCommands;
 			foreach( IModule module in this.Modules )
 			{
 				try
@@ -274,7 +281,7 @@ namespace Botwinder.core
 					module.HandleException += async (e, d, id) => await LogException(e, "--ModuleInit." + module.ToString() + " | " + d, id);
 					newCommands = await module.Init(this);
 
-					foreach( Command cmd in newCommands )
+					foreach( Command<TUser> cmd in newCommands )
 					{
 						if( this.Commands.ContainsKey(cmd.Id) )
 						{

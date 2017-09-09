@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-using guid = System.Int64;
+using guid = System.UInt64;
 
 namespace Botwinder.entities
 {
@@ -21,6 +21,9 @@ namespace Botwinder.entities
 
 		[Column("userid")]
 		public guid UserId{ get; set; } = 0;
+
+		[Column("admin_userid")]
+		public guid AdminUserId{ get; set; } = 0;
 
 		[Column("enforce_requirements")]
 		public bool EnforceRequirements{ get; set; } = false;
