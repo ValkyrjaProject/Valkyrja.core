@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Linq;
+using Discord.WebSocket;
 
-using guid = System.Int64;
+using guid = System.UInt64;
 
 namespace Botwinder.entities
 {
@@ -36,13 +38,13 @@ namespace Botwinder.entities
 		public bool IsCustomCommand{ get; set; }
 
 		/// <summary> Subscriber bonus only </summary>
-		public bool IsBonusCommand{ get; set; } //todo - Check for user being partnered and bonus.
+		public bool IsBonusCommand{ get; set; }
 
 		/// <summary> Subscriber bonus only </summary>
-		public bool IsPremiumCommand{ get; set; } //todo - Check for user being partnered and premium.
+		public bool IsPremiumCommand{ get; set; }
 
 		/// <summary> Subscriber bonus only </summary>
-		public bool IsPremiumServerwideCommand{ get; set; } //todo - Check for server being partnered and premium, and owner being partnered and premium.
+		public bool IsPremiumServerwideCommand{ get; set; }
 
 		/// <summary> Use <c>Command.PermissionType</c> to determine who can use this command. Defaults to ServerOwnder + Whitelisted or Everyone </summary>
 		public int RequiredPermissions = PermissionType.Everyone | PermissionType.ServerOwner;
@@ -50,34 +52,8 @@ namespace Botwinder.entities
 		/// <summary> Description of this command will be used when the user invokes `help` command. </summary>
 		public string Description{ get; set; } = "";
 
-
+		/// <summary> The Code Stuff! </summary>
 		public Func<CommandArguments<TUser>, Task> OnExecute{ get; set; }
-
-		public async Task<bool> Execute(CommandArguments<TUser> e)
-		{
-			if( this.OnExecute == null )
-				return false;
-
-			if( (this.DeleteRequest || (e.CommandOptions != null && e.CommandOptions.DeleteRequest)) && e.Server.DiscordServer.CurrentUser.ServerPermissions.ManageMessages )
-			{
-				try
-				{
-					await e.Message.Delete();
-				} catch(Exception)
-				{}
-			}
-
-			try
-			{
-				if( this.SendTyping )
-					await e.Message.Channel.SendIsTyping();
-				await this.OnExecute(e);
-			} catch(Exception exception)
-			{
-				await e.Client.LogException(exception, e);
-			}
-			return true;
-		}
 
 		/// <summary> Initializes a new instance of the <see cref="Botwinder.entities.Command"/> class. </summary>
 		/// <param name="id"> You will execute the command by using CommandCharacter+Command.ID </param>
@@ -131,33 +107,38 @@ namespace Botwinder.entities
 		}
 
 		/// <summary> Returns true if the User has permission to execute this command. </summary>
-		/// <param name="server"> Server will be null if this is used in PM. </param>
-		public bool CanExecute<TUser>(IBotwinderClient<TUser> client, Server<TUser> server, Channel channel, User user, CommandOptions commandOptions) where TUser: UserData, new()
+		/// <param name="commandChannelOptions"> List of all the channel options for specific command. </param>
+		public bool CanExecute<TUser>(IBotwinderClient<TUser> client, Server<TUser> server, ISocketMessageChannel channel, SocketGuildUser user, CommandOptions commandOptions, List<CommandChannelOptions> commandChannelOptions) where TUser: UserData, new()
 		{
-			// server == null, if this command is used in PM, in which case we look only at the user whitelist.
-			if( client.IsGlobalAdmin(user) )
+			if( client.IsGlobalAdmin(user.Id) )
 				return true;
 
-			//This is now obsolete code and given enough time it should be removed. And I mean the whole whitelist/blacklist system.
-			if( server != null && this.RoleBlacklistEnabled && this.RoleBlacklist != null )
-				foreach(Role role in user.Roles)
-					if( this.RoleBlacklist.Contains(role.Id) )
-						return false;
+			//Premium-only commands
+			if( this.IsPremiumCommand && !client.IsPremiumSubscriber(user.Id) )
+				return false;
+			if( this.IsBonusCommand && !client.IsBonusSubscriber(user.Id) )
+				return false;
+			if( this.IsPremiumServerwideCommand && !client.IsPremiumSubscriber(server.Guild.OwnerId) && !client.IsPremiumPartner(server.Id) )
+				return false;
 
 			//Custom Command Channel Permissions
-			if( this.RequiredPermissions != PermissionType.OwnerOnly && channel != null &&
-			    commandOptions != null && commandOptions.ChannelBlacklist != null &&
-			    commandOptions.ChannelBlacklist.Contains(channel.Id) )
+			CommandChannelOptions currentChannelOptions = null;
+			if( this.RequiredPermissions != PermissionType.OwnerOnly &&
+			    channel != null && commandChannelOptions != null &&
+				(currentChannelOptions = commandChannelOptions.FirstOrDefault(c => c.ChannelId == channel.Id)) != null &&
+			    currentChannelOptions.Blacklisted )
 				return false;
 
-			if( this.RequiredPermissions != PermissionType.OwnerOnly && channel != null &&
-			    commandOptions != null && commandOptions.ChannelWhitelist != null &&
-			    !commandOptions.ChannelWhitelist.Contains(channel.Id) )
-				return false;
+			if( this.RequiredPermissions != PermissionType.OwnerOnly &&
+			    channel != null && commandChannelOptions != null &&
+			    commandChannelOptions.Any(c => c.Whitelisted) &&
+			    ((currentChannelOptions = commandChannelOptions.FirstOrDefault(c => c.ChannelId == channel.Id)) == null ||
+			    !currentChannelOptions.Whitelisted) )
+				return false; //False only if there are *some* whitelisted channels, but it's not the current one.
 
 			//Custom Command Permission Overrides
 			int requiredPermissions = this.RequiredPermissions;
-			if( this.RequiredPermissions != PermissionType.OwnerOnly && commandOptions != null && commandOptions.PermissionOverrides != CommandConfig.PermissionOverrides.Default )
+			if( this.RequiredPermissions != PermissionType.OwnerOnly && commandOptions != null && commandOptions.PermissionOverrides != PermissionOverrides.Default )
 			{
 				switch(commandOptions.PermissionOverrides)
 				{
@@ -179,24 +160,46 @@ namespace Botwinder.entities
 					requiredPermissions = PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator | PermissionType.SubModerator | PermissionType.Member;
 					break;
 				case PermissionOverrides.Everyone:
-					requiredPermissions = PermissionType.Everyone | PermissionType.ServerOwner;
+					requiredPermissions = PermissionType.Everyone;
 					break;
 				default:
 					throw new ArgumentOutOfRangeException("permissionOverrides");
 				}
 			}
 
-			//Actually check permissions.
-			bool canExecute = server != null && (requiredPermissions & PermissionType.ServerOwner) > 0 && (user.Server.Owner.Id == user.Id || (user.ServerPermissions.ManageServer && user.ServerPermissions.Administrator ));
-			canExecute |= server != null && (requiredPermissions & PermissionType.Admin) > 0 && server.IsAdmin(user);
-			canExecute |= server != null && (requiredPermissions & PermissionType.Moderator) > 0 && server.IsModerator(user);
-			canExecute |= server != null && (requiredPermissions & PermissionType.SubModerator) > 0 && server.IsSubModerator(user);
-			canExecute |= server != null && (requiredPermissions & PermissionType.Member) > 0 && server.IsMember(user);
+			//Actually check them permissions!
+			return (requiredPermissions & PermissionType.Everyone) > 0 ||
+			       (requiredPermissions & PermissionType.ServerOwner) > 0 && server.IsOwner(user) ||
+			       (requiredPermissions & PermissionType.Admin) > 0 && server.IsAdmin(user) ||
+			       (requiredPermissions & PermissionType.Moderator) > 0 && server.IsModerator(user) ||
+			       (requiredPermissions & PermissionType.SubModerator) > 0 && server.IsSubModerator(user) ||
+			       (requiredPermissions & PermissionType.Member) > 0 && server.IsMember(user);
+		}
 
-			if( canExecute || ((requiredPermissions & PermissionType.Everyone) > 0 && !this.UserWhitelistEnabled && !this.RoleWhitelistEnabled) || (this.UserWhitelistEnabled && this.UserWhitelist.Contains(user.Id)) )
-				return true;
+		public async Task<bool> Execute(CommandArguments<TUser> e)
+		{
+			if( this.OnExecute == null )
+				return false;
 
-			return false;
+			if( (this.DeleteRequest || (e.CommandOptions != null && e.CommandOptions.DeleteRequest)) && e.Server.Guild.CurrentUser.GuildPermissions.ManageMessages )
+			{
+				try
+				{
+					await e.Message.DeleteAsync();
+				} catch(Exception)
+				{}
+			}
+
+			try
+			{
+				if( this.SendTyping )
+					await e.Channel.TriggerTypingAsync();
+				await this.OnExecute(e);
+			} catch(Exception exception)
+			{
+				await e.Client.LogException(exception, e);
+			}
+			return true;
 		}
 	}
 
@@ -215,10 +218,13 @@ namespace Botwinder.entities
 		public CommandChannelOptions CommandChannelOptions{ get; private set; }
 
 		/// <summary> Server, where this command was executed. Null for PM. </summary>
-		public IServer Server{ get; private set; }
+		public Server<TUser> Server{ get; private set; }
 
 		/// <summary> Message, where the command was invoked. </summary>
-		public Message Message{ get; private set; }
+		public SocketMessage Message{ get; private set; }
+
+		/// <summary> Channel, where the command was invoked. </summary>
+		public SocketTextChannel Channel{ get; private set; }
 
 		/// <summary> Text of the Message, where the command was invoked. The command itself is excluded. </summary>
 		public string TrimmedMessage{ get; private set; }
@@ -227,13 +233,14 @@ namespace Botwinder.entities
 		public string[] MessageArgs{ get; private set; }
 
 
-		public CommandArguments(IBotwinderClient<TUser> client, Command<TUser> command, CommandOptions options, CommandChannelOptions channelOptions, IServer server, Message message, string trimmedMessage, string[] messageArgs)
+		public CommandArguments(IBotwinderClient<TUser> client, Command<TUser> command, Server<TUser> server, SocketTextChannel channel, SocketMessage message, string trimmedMessage, string[] messageArgs, CommandOptions options = null, CommandChannelOptions channelOptions = null)
 		{
 			this.Client = client;
 			this.Command = command;
 			this.CommandOptions = options;
 			this.CommandChannelOptions = channelOptions;
 			this.Server = server;
+			this.Channel = channel;
 			this.Message = message;
 			this.TrimmedMessage = trimmedMessage;
 			this.MessageArgs = messageArgs;
