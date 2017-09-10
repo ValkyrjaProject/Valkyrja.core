@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
 using Botwinder.entities;
 using Discord;
 using Discord.WebSocket;
@@ -14,7 +13,7 @@ using guid = System.UInt64;
 
 namespace Botwinder.core
 {
-	public partial class BotwinderClient<TUser> : IBotwinderClient<TUser>,IDisposable where TUser : UserData, new()
+	public partial class BotwinderClient<TUser> : IBotwinderClient<TUser>, IDisposable where TUser : UserData, new()
 	{
 		private readonly DbConfig DbConfig;
 		private GlobalContext GlobalDb;
@@ -29,14 +28,16 @@ namespace Botwinder.core
 		private DateTime TimeConnected = DateTime.MaxValue;
 
 		private bool IsInitialized = false;
+
 		public bool IsConnected{
 			get{
 				return this.DiscordClient.LoginState == LoginState.LoggedIn &&
 				       this.DiscordClient.ConnectionState == ConnectionState.Connected &&
-				       _Connected;
+				       this._Connected;
 			}
-			private set{ _Connected = value; }
+			private set{ this._Connected = value; }
 		}
+
 		private bool _Connected = false;
 
 		private CancellationTokenSource MainUpdateCancel;
@@ -50,6 +51,8 @@ namespace Botwinder.core
 
 		private readonly ConcurrentDictionary<guid, Server<TUser>> Servers = new ConcurrentDictionary<guid, Server<TUser>>();
 		private readonly Dictionary<string, Command<TUser>> Commands = new Dictionary<string, Command<TUser>>();
+
+		private readonly List<guid> LeaveNotifiedOwners = new List<guid>();
 
 
 		public BotwinderClient()
@@ -67,6 +70,9 @@ namespace Botwinder.core
 			this.GlobalDb.Dispose();
 			this.GlobalDb = null;
 
+			this.ServerDb.Dispose();
+			this.ServerDb = null;
+
 			//todo
 		}
 
@@ -75,9 +81,9 @@ namespace Botwinder.core
 			LoadConfig();
 
 			//Find a shard for grabs.
-			while( (this.CurrentShard = this.GlobalDb.Shards.FirstOrDefault(s =>s.IsTaken == false)) == null )
+			while( (this.CurrentShard = this.GlobalDb.Shards.FirstOrDefault(s => s.IsTaken == false)) == null )
 			{
-				await Task.Delay(10000);
+				await Task.Delay(Utils.Random.Next(5000, 10000));
 			}
 
 			this.CurrentShard.IsTaken = true;
@@ -108,6 +114,9 @@ namespace Botwinder.core
 			this.Events.Connected += async () => await this.DiscordClient.SetGameAsync(GameStatusUrl);
 			this.Events.Initialize += InitCommands;
 			this.Events.Initialize += InitModules;
+			this.Events.GuildAvailable += OnGuildAvailable;
+			this.Events.JoinedGuild += OnGuildJoined;
+			this.Events.LeftGuild += OnGuildLeft;
 
 			await this.DiscordClient.LoginAsync(TokenType.Bot, this.GlobalConfig.DiscordToken);
 			await this.DiscordClient.StartAsync();
@@ -141,7 +150,7 @@ namespace Botwinder.core
 					Console.WriteLine("BotwinderClient: Waiting for other shards...");
 
 				awaited = true;
-				await Task.Delay(10000);
+				await Task.Delay(Utils.Random.Next(5000, 10000));
 			}
 
 			this.CurrentShard.IsConnecting = true;
@@ -207,8 +216,10 @@ namespace Botwinder.core
 
 			bool commandExecuted = false;
 			string prefix;
-			if( (!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) && message.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
-			    (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) && message.Content.StartsWith(prefix = server.Config.CommandPrefixAlt)) )
+			if( (!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) &&
+			     message.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
+			    (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) &&
+			     message.Content.StartsWith(prefix = server.Config.CommandPrefixAlt)) )
 				commandExecuted = await HandleCommand(server, channel, message, prefix);
 		}
 
@@ -225,8 +236,10 @@ namespace Botwinder.core
 
 			bool commandExecuted = false;
 			string prefix;
-			if( (!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) && updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
-			    (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) && updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefixAlt)) )
+			if( (!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) &&
+			     updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
+			    (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) &&
+			     updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefixAlt)) )
 				commandExecuted = await HandleCommand(server, channel, updatedMessage, prefix);
 		}
 
@@ -301,8 +314,12 @@ namespace Botwinder.core
 
 		private async Task Update()
 		{
+			if( this.GlobalConfig.EnforceRequirements )
+			{
+				await BailBadServers();
+			}
 
-			//todo
+			//todo - maintenance
 		}
 
 //Modules
@@ -313,7 +330,8 @@ namespace Botwinder.core
 			{
 				try
 				{
-					module.HandleException += async (e, d, id) => await LogException(e, "--ModuleInit." + module.ToString() + " | " + d, id);
+					module.HandleException += async (e, d, id) =>
+						await LogException(e, "--ModuleInit." + module.ToString() + " | " + d, id);
 					newCommands = await module.Init(this);
 
 					foreach( Command<TUser> cmd in newCommands )
@@ -350,8 +368,7 @@ namespace Botwinder.core
 		}
 
 //Commands
-		private void GetCommandAndParams(string message, out string commandString, out string trimmedMessage,
-			out string[] parameters)
+		private void GetCommandAndParams(string message, out string commandString, out string trimmedMessage, out string[] parameters)
 		{
 			trimmedMessage = "";
 			parameters = null;
@@ -371,7 +388,7 @@ namespace Botwinder.core
 				Match[] matches = new Match[regexMatches.Count];
 				regexMatches.CopyTo(matches, 0);
 				parameters = matches.Skip(1).Select(p => p.Value).ToArray();
-				for(int i = 0; i < parameters.Length; i++)
+				for( int i = 0; i < parameters.Length; i++ )
 					parameters[i] = parameters[i].Trim('"');
 			}
 		}
@@ -380,12 +397,11 @@ namespace Botwinder.core
 		{
 			GetCommandAndParams(message.Content.Substring(prefix.Length), out string commandString, out string trimmedMessage, out string[] parameters);
 
-			Command<TUser> command = null;
 			if( server.Commands.ContainsKey(commandString) ||
 			    (server.CustomAliases.ContainsKey(commandString) &&
 			     server.Commands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId)) )
 			{
-				command = server.Commands[commandString];
+				Command<TUser> command = server.Commands[commandString];
 				if( !string.IsNullOrEmpty(command.ParentId) ) //Internal, not-custom alias.
 					command = server.Commands[command.ParentId];
 
@@ -400,7 +416,7 @@ namespace Botwinder.core
 			          server.CustomCommands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId)) )
 			{
 				if( server.CustomCommands[commandString].CanExecute(this, server, channel, message.Author as SocketGuildUser) )
-				return await HandleCustomCommand(server.CustomCommands[commandString], channel, message);
+					return await HandleCustomCommand(server.CustomCommands[commandString], channel, message);
 			}
 
 			return false;
@@ -442,6 +458,123 @@ namespace Botwinder.core
 
 			await SendMessageToChannel(channel, msg);
 			return true;
+		}
+
+
+// Guild events
+		private async Task OnGuildJoined(SocketGuild guild)
+		{
+			try
+			{
+				await OnGuildAvailable(guild);
+
+				string msg = Localisation.SystemStrings.GuildJoined;
+				if( !IsPartner(guild.Id) && !IsSubscriber(guild.OwnerId) )
+					msg += Localisation.SystemStrings.GuildJoinedTrial;
+
+				try
+				{
+					await guild.Owner.SendMessageSafe(msg);
+				}
+				catch(Exception exception) { }
+			}
+			catch(Exception exception)
+			{
+				await LogException(exception, "--OnGuildJoined", guild.Id);
+			}
+		}
+
+		private async Task OnGuildLeft(SocketGuild guild)
+		{
+			try
+			{
+				if( !this.Servers.ContainsKey(guild.Id) )
+					return;
+
+				//todo - cancel operations
+				this.Servers.Remove(guild.Id);
+			}
+			catch(Exception exception)
+			{
+				await LogException(exception, "--OnGuildLeft", guild.Id);
+			}
+		}
+
+		private async Task OnGuildAvailable(SocketGuild guild)
+		{
+			try
+			{
+				Server<TUser> server;
+				bool instantiated = false;
+				if( this.Servers.ContainsKey(guild.Id) )
+				{
+					server = this.Servers[guild.Id];
+					server.ReloadConfig(this.ServerDb);
+				}
+				else
+				{
+					instantiated = true;
+					server = new Server<TUser>(guild, this.Commands, this.ServerDb);
+					server.LoadConfig(this.ServerDb);
+				}
+			}
+			catch(Exception exception)
+			{
+				await LogException(exception, "--OnGuildAvailable", guild.Id);
+			}
+		}
+
+		private async Task BailBadServers()
+		{
+			try
+			{
+				List<Server<TUser>> serversToLeave = new List<Server<TUser>>();
+
+				foreach( KeyValuePair<guid, Server<TUser>> pair in this.Servers )
+				{
+					try
+					{
+						//Partnered servers
+						if( !IsPartner(pair.Value.Id) && !IsSubscriber(pair.Value.Id) && !serversToLeave.Contains(pair.Value) &&
+						    (!pair.Value.Guild.CurrentUser.JoinedAt.HasValue ||
+						     DateTime.UtcNow - pair.Value.Guild.CurrentUser.JoinedAt.Value.ToUniversalTime() > TimeSpan.FromHours(this.GlobalConfig.VipTrialHours)) )
+						{
+							serversToLeave.Add(pair.Value);
+							if( !this.LeaveNotifiedOwners.Contains(pair.Value.Guild.OwnerId) )
+							{
+								this.LeaveNotifiedOwners.Add(pair.Value.Guild.OwnerId);
+								try
+								{
+									pair.Value.Guild.Owner.SendMessageSafe(Localisation.SystemStrings.VipPmLeaving).Wait();
+								}
+								catch(Exception) { }
+							}
+							continue;
+						}
+
+						//Blacklisted servers
+						if( this.GlobalDb.Blacklist.Any(b => b.Id == pair.Value.Id || b.Id == pair.Value.Guild.OwnerId) &&
+						    !serversToLeave.Contains(pair.Value) )
+						{
+							serversToLeave.Add(pair.Value);
+							continue;
+						}
+					}
+					catch(Exception exception)
+					{
+						await LogException(exception, "--BailBadServers", pair.Value.Id);
+					}
+				}
+
+				foreach( Server<TUser> server in serversToLeave )
+				{
+					await server.Guild.LeaveAsync();
+				}
+			}
+			catch(Exception exception)
+			{
+				await LogException(exception, "--BailBadServers");
+			}
 		}
 	}
 }

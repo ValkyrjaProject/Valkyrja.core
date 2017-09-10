@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -7,6 +8,20 @@ namespace Botwinder.entities
 {
 	public class Utils
 	{
+		public static Random Random{ get; set; } = new Random();
+	}
+
+	public static class ConcurrentDictionaryEx
+	{
+		public static bool Remove<TKey, TValue>(
+			this ConcurrentDictionary<TKey, TValue> self, TKey key) {
+			TValue ignored;
+			return self.TryRemove(key, out ignored);
+		}
+		public static bool Add<TKey, TValue>(
+			this ConcurrentDictionary<TKey, TValue> self, TKey key, TValue value) {
+			return self.TryAdd(key, value);
+		}
 	}
 
 	public static class DiscordEx

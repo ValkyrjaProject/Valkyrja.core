@@ -67,6 +67,9 @@ namespace Botwinder.entities
 		[Column("vip_members_max")]
 		public Int64 VipMembersMax{ get; set; } = 0;
 
+		[Column("vip_trial_hours")]
+		public Int64 VipTrialHours{ get; set; } = 36;
+
 		[Column("antispam_clear_interval")]
 		public Int64 AntispamClearInterval{ get; set; } = 0;
 

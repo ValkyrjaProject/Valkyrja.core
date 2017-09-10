@@ -34,7 +34,6 @@ namespace Botwinder.entities
 			this.Id = guild.Id;
 			this.Guild = guild;
 			this.Commands = new Dictionary<string, Command<TUser>>(allCommands);
-			ReloadConfig(db);
 		}
 
 		public void ReloadConfig(ServerContext db)
