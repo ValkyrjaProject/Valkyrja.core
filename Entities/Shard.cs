@@ -38,8 +38,8 @@ namespace Botwinder.entities
 		[Column("messages_total")]
 		public Int64 MessagesTotal{ get; set; } = 0;
 
-		[Column("config_reloads")]
-		public Int64 ConfigReloads{ get; set; } = 0;
+		[Column("messages_per_minute")]
+		public Int64 MessagesPerMinute{ get; set; } = 0;
 
 		[Column("operations_ran")]
 		public Int64 OperationsRan{ get; set; } = 0;
@@ -49,5 +49,19 @@ namespace Botwinder.entities
 
 		[Column("disconnects")]
 		public Int64 Disconnects{ get; set; } = 0;
+
+		public void ResetStats(DateTime timeStarted)
+		{
+			this.TimeStarted = timeStarted;
+			this.MemoryUsed = 0;
+			this.ThreadsActive = 0;
+			this.ServerCount = 0;
+			this.UserCount = 0;
+			this.MessagesTotal = 0;
+			this.MessagesPerMinute = 0;
+			this.OperationsRan = 0;
+			this.OperationsActive = 0;
+			this.Disconnects = 0;
+		}
 	}
 }

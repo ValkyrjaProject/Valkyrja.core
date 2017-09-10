@@ -64,6 +64,12 @@ namespace Botwinder.core
 
 		public void Dispose()
 		{
+			this.CurrentShard.IsTaken = false;
+			this.CurrentShard.IsConnecting = false;
+			this.GlobalDb.SaveChanges();
+			this.ServerDb.SaveChanges();
+			Task.Delay(500).Wait();
+
 			this.DiscordClient.Dispose();
 			this.DiscordClient = null;
 
@@ -87,6 +93,7 @@ namespace Botwinder.core
 			}
 
 			this.CurrentShard.IsTaken = true;
+			this.CurrentShard.ResetStats(this.TimeStarted);
 			this.GlobalDb.SaveChanges();
 
 			DiscordSocketConfig config = new DiscordSocketConfig();

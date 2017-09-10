@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Discord;
@@ -9,6 +10,24 @@ namespace Botwinder.entities
 	public class Utils
 	{
 		public static Random Random{ get; set; } = new Random();
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static string GetTimestamp()
+		{
+			return GetTimestamp(DateTime.UtcNow);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static string GetTimestamp(DateTime time)
+		{
+			return time.ToUniversalTime().ToString("yyyy-MM-dd_HH:mm:ss") + " UTC";
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static string GetTimestamp(DateTimeOffset time)
+		{
+			return time.ToUniversalTime().ToString("yyyy-MM-dd_HH:mm:ss") + " UTC";
+		}
 	}
 
 	public static class ConcurrentDictionaryEx
