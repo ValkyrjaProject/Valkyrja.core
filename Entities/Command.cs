@@ -108,7 +108,7 @@ namespace Botwinder.entities
 
 		/// <summary> Returns true if the User has permission to execute this command. </summary>
 		/// <param name="commandChannelOptions"> List of all the channel options for specific command. </param>
-		public bool CanExecute<TUser>(IBotwinderClient<TUser> client, Server<TUser> server, SocketGuildChannel channel, SocketGuildUser user, CommandOptions commandOptions, List<CommandChannelOptions> commandChannelOptions) where TUser: UserData, new()
+		public bool CanExecute(IBotwinderClient<TUser> client, Server<TUser> server, SocketGuildChannel channel, SocketGuildUser user, CommandOptions commandOptions, List<CommandChannelOptions> commandChannelOptions)
 		{
 			if( client.IsGlobalAdmin(user.Id) )
 				return true;

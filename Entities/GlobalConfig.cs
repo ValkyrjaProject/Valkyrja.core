@@ -10,6 +10,9 @@ namespace Botwinder.entities
 	[Table("global_config")]
 	public class GlobalConfig
 	{
+		public const int MessageCharacterLimit = 2000;
+
+
 		[Key]
 		[Required]
 		[Column("configuration_name", TypeName = "varchar(255)")]

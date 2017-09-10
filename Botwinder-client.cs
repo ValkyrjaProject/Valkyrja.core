@@ -383,8 +383,8 @@ namespace Botwinder.core
 			     server.Commands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId)) )
 			{
 				command = server.Commands[commandString];
-				CommandOptions commandOptions = CommandOptions.Get(server, commandString);
-				List<CommandChannelOptions> commandChannelOptions = CommandChannelOptions.Get(server, commandString);
+				CommandOptions commandOptions = server.GetCommandOptions(commandString);
+				List<CommandChannelOptions> commandChannelOptions = server.GetCommandChannelOptions(commandString);
 
 				CommandArguments<TUser> args = new CommandArguments<TUser>(this, command, server, channel, message, trimmedMessage, parameters, commandOptions);
 
@@ -397,8 +397,8 @@ namespace Botwinder.core
 			         (server.CustomAliases.ContainsKey(commandString) &&
 			          server.CustomCommands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId)) )
 			{
-				CommandOptions commandOptions = CommandOptions.Get(server, commandString);
-				List<CommandChannelOptions> commandChannelOptions = CommandChannelOptions.Get(server, commandString);
+				CommandOptions commandOptions = server.GetCommandOptions(commandString);
+				List<CommandChannelOptions> commandChannelOptions = server.GetCommandChannelOptions(commandString);
 
 				return await HandleCustomCommand(server.CustomCommands[commandString], channel, message);
 			}
@@ -441,7 +441,8 @@ namespace Botwinder.core
 				}
 			}
 
-			//todo send `msg` to `channel` and rewrite using string builder...
+			//todo - rewrite using string builder...
+			await SendMessageToChannel(channel, msg);
 			return true;
 		}
 	}

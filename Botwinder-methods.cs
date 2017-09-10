@@ -3,6 +3,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Botwinder.entities;
+using Discord.WebSocket;
 
 using guid = System.UInt64;
 
@@ -10,18 +11,18 @@ namespace Botwinder.core
 {
 	public partial class BotwinderClient<TUser> : IDisposable where TUser : UserData, new()
 	{
-		public async Task SendMessage(string message) //todo
+		public async Task SendMessageToChannel(SocketTextChannel channel, string message)
 		{
 			LogEntry logEntry = new LogEntry(){
 				Type = LogType.Response,
-				//ChannelId = 0,//todo
-				//ServerId = 0, //todo
+				ChannelId = channel.Id,
+				ServerId = channel.Guild.Id,
 				Message = message
 			};
 			this.GlobalDb.Log.Add(logEntry);
 			this.GlobalDb.SaveChanges();
 
-			//todo
+			await channel.SendMessageSafe(message);
 		}
 
 
