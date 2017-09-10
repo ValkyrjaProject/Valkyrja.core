@@ -80,7 +80,7 @@ namespace Botwinder.entities
 		public bool AntispamLinksStandard{ get; set; } = false;
 
 		[Column("antispam_links_standard_ban")]
-		public bool AntispamStandardStandardBan{ get; set; } = false;
+		public bool AntispamLinksStandardBan{ get; set; } = false;
 
 		[Column("antispam_links_youtube")]
 		public bool AntispamLinksYoutube{ get; set; } = false;

@@ -20,7 +20,7 @@ namespace Botwinder.entities
 
 		public DbSet<UserData> UserDatabase;
 
-		public ServerContext(DbContextOptions<GlobalContext> options) : base(options)
+		public ServerContext(DbContextOptions<ServerContext> options) : base(options)
 		{
 		}
 
@@ -52,12 +52,12 @@ namespace Botwinder.entities
 				.HasForeignKey(p => new{p.ServerId, p.UserId});
 		}
 
-		public static GlobalContext Create(string connectionString)
+		public static ServerContext Create(string connectionString)
 		{
-			DbContextOptionsBuilder<GlobalContext> optionsBuilder = new DbContextOptionsBuilder<GlobalContext>();
+			DbContextOptionsBuilder<ServerContext> optionsBuilder = new DbContextOptionsBuilder<ServerContext>();
 			optionsBuilder.UseMySql(connectionString);
 
-			GlobalContext newContext = new GlobalContext(optionsBuilder.Options);
+			ServerContext newContext = new ServerContext(optionsBuilder.Options);
 			newContext.Database.EnsureCreated();
 			return newContext;
 		}

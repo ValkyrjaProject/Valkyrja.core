@@ -77,5 +77,10 @@ namespace Botwinder.core
 			};
 			await this.Events.Exception(exceptionEntry);
 		}
+
+		public async Task LogMaintenanceAndExit()
+		{
+			Dispose();
+		}
 	}
 }

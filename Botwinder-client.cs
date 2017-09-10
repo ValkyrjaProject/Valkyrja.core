@@ -18,6 +18,7 @@ namespace Botwinder.core
 	{
 		private readonly DbConfig DbConfig;
 		private GlobalContext GlobalDb;
+		private ServerContext ServerDb;
 		public GlobalConfig GlobalConfig{ get; set; }
 		private Shard CurrentShard;
 
@@ -55,6 +56,7 @@ namespace Botwinder.core
 		{
 			this.DbConfig = DbConfig.Load();
 			this.GlobalDb = GlobalContext.Create(this.DbConfig.GetDbConnectionString());
+			this.ServerDb = ServerContext.Create(this.DbConfig.GetDbConnectionString());
 		}
 
 		public void Dispose()

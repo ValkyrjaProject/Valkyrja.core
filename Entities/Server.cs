@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
-using System.Net.Sockets;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Discord.WebSocket;
+
 using guid = System.UInt64;
 
 namespace Botwinder.entities
