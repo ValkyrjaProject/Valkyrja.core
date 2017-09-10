@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-using guid = System.Int64;
+using guid = System.UInt64;
 
 namespace Botwinder.entities
 {
@@ -23,9 +23,6 @@ namespace Botwinder.entities
 
 		[Column("description", TypeName = "text")]
 		public string Description{ get; set; } = "This is custom command on this server.";
-
-		[Column("delete_request")]
-		public bool DeleteRequest{ get; set; } = false;
 	}
 
 	[Table("custom_aliases")]

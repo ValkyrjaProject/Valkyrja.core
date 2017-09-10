@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-using guid = System.Int64;
+using guid = System.UInt64;
 
 namespace Botwinder.entities
 {
