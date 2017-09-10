@@ -17,10 +17,11 @@ namespace Botwinder.entities
 		public readonly SocketGuild Guild;
 
 		private ServerContext DbContext;
+		public ServerConfig Config;
 		public readonly Dictionary<string, Command<TUser>> Commands;
 		public Dictionary<string, CustomCommand> CustomCommands;
 		public Dictionary<string, CustomAlias> CustomAliases;
-		public ServerConfig Config;
+		private CommandOptions CachedCommandOptions;
 
 		public List<guid> IgnoredChannels;
 		public List<guid> MutedChannels = new List<guid>();
@@ -70,13 +71,78 @@ namespace Botwinder.entities
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public CommandOptions GetCommandOptions(string commandString)
 		{
-			return this.DbContext.CommandOptions.FirstOrDefault(c => c.ServerId == this.Id && c.CommandId == commandString);
+			if( this.CachedCommandOptions != null && this.CachedCommandOptions.CommandId == commandString )
+				return this.CachedCommandOptions;
+
+			return this.CachedCommandOptions = this.DbContext.CommandOptions.FirstOrDefault(c => c.ServerId == this.Id && c.CommandId == commandString);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public List<CommandChannelOptions> GetCommandChannelOptions(string commandString)
 		{
 			return this.DbContext.CommandChannelOptions.Where(c => c.ServerId == this.Id && c.CommandId == commandString)?.ToList();
+		}
+
+		public bool CanExecuteCommand(string commandId, int commandPermissions, SocketGuildChannel channel, SocketGuildUser user)
+		{
+			CommandOptions commandOptions = GetCommandOptions(commandId);
+			List<CommandChannelOptions> commandChannelOptions = GetCommandChannelOptions(commandId);
+
+			//Custom Command Channel Permissions
+			CommandChannelOptions currentChannelOptions = null;
+			if( commandPermissions != PermissionType.OwnerOnly &&
+			    channel != null && commandChannelOptions != null &&
+				(currentChannelOptions = commandChannelOptions.FirstOrDefault(c => c.ChannelId == channel.Id)) != null &&
+			    currentChannelOptions.Blacklisted )
+				return false;
+
+			if( commandPermissions != PermissionType.OwnerOnly &&
+			    channel != null && commandChannelOptions != null &&
+			    commandChannelOptions.Any(c => c.Whitelisted) &&
+			    ((currentChannelOptions = commandChannelOptions.FirstOrDefault(c => c.ChannelId == channel.Id)) == null ||
+			    !currentChannelOptions.Whitelisted) )
+				return false; //False only if there are *some* whitelisted channels, but it's not the current one.
+
+			//Custom Command Permission Overrides
+			if( commandOptions != null && commandOptions.PermissionOverrides != PermissionOverrides.Default )
+			{
+				switch(commandOptions.PermissionOverrides)
+				{
+					case PermissionOverrides.Nobody:
+						return false;
+					case PermissionOverrides.ServerOwner:
+						commandPermissions = PermissionType.ServerOwner;
+						break;
+					case PermissionOverrides.Admins:
+						commandPermissions = PermissionType.ServerOwner | PermissionType.Admin;
+						break;
+					case PermissionOverrides.Moderators:
+						commandPermissions = PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator;
+						break;
+					case PermissionOverrides.SubModerators:
+						commandPermissions = PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator |
+						                      PermissionType.SubModerator;
+						break;
+					case PermissionOverrides.Members:
+						commandPermissions = PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator |
+						                      PermissionType.SubModerator | PermissionType.Member;
+						break;
+					case PermissionOverrides.Everyone:
+						commandPermissions = PermissionType.Everyone;
+						break;
+					default:
+						throw new ArgumentOutOfRangeException("permissionOverrides");
+				}
+			}
+
+			//Actually check them permissions!
+			return ((commandPermissions & PermissionType.Everyone) > 0) ||
+			       ((commandPermissions & PermissionType.ServerOwner) > 0 && IsOwner(user)) ||
+			       ((commandPermissions & PermissionType.Admin) > 0 && IsAdmin(user)) ||
+			       ((commandPermissions & PermissionType.Moderator) > 0 && IsModerator(user)) ||
+			       ((commandPermissions & PermissionType.SubModerator) > 0 && IsSubModerator(user)) ||
+			       ((commandPermissions & PermissionType.Member) > 0 && IsMember(user));
+
 		}
 
 

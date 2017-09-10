@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Discord.WebSocket;
 
 using guid = System.UInt64;
 
@@ -23,6 +26,17 @@ namespace Botwinder.entities
 
 		[Column("description", TypeName = "text")]
 		public string Description{ get; set; } = "This is custom command on this server.";
+
+		/// <summary> Returns true if the User has permission to execute this command. </summary>
+		/// <param name="commandChannelOptions"> List of all the channel options for specific command. </param>
+		public bool CanExecute<TUser>(IBotwinderClient<TUser> client, Server<TUser> server, SocketGuildChannel channel,
+			SocketGuildUser user) where TUser: UserData, new()
+		{
+			if( client.IsGlobalAdmin(user.Id) )
+				return true;
+
+			return server.CanExecuteCommand(this.CommandId, PermissionType.Everyone, channel, user);
+		}
 	}
 
 	[Table("custom_aliases")]

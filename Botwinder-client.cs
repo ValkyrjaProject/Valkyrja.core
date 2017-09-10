@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.RegularExpressions;
 using Botwinder.entities;
 using Discord;
@@ -383,23 +384,20 @@ namespace Botwinder.core
 			     server.Commands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId)) )
 			{
 				command = server.Commands[commandString];
-				CommandOptions commandOptions = server.GetCommandOptions(commandString);
-				List<CommandChannelOptions> commandChannelOptions = server.GetCommandChannelOptions(commandString);
+				if( !string.IsNullOrEmpty(command.ParentId) ) //Internal, not-custom alias.
+					command = server.Commands[command.ParentId];
 
+				CommandOptions commandOptions = server.GetCommandOptions(commandString);
 				CommandArguments<TUser> args = new CommandArguments<TUser>(this, command, server, channel, message, trimmedMessage, parameters, commandOptions);
 
-				if( command.CanExecute(this, server, channel, message.Author as SocketGuildUser, commandOptions,
-					commandChannelOptions) )
+				if( command.CanExecute(this, server, channel, message.Author as SocketGuildUser) )
 					return await command.Execute(args);
-				return true;
 			}
 			else if( server.CustomCommands.ContainsKey(commandString) ||
 			         (server.CustomAliases.ContainsKey(commandString) &&
 			          server.CustomCommands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId)) )
 			{
-				CommandOptions commandOptions = server.GetCommandOptions(commandString);
-				List<CommandChannelOptions> commandChannelOptions = server.GetCommandChannelOptions(commandString);
-
+				if( server.CustomCommands[commandString].CanExecute(this, server, channel, message.Author as SocketGuildUser) )
 				return await HandleCustomCommand(server.CustomCommands[commandString], channel, message);
 			}
 
@@ -408,8 +406,7 @@ namespace Botwinder.core
 
 		private async Task<bool> HandleCustomCommand(CustomCommand cmd, SocketTextChannel channel, SocketMessage message)
 		{
-			//todo - implement support for CommandOptions and CommandChannelOptions.
-
+			//todo - rewrite using string builder...
 			string msg = cmd.Response;
 
 			if( msg.Contains("{sender}") || msg.Contains("{{sender}}") )
@@ -441,7 +438,6 @@ namespace Botwinder.core
 				}
 			}
 
-			//todo - rewrite using string builder...
 			await SendMessageToChannel(channel, msg);
 			return true;
 		}

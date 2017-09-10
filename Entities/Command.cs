@@ -37,6 +37,9 @@ namespace Botwinder.entities
 		/// <summary> True if this is a custom command. </summary>
 		public bool IsCustomCommand{ get; set; }
 
+		/// <summary> Set to true to handle as cancelable and tracked long running operation. </summary>
+		public bool IsOperation{ get; set; } //todo - not implemented yet.
+
 		/// <summary> Subscriber bonus only </summary>
 		public bool IsBonusCommand{ get; set; }
 
@@ -98,8 +101,10 @@ namespace Botwinder.entities
 			newCommand.IsHidden = this.IsHidden;
 			newCommand.IsCoreCommand = this.IsCoreCommand;
 			newCommand.IsCustomCommand = this.IsCustomCommand;
+			newCommand.IsOperation = this.IsOperation;
 			newCommand.IsBonusCommand = this.IsBonusCommand;
 			newCommand.IsPremiumCommand = this.IsPremiumCommand;
+			newCommand.IsPremiumServerwideCommand = this.IsPremiumServerwideCommand;
 			newCommand.RequiredPermissions = this.RequiredPermissions;
 			newCommand.Description = this.Description;
 			newCommand.OnExecute = this.OnExecute;
@@ -108,7 +113,7 @@ namespace Botwinder.entities
 
 		/// <summary> Returns true if the User has permission to execute this command. </summary>
 		/// <param name="commandChannelOptions"> List of all the channel options for specific command. </param>
-		public bool CanExecute(IBotwinderClient<TUser> client, Server<TUser> server, SocketGuildChannel channel, SocketGuildUser user, CommandOptions commandOptions, List<CommandChannelOptions> commandChannelOptions)
+		public bool CanExecute(IBotwinderClient<TUser> client, Server<TUser> server, SocketGuildChannel channel, SocketGuildUser user)
 		{
 			if( client.IsGlobalAdmin(user.Id) )
 				return true;
@@ -121,59 +126,7 @@ namespace Botwinder.entities
 			if( this.IsPremiumServerwideCommand && !client.IsPremiumSubscriber(server.Guild.OwnerId) && !client.IsPremiumPartner(server.Id) )
 				return false;
 
-			//Custom Command Channel Permissions
-			CommandChannelOptions currentChannelOptions = null;
-			if( this.RequiredPermissions != PermissionType.OwnerOnly &&
-			    channel != null && commandChannelOptions != null &&
-				(currentChannelOptions = commandChannelOptions.FirstOrDefault(c => c.ChannelId == channel.Id)) != null &&
-			    currentChannelOptions.Blacklisted )
-				return false;
-
-			if( this.RequiredPermissions != PermissionType.OwnerOnly &&
-			    channel != null && commandChannelOptions != null &&
-			    commandChannelOptions.Any(c => c.Whitelisted) &&
-			    ((currentChannelOptions = commandChannelOptions.FirstOrDefault(c => c.ChannelId == channel.Id)) == null ||
-			    !currentChannelOptions.Whitelisted) )
-				return false; //False only if there are *some* whitelisted channels, but it's not the current one.
-
-			//Custom Command Permission Overrides
-			int requiredPermissions = this.RequiredPermissions;
-			if( this.RequiredPermissions != PermissionType.OwnerOnly && commandOptions != null && commandOptions.PermissionOverrides != PermissionOverrides.Default )
-			{
-				switch(commandOptions.PermissionOverrides)
-				{
-				case PermissionOverrides.Nobody:
-					return false;
-				case PermissionOverrides.ServerOwner:
-					requiredPermissions = PermissionType.ServerOwner;
-					break;
-				case PermissionOverrides.Admins:
-					requiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
-					break;
-				case PermissionOverrides.Moderators:
-					requiredPermissions = PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator;
-					break;
-				case PermissionOverrides.SubModerators:
-					requiredPermissions = PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator | PermissionType.SubModerator;
-					break;
-				case PermissionOverrides.Members:
-					requiredPermissions = PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator | PermissionType.SubModerator | PermissionType.Member;
-					break;
-				case PermissionOverrides.Everyone:
-					requiredPermissions = PermissionType.Everyone;
-					break;
-				default:
-					throw new ArgumentOutOfRangeException("permissionOverrides");
-				}
-			}
-
-			//Actually check them permissions!
-			return (requiredPermissions & PermissionType.Everyone) > 0 ||
-			       (requiredPermissions & PermissionType.ServerOwner) > 0 && server.IsOwner(user) ||
-			       (requiredPermissions & PermissionType.Admin) > 0 && server.IsAdmin(user) ||
-			       (requiredPermissions & PermissionType.Moderator) > 0 && server.IsModerator(user) ||
-			       (requiredPermissions & PermissionType.SubModerator) > 0 && server.IsSubModerator(user) ||
-			       (requiredPermissions & PermissionType.Member) > 0 && server.IsMember(user);
+			return server.CanExecuteCommand(this.Id, this.RequiredPermissions, channel, user);
 		}
 
 		public async Task<bool> Execute(CommandArguments<TUser> e)
@@ -194,7 +147,7 @@ namespace Botwinder.entities
 			{
 				if( this.SendTyping )
 					await e.Channel.TriggerTypingAsync();
-				await this.OnExecute(e);
+				await this.OnExecute(e); //todo - implement execution timeout for non-operations
 			} catch(Exception exception)
 			{
 				await e.Client.LogException(exception, e);
