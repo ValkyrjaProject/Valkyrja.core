@@ -20,6 +20,13 @@ namespace Botwinder.entities
 	}
 
 	/*
+	Notes:
+
+	* To send a message to a channel, use client.SendMessageToChannel(channel, string message, embed = null)
+	* Do not use channel.SendMessageSafe or channel.SafeMessageAsync directly !!!
+	* Use user.SendMessageSafe instead of SendMessageAsync !!!
+
+
 	public class ExampleModule: IModule
 	{
 		public Func<Exception, string, guid, Task> HandleException{ get; set; }
