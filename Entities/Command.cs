@@ -19,6 +19,9 @@ namespace Botwinder.entities
 		/// <summary> Parent of this command, if it is an alias. </summary>
 		public string ParentId{ get; set; }
 
+		/// <summary> Set to true to handle as cancelable and tracked long running operation. </summary>
+		public CommandType Type{ get; set; } = CommandType.Standard;
+
 		/// <summary> Send the "typing" event before executing the command? </summary>
 		public bool SendTyping{ get; set; } = true;
 
@@ -36,9 +39,6 @@ namespace Botwinder.entities
 
 		/// <summary> True if this is a custom command. </summary>
 		public bool IsCustomCommand{ get; set; }
-
-		/// <summary> Set to true to handle as cancelable and tracked long running operation. </summary>
-		public bool IsOperation{ get; set; } //todo - not implemented yet.
 
 		/// <summary> Subscriber bonus only </summary>
 		public bool IsBonusCommand{ get; set; }
@@ -101,7 +101,7 @@ namespace Botwinder.entities
 			newCommand.IsHidden = this.IsHidden;
 			newCommand.IsCoreCommand = this.IsCoreCommand;
 			newCommand.IsCustomCommand = this.IsCustomCommand;
-			newCommand.IsOperation = this.IsOperation;
+			newCommand.Type = this.Type;
 			newCommand.IsBonusCommand = this.IsBonusCommand;
 			newCommand.IsPremiumCommand = this.IsPremiumCommand;
 			newCommand.IsPremiumServerwideCommand = this.IsPremiumServerwideCommand;
@@ -194,5 +194,12 @@ namespace Botwinder.entities
 			this.TrimmedMessage = trimmedMessage;
 			this.MessageArgs = messageArgs;
 		}
+	}
+
+	public enum CommandType
+	{
+		Standard,
+		Operation,
+		LargeOperation
 	}
 }

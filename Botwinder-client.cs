@@ -19,7 +19,7 @@ namespace Botwinder.core
 		private GlobalContext GlobalDb;
 		private ServerContext ServerDb;
 		public GlobalConfig GlobalConfig{ get; set; }
-		private Shard CurrentShard;
+		internal Shard CurrentShard;
 
 		private DiscordSocketClient DiscordClient;
 		public Events Events;
@@ -51,6 +51,8 @@ namespace Botwinder.core
 
 		private readonly ConcurrentDictionary<guid, Server<TUser>> Servers = new ConcurrentDictionary<guid, Server<TUser>>();
 		private readonly Dictionary<string, Command<TUser>> Commands = new Dictionary<string, Command<TUser>>();
+		internal readonly List<Operation<TUser>> CurrentOperations = new List<Operation<TUser>>();
+		internal object OperationsLock;
 
 		private readonly List<guid> LeaveNotifiedOwners = new List<guid>();
 
@@ -326,6 +328,9 @@ namespace Botwinder.core
 				await BailBadServers();
 			}
 
+			this.GlobalDb.SaveChanges(); //Note that this method checks for changes first.
+			this.ServerDb.SaveChanges();
+
 			//todo - maintenance
 		}
 
@@ -552,7 +557,7 @@ namespace Botwinder.core
 								this.LeaveNotifiedOwners.Add(pair.Value.Guild.OwnerId);
 								try
 								{
-									pair.Value.Guild.Owner.SendMessageSafe(Localisation.SystemStrings.VipPmLeaving).Wait();
+									await pair.Value.Guild.Owner.SendMessageSafe(Localisation.SystemStrings.VipPmLeaving);
 								}
 								catch(Exception) { }
 							}
