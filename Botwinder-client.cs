@@ -19,7 +19,7 @@ namespace Botwinder.core
 		private GlobalContext GlobalDb;
 		private ServerContext ServerDb;
 		public GlobalConfig GlobalConfig{ get; set; }
-		internal Shard CurrentShard;
+		public Shard CurrentShard{ get; set; }
 
 		private DiscordSocketClient DiscordClient;
 		public Events Events;
@@ -30,12 +30,10 @@ namespace Botwinder.core
 		private bool IsInitialized = false;
 
 		public bool IsConnected{
-			get{
-				return this.DiscordClient.LoginState == LoginState.LoggedIn &&
-				       this.DiscordClient.ConnectionState == ConnectionState.Connected &&
-				       this._Connected;
-			}
-			private set{ this._Connected = value; }
+			get => this.DiscordClient.LoginState == LoginState.LoggedIn &&
+			       this.DiscordClient.ConnectionState == ConnectionState.Connected &&
+			       this._Connected;
+			set => this._Connected = value;
 		}
 
 		private bool _Connected = false;
@@ -51,8 +49,8 @@ namespace Botwinder.core
 
 		private readonly ConcurrentDictionary<guid, Server<TUser>> Servers = new ConcurrentDictionary<guid, Server<TUser>>();
 		private readonly Dictionary<string, Command<TUser>> Commands = new Dictionary<string, Command<TUser>>();
-		internal readonly List<Operation<TUser>> CurrentOperations = new List<Operation<TUser>>();
-		internal object OperationsLock;
+		public List<Operation<TUser>> CurrentOperations{ get; set; } = new List<Operation<TUser>>();
+		public Object OperationsLock{ get; set; } = new Object();
 
 		private readonly List<guid> LeaveNotifiedOwners = new List<guid>();
 
@@ -488,7 +486,7 @@ namespace Botwinder.core
 				{
 					await guild.Owner.SendMessageSafe(msg);
 				}
-				catch(Exception exception) { }
+				catch(Exception) { }
 			}
 			catch(Exception exception)
 			{
@@ -517,7 +515,6 @@ namespace Botwinder.core
 			try
 			{
 				Server<TUser> server;
-				bool instantiated = false;
 				if( this.Servers.ContainsKey(guild.Id) )
 				{
 					server = this.Servers[guild.Id];
@@ -525,7 +522,6 @@ namespace Botwinder.core
 				}
 				else
 				{
-					instantiated = true;
 					server = new Server<TUser>(guild, this.Commands, this.ServerDb);
 					server.LoadConfig(this.ServerDb);
 				}

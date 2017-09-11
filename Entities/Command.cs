@@ -147,7 +147,24 @@ namespace Botwinder.entities
 			{
 				if( this.SendTyping )
 					await e.Channel.TriggerTypingAsync();
-				await this.OnExecute(e); //todo - implement execution timeout for non-operations
+
+				if( this.Type == CommandType.Standard )
+				{
+					Task task = this.OnExecute(e);
+					if( await Task.WhenAny(task, Task.Delay(GlobalConfig.CommandExecutionTimeout)) == task )
+					{
+						await task;
+					}
+					else
+					{
+						await e.Client.SendMessageToChannel(e.Channel, "Command execution timed out. _(Please wait a moment before trying again.)_");
+					}
+				}
+				else
+				{
+					Operation<TUser> operation = Operation<TUser>.Create(e);
+					await operation.Execute();
+				}
 			} catch(Exception exception)
 			{
 				await e.Client.LogException(exception, e);
@@ -181,6 +198,9 @@ namespace Botwinder.entities
 
 		/// <summary> Command parameters (individual words) from the original message. MessageArgs[0] == Command.ID; </summary>
 		public string[] MessageArgs{ get; private set; }
+
+		/// <summary> Null if this is standard command. </summary>
+		public Operation<TUser> Operation{ get; set; } //Necessary evul.
 
 
 		public CommandArguments(IBotwinderClient<TUser> client, Command<TUser> command, Server<TUser> server, SocketTextChannel channel, SocketMessage message, string trimmedMessage, string[] messageArgs, CommandOptions options = null)

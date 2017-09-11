@@ -11,6 +11,7 @@ namespace Botwinder.entities
 	public class GlobalConfig
 	{
 		public const int MessageCharacterLimit = 2000;
+		public const int CommandExecutionTimeout = 10000;
 
 
 		[Key]
@@ -63,6 +64,9 @@ namespace Botwinder.entities
 
 		[Column("main_channelid")]
 		public guid MainChannelId{ get; set; } = 0;
+
+		[Column("vip_skip_queue")]
+		public bool VipSkipQueue{ get; set; } = false;
 
 		[Column("vip_members_max")]
 		public Int64 VipMembersMax{ get; set; } = 0;

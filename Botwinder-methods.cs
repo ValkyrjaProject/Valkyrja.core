@@ -122,7 +122,7 @@ namespace Botwinder.core
 				}
 			} catch(Exception exception)
 			{
-				LogException(exception, "--LogMaintenance");
+				await LogException(exception, "--LogMaintenance");
 			}
 
 			Dispose();
