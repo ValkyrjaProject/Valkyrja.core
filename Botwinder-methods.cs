@@ -15,15 +15,7 @@ namespace Botwinder.core
 	{
 		public async Task SendMessageToChannel(SocketTextChannel channel, string message)
 		{
-			LogEntry logEntry = new LogEntry(){
-				Type = LogType.Response,
-				ChannelId = channel.Id,
-				ServerId = channel.Guild.Id,
-				Message = message
-			};
-			this.GlobalDb.Log.Add(logEntry);
-			this.GlobalDb.SaveChanges();
-
+			LogMessage(LogType.Response, channel, message);
 			await channel.SendMessageSafe(message);
 		}
 
@@ -65,6 +57,18 @@ namespace Botwinder.core
 			return this.GlobalDb.PartneredServers.Any(s => s.ServerId == id && s.IsPremium);
 		}
 
+
+		public void LogMessage(LogType logType, SocketTextChannel channel, string message)
+		{
+			LogEntry logEntry = new LogEntry(){
+				Type = logType,
+				ChannelId = channel.Id,
+				ServerId = channel.Guild.Id,
+				Message = message
+			};
+			this.GlobalDb.Log.Add(logEntry);
+			this.GlobalDb.SaveChanges();
+		}
 
 		public async Task LogException(Exception exception, CommandArguments<TUser> args) =>
 			await LogException(exception, "--Command: "+ args.Command.Id + " | Parameters: " + args.TrimmedMessage, args.Server.Id);
