@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Botwinder.entities;
 using Discord;
 using Discord.WebSocket;
@@ -53,6 +54,8 @@ namespace Botwinder.core
 		public Object OperationsLock{ get; set; } = new Object();
 
 		private readonly List<guid> LeaveNotifiedOwners = new List<guid>();
+		private DateTime LastMessageAverageTime = DateTime.UtcNow;
+		private int MessagesThisMinute = 0;
 
 
 		public BotwinderClient()
@@ -196,6 +199,7 @@ namespace Botwinder.core
 		{
 			Console.WriteLine("BotwinderClient: Disconnected.");
 			this.IsConnected = false;
+			this.CurrentShard.Disconnects++;
 
 			await LogException(exception, "--D.NET Client Disconnected");
 
@@ -212,6 +216,9 @@ namespace Botwinder.core
 
 		private async Task OnMessageReceived(SocketMessage message)
 		{
+			this.CurrentShard.MessagesTotal++;
+			this.MessagesThisMinute++;
+
 			SocketTextChannel channel = message.Channel as SocketTextChannel;
 			if( channel == null || !this.Servers.ContainsKey(channel.Guild.Id) )
 				return;
@@ -326,10 +333,28 @@ namespace Botwinder.core
 				await BailBadServers();
 			}
 
+			UpdateShardStats();
+
 			this.GlobalDb.SaveChanges(); //Note that this method checks for changes first.
 			this.ServerDb.SaveChanges();
 
 			//todo - maintenance
+		}
+
+		private void UpdateShardStats()
+		{
+			if( DateTime.UtcNow - this.LastMessageAverageTime > TimeSpan.FromMinutes(1) )
+			{
+				this.CurrentShard.MessagesPerMinute = this.MessagesThisMinute;
+				this.MessagesThisMinute = 0;
+				this.LastMessageAverageTime = DateTime.UtcNow;
+			}
+
+			this.CurrentShard.OperationsActive = this.CurrentOperations.Count;
+			this.CurrentShard.ThreadsActive = Process.GetCurrentProcess().Threads.Count;
+			this.CurrentShard.MemoryUsed = GC.GetTotalMemory(false) / 1000000;
+			this.CurrentShard.ServerCount = this.Servers.Count;
+			this.CurrentShard.UserCount = this.DiscordClient.Guilds.Sum(s => s.MemberCount);
 		}
 
 //Modules
