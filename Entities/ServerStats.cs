@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
 
 using guid = System.UInt64;
@@ -16,7 +17,7 @@ namespace Botwinder.entities
 		public guid ServerId{ get; set; } = 0;
 
 		[Column("name", TypeName = "varchar(255)")]
-		public string Name{ get; set; } = "";
+		public string ServerName{ get; set; } = "";
 
 		[Column("shardid")]
 		public Int64 ShardId{ get; set; } = 0;
@@ -41,5 +42,21 @@ namespace Botwinder.entities
 
 		[Column("vip")]
 		public bool IsDiscordPartner{ get; set; } = false;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override string ToString()
+		{
+			return $"**Server ID: `{this.ServerId}`**\n" +
+			       $"Server Name: `{this.ServerName}`\n" +
+			       $"Owner: <@{this.OwnerId}>\n" +
+			       $"Owner ID: `{this.OwnerId}`\n" +
+			       $"Owner name: `{this.OwnerName}`\n" +
+			       $"Discord Partner: `{this.IsDiscordPartner}`\n" +
+			       $"Members count: `{this.UserCount}`" +
+			       $"Shard ID: `{this.ShardId}`\n" +
+			       $"First Joined at: `{Utils.GetTimestamp(this.JoinedTimeFirst)}`\n" +
+			       $"Last Joined at: `{Utils.GetTimestamp(this.JoinedTime)}`\n" +
+			       $"Joined count: `{this.JoinedCount}`\n";
+		}
 	}
 }

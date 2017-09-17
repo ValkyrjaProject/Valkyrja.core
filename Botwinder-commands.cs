@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Linq;
 using System.Text;
+using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Botwinder.entities;
 
@@ -85,7 +85,7 @@ namespace Botwinder.core
 				string responseString = response.ToString();
 				if( string.IsNullOrWhiteSpace(responseString) )
 					responseString = "I did not record any errors :stuck_out_tongue:";
-				await e.Message.Channel.SendMessageSafe(responseString);
+				await SendMessageToChannel(e.Channel, responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -100,7 +100,42 @@ namespace Botwinder.core
 				if( int.TryParse(e.TrimmedMessage, out int id) && (exception = this.GlobalDb.Exceptions.FirstOrDefault(ex => ex.Id == id)) != null )
 					responseString = exception.GetStack();
 
-				await e.Message.Channel.SendMessageSafe(responseString);
+				await SendMessageToChannel(e.Channel, responseString);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
+
+// !getServer
+			newCommand = new Command<TUser>("getServer");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Display some info about specific server with id/name, or owners id/username.";
+			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.OnExecute += async e => {
+				guid id;
+				StringBuilder response = new StringBuilder();
+				IEnumerable<ServerStats> foundServers = null;
+				if( string.IsNullOrEmpty(e.TrimmedMessage) ||
+				    (!guid.TryParse(e.TrimmedMessage, out id) ||
+				     !(foundServers = this.ServerDb.ServerStats.Where(s =>
+					     s.ServerId == id || s.OwnerId == id || s.ServerName.Contains(e.TrimmedMessage) || s.OwnerName.Contains(e.TrimmedMessage)
+					     )).Any()) )
+				{
+					await SendMessageToChannel(e.Channel, "Server not found.");
+					return;
+				}
+
+				if( foundServers.Count() > 5 )
+				{
+					response.AppendLine("__**Found more than 5 servers!**__\n");
+				}
+
+				foreach(ServerStats server in foundServers.Take(5))
+				{
+					response.AppendLine(server.ToString());
+					response.AppendLine();
+				}
+
+				await SendMessageToChannel(e.Channel, response.ToString());
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
