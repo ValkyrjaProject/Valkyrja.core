@@ -146,11 +146,17 @@ namespace Botwinder.entities
 			try
 			{
 				e.Client.LogMessage(LogType.Command, e.Channel,
-					e.Message.Author.Username + "#" + e.Message.Author.Discriminator + " | " +
+					e.Message.Author.GetUsername() + " | " +
 					e.Message.Author.Id + " | " + e.Message.Content);
 
 				if( this.SendTyping )
 					await e.Channel.TriggerTypingAsync();
+
+				if( !string.IsNullOrWhiteSpace(e.TrimmedMessage) && e.TrimmedMessage == "help" )
+				{
+					await e.Client.SendMessageToChannel(e.Channel, e.Command.Description);
+					return true;
+				}
 
 				if( this.Type == CommandType.Standard )
 				{

@@ -176,5 +176,16 @@ namespace Botwinder.entities
 			lock(this.CommandArgs.Client.OperationsLock)
 				this.CommandArgs.Client.CurrentOperations.Remove(this);
 		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override String ToString()
+		{
+			return $"Command: `{this.CommandArgs.Command.Id}`\n" +
+			       $"Status: `{this.CurrentState}`\n" +
+			       $"Author: `{this.CommandArgs.Message.Author.GetUsername()}`\n" +
+			       $"Channel: `#{this.CommandArgs.Channel.Name}`\n" +
+			       $"TimeCreated: `{Utils.GetTimestamp(this.TimeCreated)}`\n" +
+			       $"TimeStarted: `{(this.TimeStarted == DateTime.MinValue ? "0" : Utils.GetTimestamp(this.TimeStarted))}`";
+		}
 	}
 }
