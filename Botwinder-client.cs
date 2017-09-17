@@ -334,7 +334,7 @@ namespace Botwinder.core
 			}
 
 			UpdateShardStats();
-			UpdateServerStats();
+			await UpdateServerStats();
 
 			this.GlobalDb.SaveChanges(); //Note that this method checks for changes first.
 			this.ServerDb.SaveChanges();
@@ -358,7 +358,7 @@ namespace Botwinder.core
 			this.CurrentShard.UserCount = this.DiscordClient.Guilds.Sum(s => s.MemberCount);
 		}
 
-		private void UpdateServerStats()
+		private async Task UpdateServerStats()
 		{
 			foreach( KeyValuePair<guid, Server<TUser>> pair in this.Servers )
 			{
@@ -392,6 +392,12 @@ namespace Botwinder.core
 				stats.OwnerName = pair.Value.Guild.Owner.GetUsername();
 				stats.IsDiscordPartner = pair.Value.Guild.VoiceRegionId.StartsWith("vip");
 				stats.UserCount = pair.Value.Guild.MemberCount;
+
+				try
+				{
+					pair.Value.Config.InviteUrl = (await pair.Value.Guild.DefaultChannel.CreateInviteAsync()).Url;
+				}
+				catch(Exception) { }
 			}
 		}
 

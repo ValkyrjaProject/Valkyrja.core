@@ -90,6 +90,32 @@ namespace Botwinder.core
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
+// !getInvite
+			newCommand = new Command<TUser>("getInvite");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Get an invite url with serverid.";
+			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.OnExecute += async e => {
+				guid id;
+				ServerConfig foundServer = null;
+				if( string.IsNullOrEmpty(e.TrimmedMessage) ||
+				    !guid.TryParse(e.TrimmedMessage, out id) ||
+				    (foundServer = this.ServerDb.ServerConfigurations.FirstOrDefault(s => s.ServerId == id)) == null )
+				{
+					await SendMessageToChannel(e.Channel, "Server not found.");
+					return;
+				}
+
+				if( string.IsNullOrEmpty(foundServer.InviteUrl) )
+				{
+					await SendMessageToChannel(e.Channel, "I don't have permissions to create this InviteUrl.");
+					return;
+				}
+
+				await SendMessageToChannel(e.Channel, foundServer.InviteUrl);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
 // !maintenance
 			newCommand = new Command<TUser>("maintenance");
 			newCommand.Type = CommandType.Standard;

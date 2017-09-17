@@ -19,6 +19,9 @@ namespace Botwinder.entities
 		[Column("name", TypeName = "varchar(255)")]
 		public string Name{ get; set; } = "";
 
+		[Column("invite_url", TypeName = "varchar(255)")]
+		public string InviteUrl{ get; set; } = "";
+
 		[Column("localisation_id")]
 		public Int64 LocalisationId{ get; set; } = 0;
 
