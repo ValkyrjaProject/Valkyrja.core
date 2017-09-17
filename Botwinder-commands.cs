@@ -15,7 +15,7 @@ namespace Botwinder.core
 			Command<TUser> newCommand = null;
 
 
-			// !global
+// !global
 			newCommand = new Command<TUser>("global");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Display all teh numbers.";
@@ -52,6 +52,17 @@ namespace Botwinder.core
 				                 $"{shards.ToString()}";
 
 				await SendMessageToChannel(e.Channel, message);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
+// !maintenance
+			newCommand = new Command<TUser>("maintenance");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Performe maintenance";
+			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.OnExecute += async e =>{
+				await SendMessageToChannel(e.Channel, "Okay, this may take a while...");
+				await LogMaintenanceAndExit();
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
