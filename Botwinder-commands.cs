@@ -159,29 +159,36 @@ namespace Botwinder.core
 						if( !allOperations && op.CommandArgs.Server.Id != e.Server.Id )
 							continue;
 
+						response.AppendLine(op.ToString());
 						if( allOperations )
-							response.AppendLine($"Command: `{op.CommandArgs.Command.Id}`\n" +
-							                    $"Status: `{op.CurrentState}`\n" +
-							                    $"Author: `{op.CommandArgs.Message.Author.GetUsername()}`\n" +
-							                    $"Server: `{op.CommandArgs.Server.Guild.Name}`\n" +
+							response.AppendLine($"Server: `{op.CommandArgs.Server.Guild.Name}`\n" +
 							                    $"ServerID: `{op.CommandArgs.Server.Id}`\n" +
-							                    $"Channel: `#{op.CommandArgs.Channel.Name}`\n" +
-							                    $"Allocated DataMemory: `{op.AllocatedMemoryStarted:#0.00} MB`\n" +
-							                    $"TimeCreated: `{Utils.GetTimestamp(op.TimeCreated)}`\n" +
-							                    $"TimeStarted: `{(op.TimeStarted == DateTime.MinValue ? "0" : Utils.GetTimestamp(op.TimeStarted))}`");
-						else
-							response.AppendLine($"Command: `{op.CommandArgs.Command.Id}`\n" +
-							                    $"Status: `{op.CurrentState}`\n" +
-							                    $"Author: `{op.CommandArgs.Message.Author.GetUsername()}`\n" +
-							                    $"Channel: `#{op.CommandArgs.Channel.Name}`\n" +
-							                    $"TimeCreated: `{Utils.GetTimestamp(op.TimeCreated)}`\n" +
-							                    $"TimeStarted: `{(op.TimeStarted == DateTime.MinValue ? "0" : Utils.GetTimestamp(op.TimeStarted))}`");
+							                    $"Allocated DataMemory: `{op.AllocatedMemoryStarted:#0.00} MB`\n");
 					}
 				}
 
 				string responseString = response.ToString();
 				if( string.IsNullOrEmpty(responseString) )
 					responseString = "There are no operations running.";
+
+				await SendMessageToChannel(e.Channel, responseString);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
+// !cancel
+			newCommand = new Command<TUser>("cancel");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Cancel queued or running operation - use in the same channel, and with the name of the command as parameter. (nuke, archive, etc...)";
+			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
+			newCommand.OnExecute += async e => {
+				string responseString = "Operation not found.";
+				Operation<TUser> operation = null;
+
+				if( !string.IsNullOrEmpty(e.TrimmedMessage) &&
+				    (operation = this.CurrentOperations.FirstOrDefault(
+					    op => op.CommandArgs.Channel.Id == e.Channel.Id &&
+					          op.CommandArgs.Command.Id == e.TrimmedMessage)) != null )
+					responseString = "Operation canceled:\n\n" + operation.ToString();
 
 				await SendMessageToChannel(e.Channel, responseString);
 			};
