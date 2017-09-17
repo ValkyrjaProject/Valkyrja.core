@@ -10,6 +10,7 @@ namespace Botwinder.entities
 	public class ServerContext: DbContext
 	{
 		public DbSet<ServerConfig> ServerConfigurations;
+		public DbSet<ServerStats> ServerStats;
 		public DbSet<ChannelConfig> Channels;
 		public DbSet<RoleConfig> Roles;
 

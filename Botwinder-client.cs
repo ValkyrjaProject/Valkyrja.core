@@ -334,6 +334,7 @@ namespace Botwinder.core
 			}
 
 			UpdateShardStats();
+			UpdateServerStats();
 
 			this.GlobalDb.SaveChanges(); //Note that this method checks for changes first.
 			this.ServerDb.SaveChanges();
@@ -355,6 +356,43 @@ namespace Botwinder.core
 			this.CurrentShard.MemoryUsed = GC.GetTotalMemory(false) / 1000000;
 			this.CurrentShard.ServerCount = this.Servers.Count;
 			this.CurrentShard.UserCount = this.DiscordClient.Guilds.Sum(s => s.MemberCount);
+		}
+
+		private void UpdateServerStats()
+		{
+			foreach( KeyValuePair<guid, Server<TUser>> pair in this.Servers )
+			{
+				ServerStats stats = null;
+				if( (stats = this.ServerDb.ServerStats.FirstOrDefault(s => s.ServerId == pair.Key)) == null )
+				{
+					stats = new ServerStats();
+					stats.ServerId = pair.Value.Id;
+					this.ServerDb.ServerStats.Add(stats);
+				}
+
+				DateTime joinedAt = DateTime.UtcNow;
+				if( pair.Value.Guild.CurrentUser.JoinedAt.HasValue )
+					joinedAt = pair.Value.Guild.CurrentUser.JoinedAt.Value.UtcDateTime;
+					//Although D.NET lists this as nullable, D.API always provides the value. It is safe to assume that it's always there.
+
+				if( stats.JoinedTimeFirst == DateTime.MaxValue ) //This is the first time that we joined the server.
+				{
+					stats.JoinedTimeFirst = joinedAt;
+				}
+
+				if( stats.JoinedTime != joinedAt )
+				{
+					stats.JoinedTime = joinedAt;
+					stats.JoinedCount++;
+				}
+
+				stats.ShardId = this.CurrentShard.Id;
+				stats.Name = pair.Value.Guild.Name;
+				stats.OwnerId = pair.Value.Guild.OwnerId;
+				stats.OwnerName = pair.Value.Guild.Owner.Username +"#"+ pair.Value.Guild.Owner.Discriminator;
+				stats.IsDiscordPartner = pair.Value.Guild.VoiceRegionId.StartsWith("vip");
+				stats.UserCount = pair.Value.Guild.MemberCount;
+			}
 		}
 
 //Modules

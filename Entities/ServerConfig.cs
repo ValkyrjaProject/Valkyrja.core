@@ -17,7 +17,7 @@ namespace Botwinder.entities
 		public guid ServerId{ get; set; } = 0;
 
 		[Column("name", TypeName = "varchar(255)")]
-		public string Name{ get; set; } = "default";
+		public string Name{ get; set; } = "";
 
 		[Column("localisation_id")]
 		public Int64 LocalisationId{ get; set; } = 0;
