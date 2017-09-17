@@ -45,6 +45,18 @@ namespace Botwinder.entities
 
 	public static class DiscordEx
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static string GetName(this IGuildUser self)
+		{
+			return !string.IsNullOrWhiteSpace(self.Nickname) ? self.Nickname : self.Username +"#"+ self.Discriminator;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static string GetUsername(this IUser self)
+		{
+			return self.Username +"#"+ self.Discriminator;
+		}
+
 		public static async Task SendMessageSafe(this IUser self, string message, Embed embed = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed), message);
 		public static async Task SendMessageSafe(this ISocketMessageChannel self, string message, Embed embed = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed), message);
 		//public static async Task SendMessageSafe(this IDMChannel self, string message, Embed embed = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed), message); // I don't think that we will ever need this one.
