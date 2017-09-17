@@ -77,7 +77,7 @@ namespace Botwinder.core
 				if( !int.TryParse(e.TrimmedMessage, out int n) || n <= 0 )
 					n = 10;
 
-				foreach(ExceptionEntry exception in this.GlobalDb.Exceptions.Skip(Math.Max(0, this.GlobalDb.Exceptions.Count() - n)))
+				foreach( ExceptionEntry exception in this.GlobalDb.Exceptions.Skip(Math.Max(0, this.GlobalDb.Exceptions.Count() - n)) )
 				{
 					response.AppendLine(exception.GetMessage());
 				}
@@ -85,6 +85,21 @@ namespace Botwinder.core
 				string responseString = response.ToString();
 				if( string.IsNullOrWhiteSpace(responseString) )
 					responseString = "I did not record any errors :stuck_out_tongue:";
+				await e.Message.Channel.SendMessageSafe(responseString);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
+// !getException
+			newCommand = new Command<TUser>("getException");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Get an exception stack for specific ID.";
+			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.OnExecute += async e => {
+				string responseString = "I couldn't find that exception.";
+				ExceptionEntry exception = null;
+				if( int.TryParse(e.TrimmedMessage, out int id) && (exception = this.GlobalDb.Exceptions.FirstOrDefault(ex => ex.Id == id)) != null )
+					responseString = exception.GetStack();
+
 				await e.Message.Channel.SendMessageSafe(responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
