@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
@@ -62,6 +63,34 @@ namespace Botwinder.entities
 			this.OperationsRan = 0;
 			this.OperationsActive = 0;
 			this.Disconnects = 0;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public string GetStatsString()
+		{
+			TimeSpan uptime = DateTimeOffset.UtcNow - this.TimeStarted;
+			int days = uptime.Days;
+			int hours = uptime.Hours;
+			int minutes = uptime.Minutes;
+			int seconds = uptime.Seconds;
+
+			string uptimeString = (days == 0 ? "" : (days.ToString() + (days == 1 ? " day, " : " days, "))) +
+				(hours == 0 ? "" : (hours.ToString() + (hours == 1 ? " hour, " : " hours, "))) +
+				(minutes == 0 ? "" : (minutes.ToString() + (minutes == 1 ? " minute, " : " minutes "))) +
+				((days == 0 && hours == 0 && minutes == 0 ? "" : "and ") + seconds.ToString() + (seconds == 1 ? " second." : " seconds."));
+
+			return $"**Shard ID: `{this.Id}`**\n" +
+			       $"  Time Started: `{this.TimeStarted}`\n" +
+			       $"  Uptime: `{uptimeString}`\n" +
+			       $"  Allocated data Memory: `{this.MemoryUsed} MB`\n" +
+			       $"  Threads: `{this.ThreadsActive}`\n" +
+			       $"  Messages received: `{this.MessagesTotal}`\n" +
+			       $"  Messages per minute: `{this.MessagesPerMinute}`\n" +
+			       $"  Operations ran: `{this.OperationsRan}`\n" +
+			       $"  Operations active: `{this.OperationsActive}`\n" +
+			       $"  Disconnects: `{this.Disconnects}`\n" +
+			       $"  Servers: `{this.ServerCount}`\n" +
+			       $"  Members `{this.UserCount}`";
 		}
 	}
 }

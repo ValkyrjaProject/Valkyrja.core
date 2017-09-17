@@ -56,7 +56,7 @@ namespace Botwinder.entities
 		public string Description{ get; set; } = "";
 
 		/// <summary> The Code Stuff! </summary>
-		public Func<CommandArguments<TUser>, Task> OnExecute{ get; set; }
+		public Func<CommandArguments<TUser>, Task> OnExecute = null;
 
 		/// <summary> Initializes a new instance of the <see cref="Botwinder.entities.Command"/> class. </summary>
 		/// <param name="id"> You will execute the command by using CommandCharacter+Command.ID </param>
