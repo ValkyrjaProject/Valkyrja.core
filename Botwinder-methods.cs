@@ -64,6 +64,7 @@ namespace Botwinder.core
 				Type = logType,
 				ChannelId = channel.Id,
 				ServerId = channel.Guild.Id,
+				DateTime = DateTime.UtcNow,
 				Message = message
 			};
 			this.GlobalDb.Log.Add(logEntry);
@@ -79,19 +80,21 @@ namespace Botwinder.core
 				Message = exception.Message,
 				Stack = exception.StackTrace,
 				Data = data,
-				ServerId = serverId
+				ServerId = serverId,
+				DateTime = DateTime.UtcNow
 			};
 			await this.Events.Exception(exceptionEntry);
 		}
 
 		public async Task LogMaintenanceAndExit()
 		{
-			//if( this.CurrentOperations.Any() ) //todo - operations
-			//	return;
+			if( this.CurrentOperations.Any() )
+				return;
 
-			SocketGuild server = null;
-			SocketTextChannel channel = null;
-			try{
+			try
+			{
+				SocketTextChannel channel = null;
+				SocketGuild server = null;
 				if( (server = this.DiscordClient.GetGuild(this.GlobalConfig.MainServerId)) != null && (channel = server.GetTextChannel(this.GlobalConfig.MainChannelId)) != null )
 				{
 					TimeSpan uptime = DateTimeOffset.UtcNow - this.TimeStarted;

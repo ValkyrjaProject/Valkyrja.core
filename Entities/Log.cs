@@ -30,6 +30,9 @@ namespace Botwinder.entities
 		[Column("type", TypeName = "tinyint")]
 		public LogType Type{ get; set; } = LogType.None;
 
+		[Column("datetime")]
+		public DateTime DateTime{ get; set; } = DateTime.UtcNow;
+
 		[Column("message", TypeName = "text")]
 		public string Message{ get; set; } = "";
 	}
@@ -52,6 +55,9 @@ namespace Botwinder.entities
 
 		[Column("serverid")]
 		public guid ServerId{ get; set; } = 0;
+
+		[Column("datetime")]
+		public DateTime DateTime{ get; set; } = DateTime.UtcNow;
 
 		[Column("message", TypeName = "varchar(255)")]
 		public string Message{ get; set; } = "";
