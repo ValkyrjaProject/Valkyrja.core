@@ -2,6 +2,7 @@
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Threading.Tasks;
 using Botwinder.entities;
 
@@ -159,6 +160,57 @@ namespace Botwinder.core
 				ExceptionEntry exception = null;
 				if( !string.IsNullOrEmpty(e.TrimmedMessage) && int.TryParse(e.TrimmedMessage, out int id) && (exception = this.GlobalDb.Exceptions.FirstOrDefault(ex => ex.Id == id)) != null )
 					responseString = exception.GetStack();
+
+				await SendMessageToChannel(e.Channel, responseString);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
+// !blacklist
+			newCommand = new Command<TUser>("blacklist");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Add or remove an ID to or from the blacklist.";
+			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.OnExecute += async e => {
+				guid id = 0;
+				string responseString = "Invalid parameters.";
+				if( e.MessageArgs == null || e.MessageArgs.Length < 2 || !guid.TryParse(e.MessageArgs[1], out id) )
+				{
+					await SendMessageToChannel(e.Channel, responseString);
+					return;
+				}
+
+				ServerStats server = this.ServerDb.ServerStats.FirstOrDefault(s => s.ServerId == id || s.OwnerId == id);
+				switch(e.MessageArgs[0])
+				{
+					case "add":
+						if( this.GlobalDb.Blacklist.Any(b => b.Id == id) )
+						{
+							responseString = "That ID is already blacklisted.";
+							break;
+						}
+
+						this.GlobalDb.Blacklist.Add(new BlacklistEntry(){Id = id});
+						responseString = server == null ? "Done." : server.ServerId == id ?
+								$"I'll be leaving `{server.OwnerName}`'s server `{server.ServerName}` shortly." :
+								$"All of `{server.OwnerName}`'s servers are now blacklisted.";
+						break;
+					case "remove":
+						BlacklistEntry entry = this.GlobalDb.Blacklist.FirstOrDefault(b => b.Id == id);
+						if( entry == null )
+						{
+							responseString = "That ID was not blacklisted.";
+							break;
+						}
+
+						this.GlobalDb.Blacklist.Remove(entry);
+						responseString = server == null ? "Done." : server.ServerId == id ?
+								$"Entry for `{server.OwnerName}`'s server `{server.ServerName}` was removed from the balcklist." :
+								$"Entries for all `{server.OwnerName}`'s servers were removed from the blacklist.";
+						break;
+					default:
+						responseString = "Invalid keyword.";
+						break;
+				}
 
 				await SendMessageToChannel(e.Channel, responseString);
 			};
