@@ -17,6 +17,7 @@ namespace Botwinder.entities
 
 		private ServerContext DbContext;
 		public ServerConfig Config;
+		public Localisation Localisation;
 		public readonly Dictionary<string, Command<TUser>> Commands;
 		public Dictionary<string, CustomCommand> CustomCommands;
 		public Dictionary<string, CustomAlias> CustomAliases;
@@ -29,7 +30,7 @@ namespace Botwinder.entities
 		public Dictionary<guid, RoleConfig> Roles;
 
 
-		public Server(SocketGuild guild, Dictionary<string, Command<TUser>> allCommands, ServerContext db)
+		public Server(SocketGuild guild, Dictionary<string, Command<TUser>> allCommands)
 		{
 			this.Id = guild.Id;
 			this.Guild = guild;

@@ -16,7 +16,7 @@ namespace Botwinder.entities
 		public DbSet<LogEntry> Log;
 		public DbSet<ExceptionEntry> Exceptions;
 		public DbSet<Shard> Shards;
-		//public DbSet<Localisation> Localisation;
+		public DbSet<Localisation> Localisations;
 
 		public GlobalContext(DbContextOptions<GlobalContext> options) : base(options)
 		{

@@ -591,8 +591,9 @@ namespace Botwinder.core
 				}
 				else
 				{
-					server = new Server<TUser>(guild, this.Commands, this.ServerDb);
+					server = new Server<TUser>(guild, this.Commands);
 					server.LoadConfig(this.ServerDb);
+					server.Localisation = this.GlobalDb.Localisations.FirstOrDefault(l => l.Id == server.Config.LocalisationId);
 				}
 			}
 			catch(Exception exception)
