@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.Threading.Tasks;
 using Botwinder.entities;
-
+using Microsoft.EntityFrameworkCore.Scaffolding.Internal;
 using guid = System.UInt64;
 
 namespace Botwinder.core
@@ -175,8 +175,13 @@ namespace Botwinder.core
 				string responseString = "Invalid parameters.";
 				if( e.MessageArgs == null || e.MessageArgs.Length < 2 || !guid.TryParse(e.MessageArgs[1], out id) )
 				{
-					await SendMessageToChannel(e.Channel, responseString);
-					return;
+					if( !e.Message.MentionedUsers.Any() )
+					{
+						await SendMessageToChannel(e.Channel, responseString);
+						return;
+					}
+
+					id = e.Message.MentionedUsers.First().Id;
 				}
 
 				ServerStats server = this.ServerDb.ServerStats.FirstOrDefault(s => s.ServerId == id || s.OwnerId == id);
@@ -206,6 +211,128 @@ namespace Botwinder.core
 						responseString = server == null ? "Done." : server.ServerId == id ?
 								$"Entry for `{server.OwnerName}`'s server `{server.ServerName}` was removed from the balcklist." :
 								$"Entries for all `{server.OwnerName}`'s servers were removed from the blacklist.";
+						break;
+					default:
+						responseString = "Invalid keyword.";
+						break;
+				}
+
+				await SendMessageToChannel(e.Channel, responseString);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
+// !subscriber
+			newCommand = new Command<TUser>("subscriber");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Add or remove an ID to or from the subscribers, use with optional bonus or premium parameter.";
+			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.OnExecute += async e =>{
+				guid id = 0;
+				string responseString = "Invalid parameters.";
+				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
+				    !guid.TryParse(e.MessageArgs[1], out id) )
+				{
+					if( !e.Message.MentionedUsers.Any() )
+					{
+						await SendMessageToChannel(e.Channel, responseString);
+						return;
+					}
+
+					id = e.Message.MentionedUsers.First().Id;
+				}
+
+				Subscriber subscriber = this.GlobalDb.Subscribers.FirstOrDefault(s => s.UserId == id);
+				switch(e.MessageArgs[0]) //Nope - mentioned users above mean that there is a parameter.
+				{
+					case "add":
+						if( subscriber == null )
+							this.GlobalDb.Subscribers.Add(subscriber = new Subscriber(){UserId = id});
+
+						for( int i = 2; i < e.MessageArgs.Length; i++ )
+						{
+							subscriber.HasBonus = subscriber.HasBonus || e.MessageArgs[i] == "bonus";
+							subscriber.IsPremium = subscriber.IsPremium || e.MessageArgs[i] == "premium";
+						}
+
+						responseString = "Done.";
+						break;
+					case "remove":
+						if( subscriber == null )
+						{
+							responseString = "That ID was not a subscriber.";
+							break;
+						}
+
+						responseString = "Done.";
+						if( e.MessageArgs.Length < 3 )
+						{
+							this.GlobalDb.Subscribers.Remove(subscriber);
+							break;
+						}
+
+						for( int i = 2; i < e.MessageArgs.Length; i++ )
+						{
+							subscriber.HasBonus = subscriber.HasBonus && e.MessageArgs[i] != "bonus";
+							subscriber.IsPremium = subscriber.IsPremium && e.MessageArgs[i] != "premium";
+						}
+						break;
+					default:
+						responseString = "Invalid keyword.";
+						break;
+				}
+
+				await SendMessageToChannel(e.Channel, responseString);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
+// !partner
+			newCommand = new Command<TUser>("partner");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Add or remove an ID to or from the partners, use with optional premium parameter.";
+			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.OnExecute += async e =>{
+				guid id = 0;
+				string responseString = "Invalid parameters.";
+				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
+				    !guid.TryParse(e.MessageArgs[1], out id) )
+				{
+					if( !e.Message.MentionedUsers.Any() )
+					{
+						await SendMessageToChannel(e.Channel, responseString);
+						return;
+					}
+
+					id = e.Message.MentionedUsers.First().Id;
+				}
+
+				PartneredServer partner = this.GlobalDb.PartneredServers.FirstOrDefault(s => s.ServerId == id);
+				switch(e.MessageArgs[0]) //Nope - mentioned users above mean that there is a parameter.
+				{
+					case "add":
+						if( partner == null )
+							this.GlobalDb.PartneredServers.Add(partner = new PartneredServer(){ServerId = id});
+
+						if( e.MessageArgs.Length > 2 )
+							partner.IsPremium = partner.IsPremium || e.MessageArgs[2] == "premium";
+
+						responseString = "Done.";
+						break;
+					case "remove":
+						if( partner == null )
+						{
+							responseString = "That ID was not a partner.";
+							break;
+						}
+
+						responseString = "Done.";
+						if( e.MessageArgs.Length < 3 )
+						{
+							this.GlobalDb.PartneredServers.Remove(partner);
+							break;
+						}
+
+						if( e.MessageArgs.Length > 2 )
+							partner.IsPremium = partner.IsPremium && e.MessageArgs[2] != "premium";
 						break;
 					default:
 						responseString = "Invalid keyword.";
