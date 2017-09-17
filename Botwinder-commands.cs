@@ -56,6 +56,40 @@ namespace Botwinder.core
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
+// !getServer
+			newCommand = new Command<TUser>("getServer");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Display some info about specific server with id/name, or owners id/username.";
+			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.OnExecute += async e => {
+				guid id;
+				StringBuilder response = new StringBuilder();
+				IEnumerable<ServerStats> foundServers = null;
+				if( string.IsNullOrEmpty(e.TrimmedMessage) ||
+				    (!guid.TryParse(e.TrimmedMessage, out id) ||
+				     !(foundServers = this.ServerDb.ServerStats.Where(s =>
+					     s.ServerId == id || s.OwnerId == id || s.ServerName.Contains(e.TrimmedMessage) || s.OwnerName.Contains(e.TrimmedMessage)
+				     )).Any()) )
+				{
+					await SendMessageToChannel(e.Channel, "Server not found.");
+					return;
+				}
+
+				if( foundServers.Count() > 5 )
+				{
+					response.AppendLine("__**Found more than 5 servers!**__\n");
+				}
+
+				foreach(ServerStats server in foundServers.Take(5))
+				{
+					response.AppendLine(server.ToString());
+					response.AppendLine();
+				}
+
+				await SendMessageToChannel(e.Channel, response.ToString());
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
 // !maintenance
 			newCommand = new Command<TUser>("maintenance");
 			newCommand.Type = CommandType.Standard;
@@ -74,7 +108,7 @@ namespace Botwinder.core
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				StringBuilder response = new StringBuilder();
-				if( !int.TryParse(e.TrimmedMessage, out int n) || n <= 0 )
+				if( string.IsNullOrEmpty(e.TrimmedMessage) || !int.TryParse(e.TrimmedMessage, out int n) || n <= 0 )
 					n = 10;
 
 				foreach( ExceptionEntry exception in this.GlobalDb.Exceptions.Skip(Math.Max(0, this.GlobalDb.Exceptions.Count() - n)) )
@@ -97,48 +131,75 @@ namespace Botwinder.core
 			newCommand.OnExecute += async e => {
 				string responseString = "I couldn't find that exception.";
 				ExceptionEntry exception = null;
-				if( int.TryParse(e.TrimmedMessage, out int id) && (exception = this.GlobalDb.Exceptions.FirstOrDefault(ex => ex.Id == id)) != null )
+				if( !string.IsNullOrEmpty(e.TrimmedMessage) && int.TryParse(e.TrimmedMessage, out int id) && (exception = this.GlobalDb.Exceptions.FirstOrDefault(ex => ex.Id == id)) != null )
 					responseString = exception.GetStack();
 
 				await SendMessageToChannel(e.Channel, responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
-
-// !getServer
-			newCommand = new Command<TUser>("getServer");
+// !operations
+			newCommand = new Command<TUser>("operations");
 			newCommand.Type = CommandType.Standard;
-			newCommand.Description = "Display some info about specific server with id/name, or owners id/username.";
-			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.Description = "Display info about all queued or running operations on your server.";
+			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
 			newCommand.OnExecute += async e => {
-				guid id;
 				StringBuilder response = new StringBuilder();
-				IEnumerable<ServerStats> foundServers = null;
-				if( string.IsNullOrEmpty(e.TrimmedMessage) ||
-				    (!guid.TryParse(e.TrimmedMessage, out id) ||
-				     !(foundServers = this.ServerDb.ServerStats.Where(s =>
-					     s.ServerId == id || s.OwnerId == id || s.ServerName.Contains(e.TrimmedMessage) || s.OwnerName.Contains(e.TrimmedMessage)
-					     )).Any()) )
+				bool allOperations = IsGlobalAdmin(e.Message.Author.Id);
+
+				response.AppendLine($"Total operations in the queue: `{this.CurrentOperations.Count}`");
+				if( allOperations )
+					response.AppendLine($"Currently allocated data Memory: `{(GC.GetTotalMemory(false) / 1000000f):#0.00} MB`");
+
+				response.AppendLine();
+				lock( this.OperationsLock )
 				{
-					await SendMessageToChannel(e.Channel, "Server not found.");
-					return;
+					foreach( Operation<TUser> op in this.CurrentOperations )
+					{
+						if( !allOperations && op.CommandArgs.Server.Id != e.Server.Id )
+							continue;
+
+						if( allOperations )
+							response.AppendLine($"Command: `{op.CommandArgs.Command.Id}`\n" +
+							                    $"Status: `{op.CurrentState}`\n" +
+							                    $"Author: `{op.CommandArgs.Message.Author.GetUsername()}`\n" +
+							                    $"Server: `{op.CommandArgs.Server.Guild.Name}`\n" +
+							                    $"ServerID: `{op.CommandArgs.Server.Id}`\n" +
+							                    $"Channel: `#{op.CommandArgs.Channel.Name}`\n" +
+							                    $"Allocated DataMemory: `{op.AllocatedMemoryStarted:#0.00} MB`\n" +
+							                    $"TimeCreated: `{Utils.GetTimestamp(op.TimeCreated)}`\n" +
+							                    $"TimeStarted: `{(op.TimeStarted == DateTime.MinValue ? "0" : Utils.GetTimestamp(op.TimeStarted))}`");
+						else
+							response.AppendLine($"Command: `{op.CommandArgs.Command.Id}`\n" +
+							                    $"Status: `{op.CurrentState}`\n" +
+							                    $"Author: `{op.CommandArgs.Message.Author.GetUsername()}`\n" +
+							                    $"Channel: `#{op.CommandArgs.Channel.Name}`\n" +
+							                    $"TimeCreated: `{Utils.GetTimestamp(op.TimeCreated)}`\n" +
+							                    $"TimeStarted: `{(op.TimeStarted == DateTime.MinValue ? "0" : Utils.GetTimestamp(op.TimeStarted))}`");
+					}
 				}
 
-				if( foundServers.Count() > 5 )
-				{
-					response.AppendLine("__**Found more than 5 servers!**__\n");
-				}
+				string responseString = response.ToString();
+				if( string.IsNullOrEmpty(responseString) )
+					responseString = "There are no operations running.";
 
-				foreach(ServerStats server in foundServers.Take(5))
-				{
-					response.AppendLine(server.ToString());
-					response.AppendLine();
-				}
-
-				await SendMessageToChannel(e.Channel, response.ToString());
+				await SendMessageToChannel(e.Channel, responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
+/*
+// !command
+			newCommand = new Command<TUser>("command");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "";
+			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.OnExecute += async e => {
+				string responseString = "";
+				await SendMessageToChannel(e.Channel, responseString);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
+*/
 			return Task.CompletedTask;
 		}
 	}
