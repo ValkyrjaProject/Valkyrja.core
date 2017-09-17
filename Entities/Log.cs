@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
 
 using guid = System.UInt64;
@@ -67,5 +68,21 @@ namespace Botwinder.entities
 
 		[Column("data", TypeName = "varchar(255)")]
 		public string Data{ get; set; } = "";
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public string GetMessage()
+		{
+			return $"\n**ID: `{this.Id}`**\n" +
+			       $"Timestamp: `{Utils.GetTimestamp(this.DateTime)}`\n" +
+			       $"ServerId: `{this.ServerId}`\n" +
+			       $"Message: {this.Message}\n" +
+			       $"Data: {this.Data}";
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public string GetStack()
+		{
+			return GetMessage() + $"\nStack: {this.Stack}";
+		}
 	}
 }

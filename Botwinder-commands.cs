@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Botwinder.entities;
@@ -63,6 +64,28 @@ namespace Botwinder.core
 			newCommand.OnExecute += async e =>{
 				await SendMessageToChannel(e.Channel, "Okay, this may take a while...");
 				await LogMaintenanceAndExit();
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
+// !getExceptions
+			newCommand = new Command<TUser>("getExceptions");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Get a list of exceptions.";
+			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.OnExecute += async e => {
+				StringBuilder response = new StringBuilder();
+				if( !int.TryParse(e.TrimmedMessage, out int n) || n <= 0 )
+					n = 10;
+
+				foreach(ExceptionEntry exception in this.GlobalDb.Exceptions.Skip(Math.Max(0, this.GlobalDb.Exceptions.Count() - n)))
+				{
+					response.AppendLine(exception.GetMessage());
+				}
+
+				string responseString = response.ToString();
+				if( string.IsNullOrWhiteSpace(responseString) )
+					responseString = "I did not record any errors :stuck_out_tongue:";
+				await e.Message.Channel.SendMessageSafe(responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
