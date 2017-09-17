@@ -399,6 +399,19 @@ namespace Botwinder.core
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
+// !say
+			newCommand = new Command<TUser>("say");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Make the bot say something!";
+			newCommand.RequiredPermissions = PermissionType.SubModerator;
+			newCommand.IsBonusCommand = true;
+			newCommand.OnExecute += async e => {
+				if( string.IsNullOrWhiteSpace(e.TrimmedMessage) )
+					return;
+				await SendMessageToChannel(e.Channel, e.TrimmedMessage);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
 /*
 // !command
 			newCommand = new Command<TUser>("command");
