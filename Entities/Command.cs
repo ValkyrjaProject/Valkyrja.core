@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using Discord.Net;
 using Discord.WebSocket;
 
 using guid = System.UInt64;
@@ -139,13 +140,13 @@ namespace Botwinder.entities
 				try
 				{
 					await e.Message.DeleteAsync();
-				} catch(Exception)
-				{}
+				}
+				catch(Exception) { }
 			}
 
 			try
 			{
-				e.Client.LogMessage(LogType.Command, e.Channel, e.Message);
+				await e.Client.LogMessage(LogType.Command, e.Channel, e.Message);
 
 				if( this.SendTyping )
 					await e.Channel.TriggerTypingAsync();
@@ -173,7 +174,9 @@ namespace Botwinder.entities
 					Operation<TUser> operation = Operation<TUser>.Create(e);
 					await operation.Execute();
 				}
-			} catch(Exception exception)
+			}
+			catch(HttpException) { }
+			catch(Exception exception)
 			{
 				await e.Client.LogException(exception, e);
 			}

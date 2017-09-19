@@ -15,7 +15,7 @@ namespace Botwinder.entities
 
 		public readonly SocketGuild Guild;
 
-		private ServerContext DbContext;
+		private string DbConnectionString;
 		public ServerConfig Config;
 		public Localisation Localisation;
 		public readonly Dictionary<string, Command<TUser>> Commands;
@@ -37,33 +37,35 @@ namespace Botwinder.entities
 			this.Commands = new Dictionary<string, Command<TUser>>(allCommands);
 		}
 
-		public void ReloadConfig(ServerContext db)
+		public void ReloadConfig(string dbConnectionString)
 		{
-			this.DbContext = db;
+			this.DbConnectionString = dbConnectionString;
+			ServerContext dbContext = ServerContext.Create(dbConnectionString);
 
-			this.Config = db.ServerConfigurations.FirstOrDefault(c => c.ServerId == this.Id);
+			this.Config = dbContext.ServerConfigurations.FirstOrDefault(c => c.ServerId == this.Id);
 			if( this.Config == null )
 			{
 				this.Config = new ServerConfig(){ServerId = this.Id, Name = this.Guild.Name};
-				db.ServerConfigurations.Add(this.Config);
+				dbContext.ServerConfigurations.Add(this.Config);
 			}
 
 			this.CustomCommands?.Clear();
 			this.CustomAliases?.Clear();
 			this.Roles?.Clear();
 
-			this.CustomCommands = db.CustomCommands.Where(c => c.ServerId == this.Id).ToDictionary(c => c.CommandId);
-			this.CustomAliases = db.CustomAliases.Where(c => c.ServerId == this.Id).ToDictionary(c => c.Alias);
-			this.Roles = db.Roles.Where(c => c.ServerId == this.Id).ToDictionary(c => c.RoleId);
+			this.CustomCommands = dbContext.CustomCommands.Where(c => c.ServerId == this.Id).ToDictionary(c => c.CommandId);
+			this.CustomAliases = dbContext.CustomAliases.Where(c => c.ServerId == this.Id).ToDictionary(c => c.Alias);
+			this.Roles = dbContext.Roles.Where(c => c.ServerId == this.Id).ToDictionary(c => c.RoleId);
 		}
 
-		public void LoadConfig(ServerContext db)
+		public void LoadConfig(string dbConnectionString)
 		{
-			this.IgnoredChannels = db.Channels.Where(c => c.ServerId == this.Id && c.Ignored).Select(c => c.ChannelId).ToList();
-			this.TemporaryChannels = db.Channels.Where(c => c.ServerId == this.Id && c.Temporary).Select(c => c.ChannelId).ToList();
-			this.MutedChannels = db.Channels.Where(c => c.ServerId == this.Id && c.MutedUntil > DateTime.MinValue).Select(c => c.ChannelId).ToList();
+			ServerContext dbContext = ServerContext.Create(dbConnectionString);
+			this.IgnoredChannels = dbContext.Channels.Where(c => c.ServerId == this.Id && c.Ignored).Select(c => c.ChannelId).ToList();
+			this.TemporaryChannels = dbContext.Channels.Where(c => c.ServerId == this.Id && c.Temporary).Select(c => c.ChannelId).ToList();
+			this.MutedChannels = dbContext.Channels.Where(c => c.ServerId == this.Id && c.MutedUntil > DateTime.MinValue).Select(c => c.ChannelId).ToList();
 
-			ReloadConfig(db);
+			ReloadConfig(dbConnectionString);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -72,13 +74,13 @@ namespace Botwinder.entities
 			if( this.CachedCommandOptions != null && this.CachedCommandOptions.CommandId == commandString )
 				return this.CachedCommandOptions;
 
-			return this.CachedCommandOptions = this.DbContext.CommandOptions.FirstOrDefault(c => c.ServerId == this.Id && c.CommandId == commandString);
+			return this.CachedCommandOptions = ServerContext.Create(this.DbConnectionString).CommandOptions.FirstOrDefault(c => c.ServerId == this.Id && c.CommandId == commandString);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public List<CommandChannelOptions> GetCommandChannelOptions(string commandString)
 		{
-			return this.DbContext.CommandChannelOptions.Where(c => c.ServerId == this.Id && c.CommandId == commandString)?.ToList();
+			return ServerContext.Create(this.DbConnectionString).CommandChannelOptions.Where(c => c.ServerId == this.Id && c.CommandId == commandString)?.ToList();
 		}
 
 		public bool CanExecuteCommand(string commandId, int commandPermissions, SocketGuildChannel channel, SocketGuildUser user)

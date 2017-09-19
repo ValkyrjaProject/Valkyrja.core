@@ -13,7 +13,7 @@ namespace Botwinder.core
 	{
 		public async Task SendMessageToChannel(SocketTextChannel channel, string message)
 		{
-			LogMessage(LogType.Response, channel, this.GlobalConfig.UserId, message);
+			await LogMessage(LogType.Response, channel, this.GlobalConfig.UserId, message);
 			await channel.SendMessageSafe(message);
 		}
 
@@ -28,35 +28,35 @@ namespace Botwinder.core
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsSubscriber(guid id)
 		{
-			return this.GlobalDb.PartneredServers.Any(u => u.ServerId == id);
+			return GlobalContext.Create(this.DbConfig.GetDbConnectionString()).PartneredServers.Any(u => u.ServerId == id);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsPartner(guid id)
 		{
-			return this.GlobalDb.PartneredServers.Any(s => s.ServerId == id);
+			return GlobalContext.Create(this.DbConfig.GetDbConnectionString()).PartneredServers.Any(s => s.ServerId == id);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsPremiumSubscriber(guid id)
 		{
-			return this.GlobalDb.Subscribers.Any(u => u.UserId == id && u.IsPremium);
+			return GlobalContext.Create(this.DbConfig.GetDbConnectionString()).Subscribers.Any(u => u.UserId == id && u.IsPremium);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsBonusSubscriber(guid id)
 		{
-			return this.GlobalDb.Subscribers.Any(u => u.UserId == id && u.HasBonus);
+			return GlobalContext.Create(this.DbConfig.GetDbConnectionString()).Subscribers.Any(u => u.UserId == id && u.HasBonus);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsPremiumPartner(guid id)
 		{
-			return this.GlobalDb.PartneredServers.Any(s => s.ServerId == id && s.IsPremium);
+			return GlobalContext.Create(this.DbConfig.GetDbConnectionString()).PartneredServers.Any(s => s.ServerId == id && s.IsPremium);
 		}
 
 
-		public void LogMessage(LogType logType, SocketTextChannel channel, guid authorId, string message)
+		public async Task LogMessage(LogType logType, SocketTextChannel channel, guid authorId, string message)
 		{
 			LogEntry logEntry = new LogEntry(){
 				Type = logType,
@@ -66,13 +66,10 @@ namespace Botwinder.core
 				DateTime = DateTime.UtcNow,
 				Message = message
 			};
-			this.GlobalDb.Log.Add(logEntry);
-
-			lock(this.DbLock)
-				this.GlobalDb.SaveChanges();
+			await this.Events.LogEntryAdded(logEntry);
 		}
 
-		public void LogMessage(LogType logType, SocketTextChannel channel, SocketMessage message)
+		public async Task LogMessage(LogType logType, SocketTextChannel channel, SocketMessage message)
 		{
 			LogEntry logEntry = new LogEntry(){
 				Type = logType,
@@ -83,10 +80,7 @@ namespace Botwinder.core
 				DateTime = DateTime.UtcNow,
 				Message = message.Content
 			};
-			this.GlobalDb.Log.Add(logEntry);
-
-			lock(this.DbLock)
-				this.GlobalDb.SaveChanges();
+			await this.Events.LogEntryAdded(logEntry);
 		}
 
 		public async Task LogException(Exception exception, CommandArguments<TUser> args) =>

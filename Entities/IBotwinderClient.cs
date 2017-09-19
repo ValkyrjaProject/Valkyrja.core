@@ -22,8 +22,8 @@ namespace Botwinder.entities
 		bool IsPremiumSubscriber(guid id);
 		bool IsBonusSubscriber(guid id);
 		bool IsPremiumPartner(guid id);
-		void LogMessage(LogType logType, SocketTextChannel channel, guid authorId, string message);
-		void LogMessage(LogType logType, SocketTextChannel channel, SocketMessage message);
+		Task LogMessage(LogType logType, SocketTextChannel channel, guid authorId, string message);
+		Task LogMessage(LogType logType, SocketTextChannel channel, SocketMessage message);
 		Task LogException(Exception exception, CommandArguments<TUser> args);
 		Task LogException(Exception exception, string data, guid serverId = 0);
 	}

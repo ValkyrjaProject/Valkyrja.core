@@ -32,8 +32,9 @@ namespace Botwinder.core
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				StringBuilder shards = new StringBuilder();
+				GlobalContext dbContext = GlobalContext.Create(this.DbConfig.GetDbConnectionString());
 				Shard globalCount = new Shard();
-				foreach( Shard shard in this.GlobalDb.Shards )
+				foreach( Shard shard in dbContext.Shards )
 				{
 					globalCount.ServerCount += shard.ServerCount;
 					globalCount.UserCount += shard.UserCount;
@@ -58,7 +59,7 @@ namespace Botwinder.core
 				                 $"Global Operations ran: `{globalCount.OperationsRan}`\n" +
 				                 $"Global Operations active: `{globalCount.OperationsActive}`\n" +
 				                 $"Global Disconnects: `{globalCount.Disconnects}`\n" +
-				                 $"\n**Shards: `{this.GlobalDb.Shards.Count()}`**\n\n" +
+				                 $"\n**Shards: `{dbContext.Shards.Count()}`**\n\n" +
 				                 $"{shards.ToString()}";
 
 				await SendMessageToChannel(e.Channel, message);
@@ -81,8 +82,10 @@ namespace Botwinder.core
 				guid.TryParse(e.TrimmedMessage, out id);
 				StringBuilder response = new StringBuilder();
 				IEnumerable<ServerStats> foundServers = null;
-				if( !(foundServers = this.ServerDb.ServerStats.Where(s =>
-					    s.ServerId == id || s.OwnerId == id || s.ServerName.ToLower().Contains(e.TrimmedMessage.ToLower()) || s.OwnerName.ToLower().Contains(e.TrimmedMessage.ToLower())
+				if( !(foundServers = ServerContext.Create(this.DbConfig.GetDbConnectionString()).ServerStats.Where(s =>
+					    s.ServerId == id || s.OwnerId == id ||
+					    s.ServerName.ToLower().Contains($"{e.TrimmedMessage.ToLower()}") ||
+					    s.OwnerName.ToLower().Contains($"{e.TrimmedMessage.ToLower()}")
 				    )).Any() )
 				{
 					await SendMessageToChannel(e.Channel, "Server not found.");
@@ -114,7 +117,7 @@ namespace Botwinder.core
 				ServerConfig foundServer = null;
 				if( string.IsNullOrEmpty(e.TrimmedMessage) ||
 				    !guid.TryParse(e.TrimmedMessage, out id) ||
-				    (foundServer = this.ServerDb.ServerConfigurations.FirstOrDefault(s => s.ServerId == id)) == null )
+				    (foundServer = ServerContext.Create(this.DbConfig.GetDbConnectionString()).ServerConfigurations.FirstOrDefault(s => s.ServerId == id)) == null )
 				{
 					await SendMessageToChannel(e.Channel, "Server not found.");
 					return;
@@ -149,9 +152,10 @@ namespace Botwinder.core
 			newCommand.OnExecute += async e => {
 				StringBuilder response = new StringBuilder();
 				if( string.IsNullOrEmpty(e.TrimmedMessage) || !int.TryParse(e.TrimmedMessage, out int n) || n <= 0 )
-					n = 10;
+					n = 5;
 
-				foreach( ExceptionEntry exception in this.GlobalDb.Exceptions.Skip(Math.Max(0, this.GlobalDb.Exceptions.Count() - n)) )
+				GlobalContext dbContext = GlobalContext.Create(this.DbConfig.GetDbConnectionString());
+				foreach( ExceptionEntry exception in dbContext.Exceptions.Skip(Math.Max(0, dbContext.Exceptions.Count() - n)) )
 				{
 					response.AppendLine(exception.GetMessage());
 				}
@@ -171,7 +175,8 @@ namespace Botwinder.core
 			newCommand.OnExecute += async e => {
 				string responseString = "I couldn't find that exception.";
 				ExceptionEntry exception = null;
-				if( !string.IsNullOrEmpty(e.TrimmedMessage) && int.TryParse(e.TrimmedMessage, out int id) && (exception = this.GlobalDb.Exceptions.FirstOrDefault(ex => ex.Id == id)) != null )
+				GlobalContext dbContext = GlobalContext.Create(this.DbConfig.GetDbConnectionString());
+				if( !string.IsNullOrEmpty(e.TrimmedMessage) && int.TryParse(e.TrimmedMessage, out int id) && (exception = dbContext.Exceptions.FirstOrDefault(ex => ex.Id == id)) != null )
 					responseString = exception.GetStack();
 
 				await SendMessageToChannel(e.Channel, responseString);
@@ -197,30 +202,32 @@ namespace Botwinder.core
 					id = e.Message.MentionedUsers.First().Id;
 				}
 
-				ServerStats server = this.ServerDb.ServerStats.FirstOrDefault(s => s.ServerId == id || s.OwnerId == id);
+				GlobalContext dbContext = GlobalContext.Create(this.DbConfig.GetDbConnectionString());
+				ServerStats server = ServerContext.Create(this.DbConfig.GetDbConnectionString()).ServerStats
+					.FirstOrDefault(s => s.ServerId == id || s.OwnerId == id);
 				switch(e.MessageArgs[0])
 				{
 					case "add":
-						if( this.GlobalDb.Blacklist.Any(b => b.Id == id) )
+						if( dbContext.Blacklist.Any(b => b.Id == id) )
 						{
 							responseString = "That ID is already blacklisted.";
 							break;
 						}
 
-						this.GlobalDb.Blacklist.Add(new BlacklistEntry(){Id = id});
+						dbContext.Blacklist.Add(new BlacklistEntry(){Id = id});
 						responseString = server == null ? "Done." : server.ServerId == id ?
 								$"I'll be leaving `{server.OwnerName}`'s server `{server.ServerName}` shortly." :
 								$"All of `{server.OwnerName}`'s servers are now blacklisted.";
 						break;
 					case "remove":
-						BlacklistEntry entry = this.GlobalDb.Blacklist.FirstOrDefault(b => b.Id == id);
+						BlacklistEntry entry = dbContext.Blacklist.FirstOrDefault(b => b.Id == id);
 						if( entry == null )
 						{
 							responseString = "That ID was not blacklisted.";
 							break;
 						}
 
-						this.GlobalDb.Blacklist.Remove(entry);
+						dbContext.Blacklist.Remove(entry);
 						responseString = server == null ? "Done." : server.ServerId == id ?
 								$"Entry for `{server.OwnerName}`'s server `{server.ServerName}` was removed from the balcklist." :
 								$"Entries for all `{server.OwnerName}`'s servers were removed from the blacklist.";
@@ -254,12 +261,13 @@ namespace Botwinder.core
 					id = e.Message.MentionedUsers.First().Id;
 				}
 
-				Subscriber subscriber = this.GlobalDb.Subscribers.FirstOrDefault(s => s.UserId == id);
+				GlobalContext dbContext = GlobalContext.Create(this.DbConfig.GetDbConnectionString());
+				Subscriber subscriber = dbContext.Subscribers.FirstOrDefault(s => s.UserId == id);
 				switch(e.MessageArgs[0]) //Nope - mentioned users above mean that there is a parameter.
 				{
 					case "add":
 						if( subscriber == null )
-							this.GlobalDb.Subscribers.Add(subscriber = new Subscriber(){UserId = id});
+							dbContext.Subscribers.Add(subscriber = new Subscriber(){UserId = id});
 
 						for( int i = 2; i < e.MessageArgs.Length; i++ )
 						{
@@ -279,7 +287,7 @@ namespace Botwinder.core
 						responseString = "Done.";
 						if( e.MessageArgs.Length < 3 )
 						{
-							this.GlobalDb.Subscribers.Remove(subscriber);
+							dbContext.Subscribers.Remove(subscriber);
 							break;
 						}
 
@@ -318,12 +326,13 @@ namespace Botwinder.core
 					id = e.Message.MentionedUsers.First().Id;
 				}
 
-				PartneredServer partner = this.GlobalDb.PartneredServers.FirstOrDefault(s => s.ServerId == id);
+				GlobalContext dbContext = GlobalContext.Create(this.DbConfig.GetDbConnectionString());
+				PartneredServer partner = dbContext.PartneredServers.FirstOrDefault(s => s.ServerId == id);
 				switch(e.MessageArgs[0]) //Nope - mentioned users above mean that there is a parameter.
 				{
 					case "add":
 						if( partner == null )
-							this.GlobalDb.PartneredServers.Add(partner = new PartneredServer(){ServerId = id});
+							dbContext.PartneredServers.Add(partner = new PartneredServer(){ServerId = id});
 
 						if( e.MessageArgs.Length > 2 )
 							partner.IsPremium = partner.IsPremium || e.MessageArgs[2] == "premium";
@@ -340,7 +349,7 @@ namespace Botwinder.core
 						responseString = "Done.";
 						if( e.MessageArgs.Length < 3 )
 						{
-							this.GlobalDb.PartneredServers.Remove(partner);
+							dbContext.PartneredServers.Remove(partner);
 							break;
 						}
 

@@ -151,22 +151,26 @@ namespace Botwinder.core
 		{
 			Console.WriteLine("BotwinderClient: Loading configuration...");
 
-			bool save = false;
-			if( !this.GlobalDb.GlobalConfigs.Any() )
+			lock(this.DbLock)
 			{
-				this.GlobalDb.GlobalConfigs.Add(new GlobalConfig());
-				save = true;
-			}
-			if( !this.GlobalDb.Shards.Any() )
-			{
-				this.GlobalDb.Shards.Add(new Shard(){Id = 0});
-				save = true;
+				bool save = false;
+				if( !this.GlobalDb.GlobalConfigs.Any() )
+				{
+					this.GlobalDb.GlobalConfigs.Add(new GlobalConfig());
+					save = true;
+				}
+				if( !this.GlobalDb.Shards.Any() )
+				{
+					this.GlobalDb.Shards.Add(new Shard(){Id = 0});
+					save = true;
+				}
+
+				if( save )
+					this.GlobalDb.SaveChanges();
+
+				this.GlobalConfig = this.GlobalDb.GlobalConfigs.First(c => c.ConfigName == this.DbConfig.ConfigName);
 			}
 
-			if( save )
-				this.GlobalDb.SaveChanges();
-
-			this.GlobalConfig = this.GlobalDb.GlobalConfigs.First(c => c.ConfigName == this.DbConfig.ConfigName);
 			Console.WriteLine("BotwinderClient: Configuration loaded.");
 		}
 
@@ -302,16 +306,12 @@ namespace Botwinder.core
 		private Task Log(ExceptionEntry exceptionEntry)
 		{
 			this.GlobalDb.Exceptions.Add(exceptionEntry);
-			lock(this.DbLock)
-				this.GlobalDb.SaveChanges();
 			return Task.CompletedTask;
 		}
 
 		private Task Log(LogEntry logEntry)
 		{
 			this.GlobalDb.Log.Add(logEntry);
-			lock(this.DbLock)
-				this.GlobalDb.SaveChanges();
 			return Task.CompletedTask;
 		}
 
@@ -324,7 +324,7 @@ namespace Botwinder.core
 			while( !this.MainUpdateCancel.IsCancellationRequested )
 			{
 				if( this.GlobalConfig.LogDebug )
-					Console.WriteLine("BotwinderClient: MainUpdate loop triggered at:" + Utils.GetTimestamp(DateTime.UtcNow));
+					Console.WriteLine("BotwinderClient: MainUpdate loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 
 				DateTime frameTime = DateTime.Now;
 
@@ -424,6 +424,7 @@ namespace Botwinder.core
 			foreach( KeyValuePair<guid, Server<TUser>> pair in this.Servers )
 			{
 				ServerStats stats = null;
+				lock(this.DbLock)
 				if( (stats = this.ServerDb.ServerStats.FirstOrDefault(s => s.ServerId == pair.Key)) == null )
 				{
 					stats = new ServerStats();
@@ -659,13 +660,13 @@ namespace Botwinder.core
 				if( this.Servers.ContainsKey(guild.Id) )
 				{
 					server = this.Servers[guild.Id];
-					server.ReloadConfig(this.ServerDb);
+					server.ReloadConfig(this.DbConfig.GetDbConnectionString());
 				}
 				else
 				{
 					server = new Server<TUser>(guild, this.Commands);
-					server.LoadConfig(this.ServerDb);
-					server.Localisation = this.GlobalDb.Localisations.FirstOrDefault(l => l.Id == server.Config.LocalisationId);
+					server.LoadConfig(this.DbConfig.GetDbConnectionString());
+					server.Localisation = GlobalContext.Create(this.DbConfig.GetDbConnectionString()).Localisations.FirstOrDefault(l => l.Id == server.Config.LocalisationId);
 					this.Servers.Add(server.Id, server);
 				}
 			}
@@ -704,6 +705,7 @@ namespace Botwinder.core
 						}
 
 						//Blacklisted servers
+						lock(this.DbLock)
 						if( this.GlobalDb.Blacklist.Any(b => b.Id == pair.Value.Id || b.Id == pair.Value.Guild.OwnerId) &&
 						    !serversToLeave.Contains(pair.Value) )
 						{

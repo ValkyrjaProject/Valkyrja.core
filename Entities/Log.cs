@@ -72,7 +72,7 @@ namespace Botwinder.entities
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string GetMessage()
 		{
-			return $"\n**ID: `{this.Id}`** | Timestamp: `{Utils.GetTimestamp(this.DateTime)}`\n" +
+			return $"\n**ID: `{this.Id}`** | `{Utils.GetTimestamp(this.DateTime)}`\n" +
 			       $"{this.Message}\n" +
 			       $"{this.Data}";
 		}
@@ -80,11 +80,10 @@ namespace Botwinder.entities
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string GetStack()
 		{
-			return $"\n**ID: `{this.Id}`**\n" +
-			       $"Timestamp: `{Utils.GetTimestamp(this.DateTime)}`\n" +
+			return $"\n**ID: `{this.Id}`** | `{Utils.GetTimestamp(this.DateTime)}`\n" +
+			       $"Message: `{this.Message}`\n" +
 			       $"ServerId: `{this.ServerId}`\n" +
-			       $"Message: {this.Message}\n" +
-			       $"Data: {this.Data}\n" +
+			       $"Data: `{this.Data}`\n" +
 			       $"Stack: ```{this.Stack}```";
 		}
 	}
