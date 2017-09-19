@@ -2,16 +2,24 @@
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
 using System.Threading.Tasks;
 using Botwinder.entities;
-using Microsoft.EntityFrameworkCore.Scaffolding.Internal;
+using Discord.WebSocket;
+
 using guid = System.UInt64;
 
 namespace Botwinder.core
 {
-	public partial class BotwinderClient<TUser> : IDisposable where TUser : UserData, new()
+	public partial class BotwinderClient<TUser> : IBotwinderClient<TUser>, IDisposable where TUser : UserData, new()
 	{
+		private async Task HandleMentionResponse(Server<TUser> server, SocketTextChannel channel, SocketMessage message)
+		{
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine("BotwinderClient: MentionReceived");
+
+			await SendMessageToChannel(channel, "<:Botwinder:356545818406420481>");
+		}
+
 		private Task InitCommands()
 		{
 			Command<TUser> newCommand = null;
@@ -42,7 +50,7 @@ namespace Botwinder.core
 
 				string message = "Server Status: <http://status.botwinder.info>\n\n" +
 				                 $"Global Servers: `{globalCount.ServerCount}`\n" +
-				                 $"Global Members `{globalCount.UserCount}`" +
+				                 $"Global Members `{globalCount.UserCount}`\n" +
 				                 $"Global Allocated data Memory: `{globalCount.MemoryUsed} MB`\n" +
 				                 $"Global Threads: `{globalCount.ThreadsActive}`\n" +
 				                 $"Global Messages received: `{globalCount.MessagesTotal}`\n" +
@@ -50,7 +58,7 @@ namespace Botwinder.core
 				                 $"Global Operations ran: `{globalCount.OperationsRan}`\n" +
 				                 $"Global Operations active: `{globalCount.OperationsActive}`\n" +
 				                 $"Global Disconnects: `{globalCount.Disconnects}`\n" +
-				                 $"\n**Shards: `{shards.Length}`\n\n" +
+				                 $"\n**Shards: `{this.GlobalDb.Shards.Count()}`**\n\n" +
 				                 $"{shards.ToString()}";
 
 				await SendMessageToChannel(e.Channel, message);
@@ -63,14 +71,19 @@ namespace Botwinder.core
 			newCommand.Description = "Display some info about specific server with id/name, or owners id/username.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
+				if( string.IsNullOrEmpty(e.TrimmedMessage) )
+				{
+					await SendMessageToChannel(e.Channel, "Requires parameters.");
+					return;
+				}
+
 				guid id;
+				guid.TryParse(e.TrimmedMessage, out id);
 				StringBuilder response = new StringBuilder();
 				IEnumerable<ServerStats> foundServers = null;
-				if( string.IsNullOrEmpty(e.TrimmedMessage) ||
-				    (!guid.TryParse(e.TrimmedMessage, out id) ||
-				     !(foundServers = this.ServerDb.ServerStats.Where(s =>
-					     s.ServerId == id || s.OwnerId == id || s.ServerName.Contains(e.TrimmedMessage) || s.OwnerName.Contains(e.TrimmedMessage)
-				     )).Any()) )
+				if( !(foundServers = this.ServerDb.ServerStats.Where(s =>
+					    s.ServerId == id || s.OwnerId == id || s.ServerName.ToLower().Contains(e.TrimmedMessage.ToLower()) || s.OwnerName.ToLower().Contains(e.TrimmedMessage.ToLower())
+				    )).Any() )
 				{
 					await SendMessageToChannel(e.Channel, "Server not found.");
 					return;
@@ -404,6 +417,7 @@ namespace Botwinder.core
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Make the bot say something!";
 			newCommand.RequiredPermissions = PermissionType.SubModerator;
+			newCommand.DeleteRequest = true;
 			newCommand.IsBonusCommand = true;
 			newCommand.OnExecute += async e => {
 				if( string.IsNullOrWhiteSpace(e.TrimmedMessage) )

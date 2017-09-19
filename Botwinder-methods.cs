@@ -4,18 +4,16 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using Botwinder.entities;
-using Discord.Net.Queue;
 using Discord.WebSocket;
-
 using guid = System.UInt64;
 
 namespace Botwinder.core
 {
-	public partial class BotwinderClient<TUser> : IDisposable where TUser : UserData, new()
+	public partial class BotwinderClient<TUser> : IBotwinderClient<TUser>, IDisposable where TUser : UserData, new()
 	{
 		public async Task SendMessageToChannel(SocketTextChannel channel, string message)
 		{
-			LogMessage(LogType.Response, channel, message);
+			LogMessage(LogType.Response, channel, this.GlobalConfig.UserId, message);
 			await channel.SendMessageSafe(message);
 		}
 
@@ -58,17 +56,37 @@ namespace Botwinder.core
 		}
 
 
-		public void LogMessage(LogType logType, SocketTextChannel channel, string message)
+		public void LogMessage(LogType logType, SocketTextChannel channel, guid authorId, string message)
 		{
 			LogEntry logEntry = new LogEntry(){
 				Type = logType,
+				UserId = authorId,
 				ChannelId = channel.Id,
 				ServerId = channel.Guild.Id,
 				DateTime = DateTime.UtcNow,
 				Message = message
 			};
 			this.GlobalDb.Log.Add(logEntry);
-			this.GlobalDb.SaveChanges();
+
+			lock(this.DbLock)
+				this.GlobalDb.SaveChanges();
+		}
+
+		public void LogMessage(LogType logType, SocketTextChannel channel, SocketMessage message)
+		{
+			LogEntry logEntry = new LogEntry(){
+				Type = logType,
+				UserId = message.Author.Id,
+				MessageId = message.Id,
+				ChannelId = channel.Id,
+				ServerId = channel.Guild.Id,
+				DateTime = DateTime.UtcNow,
+				Message = message.Content
+			};
+			this.GlobalDb.Log.Add(logEntry);
+
+			lock(this.DbLock)
+				this.GlobalDb.SaveChanges();
 		}
 
 		public async Task LogException(Exception exception, CommandArguments<TUser> args) =>
@@ -76,6 +94,10 @@ namespace Botwinder.core
 
 		public async Task LogException(Exception exception, string data, guid serverId = 0)
 		{
+			Console.WriteLine(exception.Message);
+			Console.WriteLine(exception.StackTrace);
+			Console.WriteLine(data);
+
 			ExceptionEntry exceptionEntry = new ExceptionEntry(){
 				Message = exception.Message,
 				Stack = exception.StackTrace,
