@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -7,7 +9,7 @@ namespace Botwinder.entities
 {
 	public class Events
 	{
-		/// <summary> Triggers only once, after the client was connected for the first time. Consider using IModule.Init instead. </summary>
+		/// <summary> Triggers only once, as soon as the client connects for the first time. Consider using IModule.Init instead. </summary>
 		public Func<Task> Initialize = null;
 		/// <summary> Triggers after every re-connect (including the first connect) </summary>
 		public Func<Task> Connected = null;
@@ -217,7 +219,6 @@ namespace Botwinder.entities
 		private Task OnMessageUpdated(Cacheable<IMessage, ulong> originalMessage, SocketMessage updatedMessage, ISocketMessageChannel channel)
 		{
 			if( this.MessageUpdated == null )
-
 				return Task.CompletedTask;
 
 			IMessage msg = originalMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
