@@ -435,6 +435,18 @@ namespace Botwinder.core
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
+// !ping
+			newCommand = new Command<TUser>("ping");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Measure how long does it take to receive a message and handle it as a command.";
+			newCommand.RequiredPermissions = PermissionType.Everyone;
+			newCommand.OnExecute += async e => {
+				TimeSpan time = DateTime.UtcNow - Utils.GetTimeFromId(e.Message.Id);
+				string responseString = "`"+ time.TotalMilliseconds.ToString("#00") +"`ms";
+				await SendMessageToChannel(e.Channel, responseString);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
 /*
 // !command
 			newCommand = new Command<TUser>("command");
