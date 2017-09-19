@@ -23,7 +23,7 @@ namespace Botwinder.entities
 		public string InviteUrl{ get; set; } = "";
 
 		[Column("localisation_id")]
-		public Int64 LocalisationId{ get; set; } = 0;
+		public guid LocalisationId{ get; set; } = 0;
 
 		[Column("timezone_utc_relative")]
 		public Int64 TimezoneUtcRelative{ get; set; } = 0;

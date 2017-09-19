@@ -21,13 +21,13 @@ namespace Botwinder.entities
 		public string ConfigName{ get; set; } = "default";
 
 		[Column("discord_token", TypeName = "varchar(255)")]
-		public string DiscordToken{ get; set; } = "";
+		public string DiscordToken{ get; set; } = "MTg0Mjg5NzQ0MTQwNjMyMDY0.C9OsKg.qB2u4nN65Hg5FFaNUOV8Lv_3QUk";
 
 		[Column("userid")]
-		public guid UserId{ get; set; } = 0;
+		public guid UserId{ get; set; } = 278834060053446666;
 
 		[Column("admin_userid")]
-		public guid AdminUserId{ get; set; } = 0;
+		public guid AdminUserId{ get; set; } = 89805412676681728;
 
 		[Column("enforce_requirements")]
 		public bool EnforceRequirements{ get; set; } = false;
@@ -51,19 +51,19 @@ namespace Botwinder.entities
 		public bool LivestreamEnabled{ get; set; } = false;
 
 		[Column("total_shards")]
-		public Int64 TotalShards{ get; set; } = 0;
+		public Int64 TotalShards{ get; set; } = 1;
 
 		[Column("initial_update_delay")]
-		public Int64 InitialUpdateDelay{ get; set; } = 0;
+		public Int64 InitialUpdateDelay{ get; set; } = 1;
 
 		[Column("command_prefix", TypeName = "varchar(255)")]
 		public string CommandPrefix{ get; set; } = "!";
 
 		[Column("main_serverid")]
-		public guid MainServerId{ get; set; } = 0;
+		public guid MainServerId{ get; set; } = 155821059960995840;
 
 		[Column("main_channelid")]
-		public guid MainChannelId{ get; set; } = 0;
+		public guid MainChannelId{ get; set; } = 170139120318808065;
 
 		[Column("vip_skip_queue")]
 		public bool VipSkipQueue{ get; set; } = false;
@@ -96,28 +96,25 @@ namespace Botwinder.entities
 		public Int64 AntispamAllowedDuplicates{ get; set; } = 0;
 
 		[Column("target_fps")]
-		public float TargetFps{ get; set; } = 0f;
+		public float TargetFps{ get; set; } = 0.05f;
 
 		[Column("operations_max")]
-		public Int64 OperationsMax{ get; set; } = 0;
+		public Int64 OperationsMax{ get; set; } = 2;
 
 		[Column("operations_extra")]
-		public Int64 OperationsExtra{ get; set; } = 0;
+		public Int64 OperationsExtra{ get; set; } = 1;
 
 		[Column("maintenance_memory_threshold")]
-		public Int64 MaintenanceMemoryThreshold{ get; set; } = 0;
+		public Int64 MaintenanceMemoryThreshold{ get; set; } = 3000;
 
 		[Column("maintenance_thread_threshold")]
-		public Int64 MaintenanceThreadThreshold{ get; set; } = 0;
-
-		[Column("maintenance_config_reloads_threshold")]
-		public Int64 MaintenanceConfigReloadsThreshold{ get; set; } = 0;
+		public Int64 MaintenanceThreadThreshold{ get; set; } = 44;
 
 		[Column("maintenance_operations_threshold")]
-		public Int64 MaintenanceOperationsThreshold{ get; set; } = 0;
+		public Int64 MaintenanceOperationsThreshold{ get; set; } = 300;
 
-		[Column("maintenance_disconnects_threshold")]
-		public Int64 MaintenanceDisconnectsThreshold{ get; set; } = 0;
+		[Column("maintenance_disconnect_threshold")]
+		public Int64 MaintenanceDisconnectsThreshold{ get; set; } = 20;
 
 		[Column("log_debug")]
 		public bool LogDebug{ get; set; } = false;

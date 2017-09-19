@@ -3,6 +3,8 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
+using guid = System.UInt64;
+
 namespace Botwinder.entities
 {
 	[Table("localisation")]
@@ -12,7 +14,7 @@ namespace Botwinder.entities
 		[Required]
 		[Column("id")]
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
-		public Int64 Id{ get; set; } = 0;
+		public guid Id{ get; set; } = 0;
 
 		[Column("iso", TypeName = "varchar(255)")]
 		public string Iso{ get; set; } = "";

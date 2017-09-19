@@ -145,9 +145,7 @@ namespace Botwinder.entities
 
 			try
 			{
-				e.Client.LogMessage(LogType.Command, e.Channel,
-					e.Message.Author.GetUsername() + " | " +
-					e.Message.Author.Id + " | " + e.Message.Content);
+				e.Client.LogMessage(LogType.Command, e.Channel, e.Message);
 
 				if( this.SendTyping )
 					await e.Channel.TriggerTypingAsync();

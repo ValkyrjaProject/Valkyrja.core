@@ -57,8 +57,8 @@ namespace Botwinder.entities
 		[Column("exp_relative")]
 		public Int64 ExpRelative{ get; set; } = 0;
 
-		public List<Username> Usernames;
-		public List<Nickname> Nicknames;
+		public List<Username> Usernames{ get; set; }
+		public List<Nickname> Nicknames{ get; set; }
 	}
 
 	[Table("usernames")]

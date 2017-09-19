@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 
+using guid = System.UInt64;
+
 namespace Botwinder.entities
 {
 	public class Utils

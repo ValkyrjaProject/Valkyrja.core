@@ -8,6 +8,7 @@ using guid = System.UInt64;
 
 namespace Botwinder.entities
 {
+	[Table("server_stats")]
 	public class ServerStats
 	{
 		[Key]
@@ -52,7 +53,7 @@ namespace Botwinder.entities
 			       $"Owner ID: `{this.OwnerId}`\n" +
 			       $"Owner name: `{this.OwnerName}`\n" +
 			       $"Discord Partner: `{this.IsDiscordPartner}`\n" +
-			       $"Members count: `{this.UserCount}`" +
+			       $"Members count: `{this.UserCount}`\n" +
 			       $"Shard ID: `{this.ShardId}`\n" +
 			       $"First Joined at: `{Utils.GetTimestamp(this.JoinedTimeFirst)}`\n" +
 			       $"Last Joined at: `{Utils.GetTimestamp(this.JoinedTime)}`\n" +

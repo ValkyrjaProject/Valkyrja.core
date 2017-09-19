@@ -52,6 +52,7 @@ namespace Botwinder.core
 		private readonly Dictionary<string, Command<TUser>> Commands = new Dictionary<string, Command<TUser>>();
 		public List<Operation<TUser>> CurrentOperations{ get; set; } = new List<Operation<TUser>>();
 		public Object OperationsLock{ get; set; } = new Object();
+		public Object DbLock{ get; set; } = new Object();
 
 		private readonly List<guid> LeaveNotifiedOwners = new List<guid>();
 		private DateTime LastMessageAverageTime = DateTime.UtcNow;
@@ -69,8 +70,12 @@ namespace Botwinder.core
 		{
 			this.CurrentShard.IsTaken = false;
 			this.CurrentShard.IsConnecting = false;
-			this.GlobalDb.SaveChanges();
-			this.ServerDb.SaveChanges();
+			lock(this.DbLock)
+			{
+				this.GlobalDb.SaveChanges();
+				this.ServerDb.SaveChanges();
+			}
+
 			Task.Delay(500).Wait();
 
 			this.DiscordClient.Dispose();
@@ -90,14 +95,24 @@ namespace Botwinder.core
 			LoadConfig();
 
 			//Find a shard for grabs.
-			while( (this.CurrentShard = this.GlobalDb.Shards.FirstOrDefault(s => s.IsTaken == false)) == null )
+			if( this.GlobalConfig.LogDebug )
+				this.CurrentShard = this.GlobalDb.Shards.First();
+			else
 			{
-				await Task.Delay(Utils.Random.Next(5000, 10000));
+				Console.WriteLine("BotwinderClient: Waiting for a shard...");
+				while( (this.CurrentShard = this.GlobalDb.Shards.FirstOrDefault(s => s.IsTaken == false)) == null )
+				{
+					await Task.Delay(Utils.Random.Next(5000, 10000));
+				}
+
+
+				Console.WriteLine("BotwinderClient: Shard taken.");
+				this.CurrentShard.IsTaken = true;
+				lock(this.DbLock)
+					this.GlobalDb.SaveChanges();
 			}
 
-			this.CurrentShard.IsTaken = true;
 			this.CurrentShard.ResetStats(this.TimeStarted);
-			this.GlobalDb.SaveChanges();
 
 			DiscordSocketConfig config = new DiscordSocketConfig();
 			config.ShardId = (int) this.CurrentShard.Id;
@@ -134,7 +149,7 @@ namespace Botwinder.core
 
 		private void LoadConfig()
 		{
-			Console.WriteLine("BotwinderClient: Loading configuration.");
+			Console.WriteLine("BotwinderClient: Loading configuration...");
 
 			bool save = false;
 			if( !this.GlobalDb.GlobalConfigs.Any() )
@@ -142,31 +157,41 @@ namespace Botwinder.core
 				this.GlobalDb.GlobalConfigs.Add(new GlobalConfig());
 				save = true;
 			}
+			if( !this.GlobalDb.Shards.Any() )
+			{
+				this.GlobalDb.Shards.Add(new Shard(){Id = 0});
+				save = true;
+			}
 
 			if( save )
 				this.GlobalDb.SaveChanges();
 
 			this.GlobalConfig = this.GlobalDb.GlobalConfigs.First(c => c.ConfigName == this.DbConfig.ConfigName);
+			Console.WriteLine("BotwinderClient: Configuration loaded.");
 		}
 
 //Events
 		private async Task OnConnecting()
 		{
 			//Some other node is already connecting, wait.
-			bool awaited = false;
-			while( this.GlobalDb.Shards.Any(s => s.IsConnecting) )
+			if( !this.GlobalConfig.LogDebug )
 			{
-				if( !awaited )
-					Console.WriteLine("BotwinderClient: Waiting for other shards...");
+				bool awaited = false;
+				while( this.GlobalDb.Shards.Any(s => s.IsConnecting) )
+				{
+					if( !awaited )
+						Console.WriteLine("BotwinderClient: Waiting for other shards to connect...");
 
-				awaited = true;
-				await Task.Delay(Utils.Random.Next(5000, 10000));
+					awaited = true;
+					await Task.Delay(Utils.Random.Next(5000, 10000));
+				}
+
+				this.CurrentShard.IsConnecting = true;
+				lock(this.DbLock)
+					this.GlobalDb.SaveChanges();
+				if( awaited )
+					await Task.Delay(5000); //Ensure sufficient delay between connecting shards.
 			}
-
-			this.CurrentShard.IsConnecting = true;
-			this.GlobalDb.SaveChanges();
-			if( awaited )
-				await Task.Delay(5000); //Ensure sufficient delay between connecting shards.
 
 			Console.WriteLine("BotwinderClient: Connecting...");
 		}
@@ -175,21 +200,31 @@ namespace Botwinder.core
 		{
 			Console.WriteLine("BotwinderClient: Connected.");
 
-			this.CurrentShard.IsConnecting = false;
-			this.GlobalDb.SaveChanges();
+			try
+			{
+				this.CurrentShard.IsConnecting = false;
+				lock(this.DbLock)
+					this.GlobalDb.SaveChanges();
 
-			this.TimeConnected = DateTime.Now;
-			await this.DiscordClient.SetGameAsync(GameStatusConnecting);
+				this.TimeConnected = DateTime.Now;
+				await this.DiscordClient.SetGameAsync(GameStatusConnecting);
+			}
+			catch(Exception e)
+			{
+				await LogException(e, "--OnConnected");
+			}
 		}
 
 		private Task OnReady()
 		{
-			Console.WriteLine("BotwinderClient: Ready.");
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine("BotwinderClient: Ready.");
 
 			if( this.MainUpdateTask == null )
 			{
 				this.MainUpdateCancel = new CancellationTokenSource();
 				this.MainUpdateTask = Task.Factory.StartNew(MainUpdate, this.MainUpdateCancel.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+				this.MainUpdateTask.Start();
 			}
 
 			return Task.CompletedTask;
@@ -214,8 +249,12 @@ namespace Botwinder.core
 			}
 		}
 
+// Message events
 		private async Task OnMessageReceived(SocketMessage message)
 		{
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine("BotwinderClient: MessageReceived on thread "+ Thread.CurrentThread.ManagedThreadId);
+
 			this.CurrentShard.MessagesTotal++;
 			this.MessagesThisMinute++;
 
@@ -235,6 +274,9 @@ namespace Botwinder.core
 			    (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) &&
 			     message.Content.StartsWith(prefix = server.Config.CommandPrefixAlt)) )
 				commandExecuted = await HandleCommand(server, channel, message, prefix);
+
+			if( !commandExecuted && message.MentionedUsers.Any(u => u.Id == this.DiscordClient.CurrentUser.Id) )
+				await HandleMentionResponse(server, channel, message);
 		}
 
 		private async Task OnMessageUpdated(SocketMessage originalMessage, SocketMessage updatedMessage, ISocketMessageChannel iChannel)
@@ -248,7 +290,7 @@ namespace Botwinder.core
 			    server.Config.IgnoreEveryone && updatedMessage.MentionedRoles.Any(r => r.IsEveryone) )
 				return;
 
-			bool commandExecuted = false;
+			bool commandExecuted = false; //todo - if config.executeOnEdit
 			string prefix;
 			if( (!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) &&
 			     updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
@@ -260,31 +302,36 @@ namespace Botwinder.core
 		private Task Log(ExceptionEntry exceptionEntry)
 		{
 			this.GlobalDb.Exceptions.Add(exceptionEntry);
-			this.GlobalDb.SaveChanges();
+			lock(this.DbLock)
+				this.GlobalDb.SaveChanges();
 			return Task.CompletedTask;
 		}
 
 		private Task Log(LogEntry logEntry)
 		{
 			this.GlobalDb.Log.Add(logEntry);
-			this.GlobalDb.SaveChanges();
+			lock(this.DbLock)
+				this.GlobalDb.SaveChanges();
 			return Task.CompletedTask;
 		}
 
 //Update
 		private async Task MainUpdate()
 		{
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine("BotwinderClient: MainUpdate started.");
+
 			while( !this.MainUpdateCancel.IsCancellationRequested )
 			{
-				DateTime frameTime = DateTime.Now;
+				if( this.GlobalConfig.LogDebug )
+					Console.WriteLine("BotwinderClient: MainUpdate loop triggered at:" + Utils.GetTimestamp(DateTime.UtcNow));
 
-				if( this.DiscordClient.ConnectionState != ConnectionState.Connected ||
-				    this.DiscordClient.LoginState != LoginState.LoggedIn ||
-				    this.TimeConnected - DateTime.Now < TimeSpan.FromSeconds(this.GlobalConfig.InitialUpdateDelay) )
-					continue;
+				DateTime frameTime = DateTime.Now;
 
 				if( !this.IsInitialized )
 				{
+					if( this.GlobalConfig.LogDebug )
+						Console.WriteLine("BotwinderClient: Initialized.");
 					try
 					{
 						this.IsInitialized = true;
@@ -295,6 +342,15 @@ namespace Botwinder.core
 						await LogException(exception, "--Events.Initialize");
 					}
 				}
+
+				if( this.DiscordClient.ConnectionState != ConnectionState.Connected ||
+				    this.DiscordClient.LoginState != LoginState.LoggedIn ||
+				    DateTime.Now - this.TimeConnected < TimeSpan.FromSeconds(this.GlobalConfig.InitialUpdateDelay) )
+				{
+					await Task.Delay(1000);
+					continue;
+				}
+
 				if( !this.IsConnected )
 				{
 					try
@@ -322,6 +378,8 @@ namespace Botwinder.core
 				await UpdateModules();
 
 				TimeSpan deltaTime = DateTime.Now - frameTime;
+				if( this.GlobalConfig.LogDebug )
+					Console.WriteLine($"BotwinderClient: MainUpdate loop took: {deltaTime.TotalMilliseconds} ms");
 				await Task.Delay(TimeSpan.FromSeconds(1f / this.GlobalConfig.TargetFps) - deltaTime);
 			}
 		}
@@ -336,8 +394,11 @@ namespace Botwinder.core
 			UpdateShardStats();
 			await UpdateServerStats();
 
-			this.GlobalDb.SaveChanges(); //Note that this method checks for changes first.
-			this.ServerDb.SaveChanges();
+			lock(this.DbLock)
+			{
+				this.GlobalDb.SaveChanges(); //Note that this method checks for changes first.
+				this.ServerDb.SaveChanges();
+			}
 
 			//todo - maintenance
 		}
@@ -476,6 +537,9 @@ namespace Botwinder.core
 		{
 			GetCommandAndParams(message.Content.Substring(prefix.Length), out string commandString, out string trimmedMessage, out string[] parameters);
 
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine($"Command: {commandString} | {trimmedMessage}");
+
 			if( server.Commands.ContainsKey(commandString) ||
 			    (server.CustomAliases.ContainsKey(commandString) &&
 			     server.Commands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId)) )
@@ -570,7 +634,12 @@ namespace Botwinder.core
 				if( !this.Servers.ContainsKey(guild.Id) )
 					return;
 
-				//todo - cancel operations
+				for(int i = this.CurrentOperations.Count -1; i >= 0; i--)
+				{
+					if( this.CurrentOperations[i].CommandArgs.Server.Id == guild.Id )
+						this.CurrentOperations[i].Cancel();
+				}
+
 				this.Servers.Remove(guild.Id);
 			}
 			catch(Exception exception)
@@ -583,6 +652,9 @@ namespace Botwinder.core
 		{
 			try
 			{
+				while( !this.IsInitialized )
+					await Task.Delay(1000);
+
 				Server<TUser> server;
 				if( this.Servers.ContainsKey(guild.Id) )
 				{
@@ -594,6 +666,7 @@ namespace Botwinder.core
 					server = new Server<TUser>(guild, this.Commands);
 					server.LoadConfig(this.ServerDb);
 					server.Localisation = this.GlobalDb.Localisations.FirstOrDefault(l => l.Id == server.Config.LocalisationId);
+					this.Servers.Add(server.Id, server);
 				}
 			}
 			catch(Exception exception)

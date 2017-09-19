@@ -21,21 +21,40 @@ namespace Botwinder.entities
 		public GlobalContext(DbContextOptions<GlobalContext> options) : base(options)
 		{
 			this.GlobalConfigs = new InternalDbSet<GlobalConfig>(this);
+			this.Subscribers = new InternalDbSet<Subscriber>(this);
+			this.PartneredServers = new InternalDbSet<PartneredServer>(this);
+			this.Blacklist = new InternalDbSet<BlacklistEntry>(this);
+			this.Log = new InternalDbSet<LogEntry>(this);
+			this.Exceptions = new InternalDbSet<ExceptionEntry>(this);
+			this.Shards = new InternalDbSet<Shard>(this);
+			this.Localisations = new InternalDbSet<Localisation>(this);
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<GlobalConfig>()
-				.Property(p => p.EnforceRequirements)
-				.HasDefaultValue(false);
+				.HasKey(p => p.ConfigName);
 
 			modelBuilder.Entity<Subscriber>()
-				.Property(p => p.IsPremium)
-				.HasDefaultValue(false);
+				.HasKey(p => p.UserId);
 
 			modelBuilder.Entity<PartneredServer>()
-				.Property(p => p.IsPremium)
-				.HasDefaultValue(false);
+				.HasKey(p => p.ServerId);
+
+			modelBuilder.Entity<BlacklistEntry>()
+				.HasKey(p => p.Id);
+
+			modelBuilder.Entity<LogEntry>()
+				.HasKey(p => p.Id);
+
+			modelBuilder.Entity<ExceptionEntry>()
+				.HasKey(p => p.Id);
+
+			modelBuilder.Entity<Shard>()
+				.HasKey(p => p.Id);
+
+			modelBuilder.Entity<Localisation>()
+				.HasKey(p => p.Id);
 		}
 
 		public static GlobalContext Create(string connectionString)

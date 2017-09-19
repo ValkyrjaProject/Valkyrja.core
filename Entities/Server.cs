@@ -44,14 +44,13 @@ namespace Botwinder.entities
 			this.Config = db.ServerConfigurations.FirstOrDefault(c => c.ServerId == this.Id);
 			if( this.Config == null )
 			{
-				this.Config = new ServerConfig(); //todo actually create that config properly...
+				this.Config = new ServerConfig(){ServerId = this.Id, Name = this.Guild.Name};
 				db.ServerConfigurations.Add(this.Config);
-				db.SaveChanges();
 			}
 
-			this.CustomCommands.Clear();
-			this.CustomAliases.Clear();
-			this.Roles.Clear();
+			this.CustomCommands?.Clear();
+			this.CustomAliases?.Clear();
+			this.Roles?.Clear();
 
 			this.CustomCommands = db.CustomCommands.Where(c => c.ServerId == this.Id).ToDictionary(c => c.CommandId);
 			this.CustomAliases = db.CustomAliases.Where(c => c.ServerId == this.Id).ToDictionary(c => c.Alias);

@@ -80,7 +80,7 @@ namespace Botwinder.entities
 				((days == 0 && hours == 0 && minutes == 0 ? "" : "and ") + seconds.ToString() + (seconds == 1 ? " second." : " seconds."));
 
 			return $"**Shard ID: `{this.Id}`**\n" +
-			       $"  Time Started: `{this.TimeStarted}`\n" +
+			       $"  Time Started: `{Utils.GetTimestamp(this.TimeStarted)}`\n" +
 			       $"  Uptime: `{uptimeString}`\n" +
 			       $"  Allocated data Memory: `{this.MemoryUsed} MB`\n" +
 			       $"  Threads: `{this.ThreadsActive}`\n" +
