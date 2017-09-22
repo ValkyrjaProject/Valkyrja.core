@@ -712,6 +712,16 @@ namespace Botwinder.core
 							serversToLeave.Add(pair.Value);
 							continue;
 						}
+
+						//Trial count exceeded
+						ServerStats stats = this.ServerDb.ServerStats.FirstOrDefault(s => s.ServerId == pair.Value.Id);
+						lock(this.DbLock)
+						if( stats != null && stats.JoinedCount > this.GlobalConfig.VipTrialJoins &&
+						    !serversToLeave.Contains(pair.Value) )
+						{
+							serversToLeave.Add(pair.Value);
+							continue;
+						}
 					}
 					catch(Exception exception)
 					{

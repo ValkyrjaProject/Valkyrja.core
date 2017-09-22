@@ -22,6 +22,7 @@ namespace Botwinder.entities
 		public Dictionary<string, CustomCommand> CustomCommands;
 		public Dictionary<string, CustomAlias> CustomAliases;
 		private CommandOptions CachedCommandOptions;
+		private List<CommandChannelOptions> CachedCommandChannelOptions;
 
 		public List<guid> IgnoredChannels;
 		public List<guid> MutedChannels = new List<guid>();
@@ -80,7 +81,12 @@ namespace Botwinder.entities
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public List<CommandChannelOptions> GetCommandChannelOptions(string commandString)
 		{
-			return ServerContext.Create(this.DbConnectionString).CommandChannelOptions.Where(c => c.ServerId == this.Id && c.CommandId == commandString)?.ToList();
+			CommandChannelOptions tmp;
+			if( this.CachedCommandChannelOptions != null &&
+			   (tmp = this.CachedCommandChannelOptions.FirstOrDefault()) != null && tmp.CommandId == commandString )
+				return this.CachedCommandChannelOptions;
+
+			return this.CachedCommandChannelOptions = ServerContext.Create(this.DbConnectionString).CommandChannelOptions.Where(c => c.ServerId == this.Id && c.CommandId == commandString)?.ToList();
 		}
 
 		public bool CanExecuteCommand(string commandId, int commandPermissions, SocketGuildChannel channel, SocketGuildUser user)

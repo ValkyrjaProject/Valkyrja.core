@@ -21,7 +21,7 @@ namespace Botwinder.entities
 		public string ConfigName{ get; set; } = "default";
 
 		[Column("discord_token", TypeName = "varchar(255)")]
-		public string DiscordToken{ get; set; } = "MTg0Mjg5NzQ0MTQwNjMyMDY0.C9OsKg.qB2u4nN65Hg5FFaNUOV8Lv_3QUk";
+		public string DiscordToken{ get; set; } = "";
 
 		[Column("userid")]
 		public guid UserId{ get; set; } = 278834060053446666;
@@ -73,6 +73,9 @@ namespace Botwinder.entities
 
 		[Column("vip_trial_hours")]
 		public Int64 VipTrialHours{ get; set; } = 36;
+
+		[Column("vip_trial_joins")]
+		public Int64 VipTrialJoins{ get; set; } = 5;
 
 		[Column("antispam_clear_interval")]
 		public Int64 AntispamClearInterval{ get; set; } = 0;

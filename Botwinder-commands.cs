@@ -215,6 +215,7 @@ namespace Botwinder.core
 						}
 
 						dbContext.Blacklist.Add(new BlacklistEntry(){Id = id});
+						dbContext.SaveChanges();
 						responseString = server == null ? "Done." : server.ServerId == id ?
 								$"I'll be leaving `{server.OwnerName}`'s server `{server.ServerName}` shortly." :
 								$"All of `{server.OwnerName}`'s servers are now blacklisted.";
@@ -228,6 +229,7 @@ namespace Botwinder.core
 						}
 
 						dbContext.Blacklist.Remove(entry);
+						dbContext.SaveChanges();
 						responseString = server == null ? "Done." : server.ServerId == id ?
 								$"Entry for `{server.OwnerName}`'s server `{server.ServerName}` was removed from the balcklist." :
 								$"Entries for all `{server.OwnerName}`'s servers were removed from the blacklist.";
@@ -275,6 +277,7 @@ namespace Botwinder.core
 							subscriber.IsPremium = subscriber.IsPremium || e.MessageArgs[i] == "premium";
 						}
 
+						dbContext.SaveChanges();
 						responseString = "Done.";
 						break;
 					case "remove":
@@ -296,6 +299,8 @@ namespace Botwinder.core
 							subscriber.HasBonus = subscriber.HasBonus && e.MessageArgs[i] != "bonus";
 							subscriber.IsPremium = subscriber.IsPremium && e.MessageArgs[i] != "premium";
 						}
+
+						dbContext.SaveChanges();
 						break;
 					default:
 						responseString = "Invalid keyword.";
@@ -337,6 +342,7 @@ namespace Botwinder.core
 						if( e.MessageArgs.Length > 2 )
 							partner.IsPremium = partner.IsPremium || e.MessageArgs[2] == "premium";
 
+						dbContext.SaveChanges();
 						responseString = "Done.";
 						break;
 					case "remove":
@@ -355,6 +361,8 @@ namespace Botwinder.core
 
 						if( e.MessageArgs.Length > 2 )
 							partner.IsPremium = partner.IsPremium && e.MessageArgs[2] != "premium";
+
+						dbContext.SaveChanges();
 						break;
 					default:
 						responseString = "Invalid keyword.";
