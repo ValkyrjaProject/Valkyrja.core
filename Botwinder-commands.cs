@@ -2,6 +2,8 @@
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Botwinder.entities;
 using Discord.WebSocket;
@@ -143,6 +145,19 @@ namespace Botwinder.core
 				await LogMaintenanceAndExit();
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
+
+// !restart
+			newCommand = new Command<TUser>("restart");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Shut down the bot.";
+			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.OnExecute += async e => {
+				await SendMessageToChannel(e.Channel, "bai");
+				await Task.Delay(1000);
+				Environment.Exit(0);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add("shutdown", newCommand.CreateAlias("shutdown"));
 
 // !getExceptions
 			newCommand = new Command<TUser>("getExceptions");
@@ -452,6 +467,150 @@ namespace Botwinder.core
 				TimeSpan time = DateTime.UtcNow - Utils.GetTimeFromId(e.Message.Id);
 				string responseString = "`"+ time.TotalMilliseconds.ToString("#00") +"`ms";
 				await SendMessageToChannel(e.Channel, responseString);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
+// !help
+			newCommand = new Command<TUser>("help");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "PMs a list of Custom Commands for the server if used without a parameter. Use with a parameter to search for specific commands.";
+			newCommand.RequiredPermissions = PermissionType.Everyone;
+			newCommand.OnExecute += async e => {
+				StringBuilder response = new StringBuilder("Please refer to the website documentation for the full list of features and commands: <http://botwinder.info/docs>\n\n");
+				StringBuilder commandStrings = new StringBuilder();
+
+				bool isSpecific = !string.IsNullOrWhiteSpace(e.TrimmedMessage);
+				string prefix = e.Server.Config.CommandPrefix;
+				List<string> includedCommandIds = new List<string>();
+				int count = 0;
+
+				void AddCustomAlias(string commandId)
+				{
+					List<CustomAlias> aliases = e.Server.CustomAliases.Values.Where(a => a.CommandId == commandId).ToList();
+					int aliasCount = aliases.Count;
+					if( aliasCount > 0 )
+					{
+						commandStrings.Append(aliasCount == 1 ? " **-** Custom Alias: " : " **-** Custom Aliases: ");
+						for( int i = 0; i < aliasCount; i++ )
+							commandStrings.Append((i == 0 ? "`" : i == aliasCount - 1 ? " and `" : ", `") +
+							                      prefix + aliases[i].Alias + "`");
+					}
+					commandStrings.AppendLine();
+				}
+
+				void AddCommand(Command<TUser> cmd)
+				{
+					commandStrings.AppendLine($"\n```diff\n{(cmd.CanExecute(this, e.Server, e.Channel, e.Message.Author as SocketGuildUser) ? "+" : "-")}" +
+					                          $"  {prefix}{cmd.Id}```" +
+					                          $" **-** {cmd.Description}");
+					if( cmd.Aliases != null && cmd.Aliases.Any() )
+					{
+						int aliasCount = cmd.Aliases.Count;
+						commandStrings.Append(aliasCount == 1 ? " **-** Alias: " : " **-** Aliases: ");
+						for( int i = 0; i < aliasCount; i++ )
+							commandStrings.Append((i == 0 ? "`" : i == aliasCount - 1 ? " and `" : ", `") +
+							                      prefix + cmd.Aliases[i] + "`");
+						commandStrings.AppendLine();
+					}
+
+					AddCustomAlias(cmd.Id);
+				}
+
+				void AddCustomCommand(CustomCommand cmd)
+				{
+					commandStrings.AppendLine($"\n```diff\n{(cmd.CanExecute(this, e.Server, e.Channel, e.Message.Author as SocketGuildUser) ? "+" : "-")}" +
+					                          $"  {prefix}{cmd.CommandId}```" +
+					                          $" **-** {cmd.Description}");
+
+					AddCustomAlias(cmd.CommandId);
+				}
+
+				if( isSpecific )
+				{
+					string expression = e.TrimmedMessage.Replace(" ", "|") + ")\\w*";
+					if( e.MessageArgs.Length > 1 )
+						expression += "(" + expression;
+					Regex regex = new Regex($"\\w*({expression}", RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(10f));
+
+					foreach( Command<TUser> cmd in e.Server.Commands.Values )
+					{
+						if( !cmd.IsHidden &&
+						    cmd.RequiredPermissions != PermissionType.OwnerOnly &&
+						    regex.Match(cmd.Id).Success )
+						{
+							Command<TUser> command = cmd;
+							if( cmd.IsAlias && e.Server.Commands.ContainsKey(cmd.ParentId) )
+								command = e.Server.Commands[cmd.ParentId];
+
+							if( includedCommandIds.Contains(command.Id) )
+								continue;
+
+							if( ++count > 5 )
+								break;
+
+							AddCommand(cmd);
+						}
+					}
+
+					foreach( CustomCommand cmd in e.Server.CustomCommands.Values )
+					{
+						if( regex.Match(cmd.CommandId).Success ) //Chances are that it's gonna fail more often.
+						{
+							if( includedCommandIds.Contains(cmd.CommandId) )
+								continue;
+
+							if( ++count > 5 )
+								break;
+
+							AddCustomCommand(cmd);
+						}
+					}
+
+					foreach( CustomAlias alias in e.Server.CustomAliases.Values )
+					{
+						if( regex.Match(alias.Alias).Success ) //Chances are that it's gonna fail more often.
+						{
+							if( includedCommandIds.Contains(alias.CommandId) )
+								continue;
+
+							if( ++count > 5 )
+								break;
+
+							if( e.Server.Commands.ContainsKey(alias.CommandId) )
+								AddCommand(e.Server.Commands[alias.CommandId]);
+							else if( e.Server.CustomCommands.ContainsKey(alias.CommandId) )
+								AddCustomCommand(e.Server.CustomCommands[alias.CommandId]);
+						}
+					}
+
+					if( count == 0 )
+						response.AppendLine("I did not find any commands matching your search expression.");
+					else
+					{
+						if( count > 5 )
+							response.AppendLine("I found too many commands matching your search expression. **Here are the first five:**");
+
+						response.Append(commandStrings.ToString());
+					}
+				}
+				else //Not specific - PM CustomCommands.
+				{
+					foreach( CustomCommand cmd in e.Server.CustomCommands.Values )
+					{
+						if( includedCommandIds.Contains(cmd.CommandId) )
+							continue;
+
+						if( ++count > 5 )
+							break;
+
+						AddCustomCommand(cmd);
+					}
+
+					response.AppendLine("I've PMed you the Custom Commands for this server.");
+					await e.Message.Author.SendMessageSafe(commandStrings.ToString());
+				}
+
+				await SendMessageToChannel(e.Channel, response.ToString());
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 

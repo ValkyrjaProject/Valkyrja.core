@@ -148,6 +148,7 @@ namespace Botwinder.core
 				await LogException(exception, "--LogMaintenance");
 			}
 
+			await Task.Delay(500);
 			Dispose();
 
 			await Task.Delay(500);

@@ -120,7 +120,7 @@ namespace Botwinder.entities
 		public Int64 MaintenanceDisconnectsThreshold{ get; set; } = 20;
 
 		[Column("log_debug")]
-		public bool LogDebug{ get; set; } = false;
+		public bool LogDebug{ get; set; } = true;
 
 		[Column("log_exceptions")]
 		public bool LogExceptions{ get; set; } = true;
