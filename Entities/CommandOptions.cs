@@ -37,7 +37,7 @@ namespace Botwinder.entities
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public string CommandId{ get; set; } = "";
 
-		[Column("channelidid")]
+		[Column("channelid")]
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public guid ChannelId{ get; set; } = 0;
 

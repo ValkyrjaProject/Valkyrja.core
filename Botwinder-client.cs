@@ -95,12 +95,19 @@ namespace Botwinder.core
 			LoadConfig();
 
 			//Find a shard for grabs.
+			Shard GetShard(){
+				lock(this.DbLock)
+					this.CurrentShard = this.GlobalDb.Shards.FirstOrDefault(s => s.IsTaken == false);
+				return this.CurrentShard;
+			}
+
 			if( this.GlobalConfig.LogDebug )
-				this.CurrentShard = this.GlobalDb.Shards.First();
+				lock(this.DbLock)
+					this.CurrentShard = this.GlobalDb.Shards.First();
 			else
 			{
 				Console.WriteLine("BotwinderClient: Waiting for a shard...");
-				while( (this.CurrentShard = this.GlobalDb.Shards.FirstOrDefault(s => s.IsTaken == false)) == null )
+				while( GetShard() == null )
 				{
 					await Task.Delay(Utils.Random.Next(5000, 10000));
 				}
@@ -180,8 +187,13 @@ namespace Botwinder.core
 			//Some other node is already connecting, wait.
 			if( !this.GlobalConfig.LogDebug )
 			{
+				bool IsAnyShardConnecting(){
+					lock(this.DbLock)
+						return this.GlobalDb.Shards.Any(s => s.IsConnecting);
+				}
+
 				bool awaited = false;
-				while( this.GlobalDb.Shards.Any(s => s.IsConnecting) )
+				while( IsAnyShardConnecting() )
 				{
 					if( !awaited )
 						Console.WriteLine("BotwinderClient: Waiting for other shards to connect...");
@@ -256,62 +268,81 @@ namespace Botwinder.core
 // Message events
 		private async Task OnMessageReceived(SocketMessage message)
 		{
-			if( this.GlobalConfig.LogDebug )
-				Console.WriteLine("BotwinderClient: MessageReceived on thread "+ Thread.CurrentThread.ManagedThreadId);
+			try
+			{
+				if( this.GlobalConfig.LogDebug )
+					Console.WriteLine("BotwinderClient: MessageReceived on thread " + Thread.CurrentThread.ManagedThreadId);
 
-			this.CurrentShard.MessagesTotal++;
-			this.MessagesThisMinute++;
+				this.CurrentShard.MessagesTotal++;
+				this.MessagesThisMinute++;
 
-			SocketTextChannel channel = message.Channel as SocketTextChannel;
-			if( channel == null || !this.Servers.ContainsKey(channel.Guild.Id) )
-				return;
+				SocketTextChannel channel = message.Channel as SocketTextChannel;
+				if( channel == null || !this.Servers.ContainsKey(channel.Guild.Id) )
+					return;
 
-			Server<TUser> server = this.Servers[channel.Guild.Id];
-			if( server.Config.IgnoreBots && message.Author.IsBot ||
-			    server.Config.IgnoreEveryone && message.MentionedRoles.Any(r => r.IsEveryone) )
-				return;
+				Server<TUser> server = this.Servers[channel.Guild.Id];
+				if( server.Config.IgnoreBots && message.Author.IsBot ||
+				    server.Config.IgnoreEveryone && message.MentionedRoles.Any(r => r.IsEveryone) )
+					return;
 
-			bool commandExecuted = false;
-			string prefix;
-			if( (!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) &&
-			     message.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
-			    (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) &&
-			     message.Content.StartsWith(prefix = server.Config.CommandPrefixAlt)) )
-				commandExecuted = await HandleCommand(server, channel, message, prefix);
+				bool commandExecuted = false;
+				string prefix;
+				if( (!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) &&
+				     message.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
+				    (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) &&
+				     message.Content.StartsWith(prefix = server.Config.CommandPrefixAlt)) )
+					commandExecuted = await HandleCommand(server, channel, message, prefix);
 
-			if( !commandExecuted && message.MentionedUsers.Any(u => u.Id == this.DiscordClient.CurrentUser.Id) )
-				await HandleMentionResponse(server, channel, message);
+				if( !commandExecuted && message.MentionedUsers.Any(u => u.Id == this.DiscordClient.CurrentUser.Id) )
+					await HandleMentionResponse(server, channel, message);
+			}
+			catch(Exception exception)
+			{
+				await LogException(exception, "--OnMessageReceived");
+			}
 		}
 
 		private async Task OnMessageUpdated(SocketMessage originalMessage, SocketMessage updatedMessage, ISocketMessageChannel iChannel)
 		{
-			SocketTextChannel channel = iChannel as SocketTextChannel;
-			if( channel == null || !this.Servers.ContainsKey(channel.Guild.Id) )
-				return;
+			try
+			{
+				SocketTextChannel channel = iChannel as SocketTextChannel;
+				if( channel == null || !this.Servers.ContainsKey(channel.Guild.Id) )
+					return;
 
-			Server<TUser> server = this.Servers[channel.Guild.Id];
-			if( server.Config.IgnoreBots && updatedMessage.Author.IsBot ||
-			    server.Config.IgnoreEveryone && updatedMessage.MentionedRoles.Any(r => r.IsEveryone) )
-				return;
+				Server<TUser> server = this.Servers[channel.Guild.Id];
+				if( server.Config.IgnoreBots && updatedMessage.Author.IsBot ||
+				    server.Config.IgnoreEveryone && updatedMessage.MentionedRoles.Any(r => r.IsEveryone) )
+					return;
 
-			bool commandExecuted = false; //todo - if config.executeOnEdit
-			string prefix;
-			if( (!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) &&
-			     updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
-			    (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) &&
-			     updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefixAlt)) )
-				commandExecuted = await HandleCommand(server, channel, updatedMessage, prefix);
+				bool commandExecuted = false;
+				if( server.Config.ExecuteOnEdit )
+				{
+					string prefix;
+					if( (!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) &&
+					     updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
+					    (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) &&
+					     updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefixAlt)) )
+						commandExecuted = await HandleCommand(server, channel, updatedMessage, prefix);
+				}
+			}
+			catch(Exception exception)
+			{
+				await LogException(exception, "--OnMessageUpdated");
+			}
 		}
 
 		private Task Log(ExceptionEntry exceptionEntry)
 		{
-			this.GlobalDb.Exceptions.Add(exceptionEntry);
+			lock(this.DbLock)
+				this.GlobalDb.Exceptions.Add(exceptionEntry);
 			return Task.CompletedTask;
 		}
 
 		private Task Log(LogEntry logEntry)
 		{
-			this.GlobalDb.Log.Add(logEntry);
+			lock(this.DbLock)
+				this.GlobalDb.Log.Add(logEntry);
 			return Task.CompletedTask;
 		}
 
