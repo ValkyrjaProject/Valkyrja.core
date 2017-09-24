@@ -37,6 +37,12 @@ namespace Botwinder.entities
 			                                       "Should you wish to continue using it, do take a look at conditions and instructions at <http://botwinder.info/invite>";
 
 			public const string OperationQueuedString = "This command was placed in a queue for large operations at position `{0}` and will be executed as soon as possible. Should you wish to cancel it at any time, use `!cancel {1}`\n_(Premium Contributors do not have to wait.)_";
+
+			public const string MentionHelp = "Find out everything about me, my author, all the features, commands and configuration at the http://botwinder.info";
+
+			public const string MentionPrefix = "Try this: `{0}`\n_(Server owner can change it at <http://botwinder.info/config>!)_";
+
+			public const string MentionPrefixEmpty = "Command prefix is empty on this server, you will not be able to execute any commands. Please configure it at <http://botwinder.info/config>!";
 		}
 	}
 }

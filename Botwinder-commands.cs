@@ -14,18 +14,31 @@ namespace Botwinder.core
 {
 	public partial class BotwinderClient<TUser> : IBotwinderClient<TUser>, IDisposable where TUser : UserData, new()
 	{
+		private readonly Regex RegexPingHelp = new Regex(".*(ping).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+		private readonly Regex RegexMentionHelp = new Regex(".*(help|commands).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+		private readonly Regex RegexPrefixHelp = new Regex(".*(command character|prefix).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
 		private async Task HandleMentionResponse(Server<TUser> server, SocketTextChannel channel, SocketMessage message)
 		{
 			if( this.GlobalConfig.LogDebug )
 				Console.WriteLine("BotwinderClient: MentionReceived");
 
-			await SendMessageToChannel(channel, "<:Botwinder:356545818406420481>");
+			string responseString = "";
+
+			if( this.RegexPingHelp.Match(message.Content).Success )
+				responseString = $"`{(DateTime.UtcNow - Utils.GetTimeFromId(message.Id)).TotalMilliseconds:#00}`ms";
+			else if( this.RegexMentionHelp.Match(message.Content).Success )
+				responseString = Localisation.SystemStrings.MentionHelp;
+			else if( this.RegexPrefixHelp.Match(message.Content).Success )
+				responseString = string.IsNullOrEmpty(server.Config.CommandPrefix) ? Localisation.SystemStrings.MentionPrefixEmpty : string.Format(Localisation.SystemStrings.MentionPrefix, server.Config.CommandPrefix);
+
+			if( string.IsNullOrEmpty(responseString) )
+				await SendMessageToChannel(channel, responseString);
 		}
 
 		private Task InitCommands()
 		{
 			Command<TUser> newCommand = null;
-
 
 // !global
 			newCommand = new Command<TUser>("global");
