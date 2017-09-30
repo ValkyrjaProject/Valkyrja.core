@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -37,15 +40,70 @@ namespace Botwinder.entities
 		}
 	}
 
+	public static class Extensions
+	{
+		public static string ToString(this string[] self)
+		{
+			if( self == null || !self.Any() )
+				return "None.";
+
+			StringBuilder builder = new StringBuilder();
+			for(int i = 0; i < self.Length; i++)
+			{
+				builder.Append(i == 0 ? "`" : i < self.Length-1 ? "`, `" : "` and `" + self[i]);
+			}
+
+			if( self.Length > 0 )
+				builder.Append("`");
+
+			return builder.ToString();
+		}
+
+		public static string ToString(this List<string> self)
+		{
+			if( self == null || !self.Any() )
+				return "None.";
+
+			StringBuilder builder = new StringBuilder();
+			for(int i = 0; i < self.Count; i++)
+			{
+				builder.Append(i == 0 ? "`" : i < self.Count-1 ? "`, `" : "` and `" + self[i]);
+			}
+
+			if( self.Count > 0 )
+				builder.Append("`");
+
+			return builder.ToString();
+		}
+
+		public static string ToString(this IEnumerable<string> self)
+		{
+			if( self == null || !self.Any() )
+				return "None.";
+
+			StringBuilder builder = new StringBuilder();
+			int count = self.Count();
+			int i = -1;
+			foreach(string element in self)
+			{
+				builder.Append(++i == 0 ? "`" : i < count-1 ? "`, `" : "` and `" + element);
+			}
+
+			if( count > 0 )
+				builder.Append("`");
+
+			return builder.ToString();
+		}
+	}
+
 	public static class ConcurrentDictionaryEx
 	{
-		public static bool Remove<TKey, TValue>(
-			this ConcurrentDictionary<TKey, TValue> self, TKey key) {
-			TValue ignored;
-			return self.TryRemove(key, out ignored);
+		public static bool Remove<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> self, TKey key)
+		{
+			return self.TryRemove(key, out _);
 		}
-		public static bool Add<TKey, TValue>(
-			this ConcurrentDictionary<TKey, TValue> self, TKey key, TValue value) {
+		public static bool Add<TKey, TValue>(this ConcurrentDictionary<TKey, TValue> self, TKey key, TValue value)
+		{
 			return self.TryAdd(key, value);
 		}
 	}
