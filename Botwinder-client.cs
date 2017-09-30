@@ -16,7 +16,7 @@ namespace Botwinder.core
 {
 	public partial class BotwinderClient<TUser> : IBotwinderClient<TUser>, IDisposable where TUser : UserData, new()
 	{
-		private readonly DbConfig DbConfig;
+		public readonly DbConfig DbConfig;
 		private GlobalContext GlobalDb;
 		private ServerContext ServerDb;
 		public GlobalConfig GlobalConfig{ get; set; }

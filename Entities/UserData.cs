@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text;
+using Discord;
+using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 
 using guid = System.UInt64;
@@ -59,6 +63,48 @@ namespace Botwinder.entities
 
 		public List<Username> Usernames{ get; set; }
 		public List<Nickname> Nicknames{ get; set; }
+
+		public string GetWhoisString(ServerContext dbContext, SocketGuildUser user = null)
+		{
+			StringBuilder whoisString = new StringBuilder();
+
+			whoisString.AppendLine($"<@{this.UserId}>: `{this.UserId}` | `{user.GetUsername()}`\n" +
+			                       $"    Account created at: {Utils.GetTimeFromId(this.UserId)}");
+			if( user?.JoinedAt != null )
+				whoisString.AppendLine("    Joined the server: " + Utils.GetTimestamp(user.JoinedAt.Value));
+
+			if( user != null )
+				whoisString.AppendLine("    Roles: " + user.Roles.Select(r => r.Name).ToString());
+
+			if( this.Verified )
+				whoisString.AppendLine("    Verified: `true`");
+
+			if( this.Ignored )
+				whoisString.AppendLine("    Ignored by Antispam: `true`");
+
+			if( this.MutedUntil > DateTime.UtcNow )
+				whoisString.AppendLine("    Muted until: " + Utils.GetTimestamp(this.MutedUntil));
+
+			if( this.BannedUntil > DateTime.UtcNow )
+				whoisString.AppendLine("    Banned until: " + Utils.GetTimestamp(this.BannedUntil));
+
+			List<string> foundUsernames = dbContext.Usernames
+				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
+				.Select(u => u.Name).ToList();
+			whoisString.Append("    Known usernames: ");
+			whoisString.AppendLine(foundUsernames.ToString());
+
+			List<string> foundNicknames = dbContext.Nicknames
+				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
+				.Select(u => u.Name).ToList();
+			whoisString.Append("    Known nicknames: ");
+			whoisString.AppendLine(foundNicknames.ToString());
+
+			if( this.WarningCount > 0 || !string.IsNullOrEmpty(this.Notes) )
+				whoisString.AppendLine($"They have {this.WarningCount} warnings, with these notes: {this.Notes}");
+
+			return whoisString.ToString().Replace("@everyone", "@-everyone").Replace("@here", "@-here");
+		}
 	}
 
 	[Table("usernames")]
