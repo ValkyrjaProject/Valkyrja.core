@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -153,6 +154,32 @@ namespace Botwinder.core
 
 			await Task.Delay(500);
 			Environment.Exit(0);
+		}
+
+		public List<UserData> GetMentionedUsersData(ServerContext dbContext, CommandArguments<TUser> e)
+		{
+			List<guid> mentionedUserIds = new List<guid>();
+
+			if( e.Message.MentionedUsers != null && e.Message.MentionedUsers.Any() )
+			{
+				mentionedUserIds.AddRange(e.Message.MentionedUsers.Select(u => u.Id));
+			}
+			else
+			{
+				if( e.MessageArgs != null && e.MessageArgs.Length > 0 )
+				{
+					foreach(string param in e.MessageArgs)
+					{
+						guid id;
+						if( guid.TryParse(param, out id) )
+							mentionedUserIds.Add(id);
+						else
+							break;
+					}
+				}
+			}
+
+			return dbContext.UserDatabase.Where(u => u.ServerId == e.Server.Id && mentionedUserIds.Contains(u.UserId)).ToList();
 		}
 	}
 }
