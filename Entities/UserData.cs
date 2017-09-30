@@ -61,9 +61,6 @@ namespace Botwinder.entities
 		[Column("exp_relative")]
 		public Int64 ExpRelative{ get; set; } = 0;
 
-		public List<Username> Usernames{ get; set; }
-		public List<Nickname> Nicknames{ get; set; }
-
 		public string GetWhoisString(ServerContext dbContext, SocketGuildUser user = null)
 		{
 			StringBuilder whoisString = new StringBuilder();
@@ -133,8 +130,6 @@ namespace Botwinder.entities
 
 		[Column("username")]
 		public string Name{ get; set; } = "";
-
-		public UserData UserData{ get; set; }
 	}
 
 	[Table("nicknames")]
@@ -157,7 +152,5 @@ namespace Botwinder.entities
 
 		[Column("nickname")]
 		public string Name{ get; set; } = "";
-
-		public UserData UserData{ get; set; }
 	}
 }
