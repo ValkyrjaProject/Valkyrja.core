@@ -105,6 +105,12 @@ namespace Botwinder.entities
 
 			return whoisString.ToString().Replace("@everyone", "@-everyone").Replace("@here", "@-here");
 		}
+
+		public void AddWarning(string warning)
+		{
+			this.WarningCount++;
+			this.Notes += string.IsNullOrEmpty(this.Notes) ? warning : (" | " + warning);
+		}
 	}
 
 	[Table("usernames")]
