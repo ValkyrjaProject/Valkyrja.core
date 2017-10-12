@@ -49,8 +49,8 @@ Just a few guidelines about the code:
 * Always explicitly declare whether methods are public or private. If they are async, this keyword should be second (or third in case of static methods `public static async Task ...`)
 * Never return `void` with async methods unless you know what you're doing. Return `Task` instead of `void`.
   ```cs
-    
-  public class BunnehClient<TUser>: IClient<TUser> where TUser: UserData, new()
+
+  public class BunnehClient: IClient
   {
     public enum ConnectionState
     {
@@ -59,17 +59,17 @@ Just a few guidelines about the code:
       Good,
       Peachy
     }
-    
+
     internal const int LoopLimit = 60;
-    
+
     public ConnectionState State = ConnectionState.None;
-    
+
     internal int LoopCount{ get; private set; } = 0;
-  
-		
+
+
     /// <summary> This is blocking call that will await til the connection is peachy.
     /// Returns true if the operation was canceled, false otherwise. </summary>
-    public async Task<bool> AwaitConnection<TUser>(TUser user) where TUser: UserData, new()
+    public async Task<bool> AwaitConnection(TUser user)
     {
       while( this.State != ConnectionState.Peachy )
       {
@@ -78,7 +78,7 @@ Just a few guidelines about the code:
 
         await Task.Delay(1000);
       }
-  
+
       await user.SendMessageAsync("You have been connected!");
       return false;
     }

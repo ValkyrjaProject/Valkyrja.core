@@ -13,10 +13,10 @@ namespace Botwinder.entities
 
 		/// <summary> Initialise the module, startup call only. </summary>
 		/// <returns> Return a list of Commands for this module. </returns>
-		Task<List<Command<TUser>>> Init<TUser>(IBotwinderClient<TUser> client) where TUser: UserData, new();
+		Task<List<Command>> Init(IBotwinderClient client);
 
 		/// <summary> Main Update loop for this module. Do whatever you want. </summary>
-		Task Update<TUser>(IBotwinderClient<TUser> client) where TUser: UserData, new();
+		Task Update(IBotwinderClient client);
 	}
 
 	/*
@@ -31,16 +31,16 @@ namespace Botwinder.entities
 	{
 		public Func<Exception, string, guid, Task> HandleException{ get; set; }
 
-		public async Task<List<Command>> Init<TUser>(IBotwinderClient<TUser> iClient) where TUser : UserData, new()
+		public async Task<List<Command>> Init(IBotwinderClient iClient)
 		{
 			//This way you can actually use all the sweets that the client offers...
-			BotwinderClient<TUser> client = iClient as BotwinderClient<TUser>;
+			BotwinderClient client = iClient as BotwinderClient;
 			throw new NotImplementedException();
 		}
 
-		public Task Update<TUser>(IBotwinderClient<TUser> iClient) where TUser : UserData, new()
+		public Task Update(IBotwinderClient iClient)
 		{
-			BotwinderClient<TUser> client = iClient as BotwinderClient<TUser>;
+			BotwinderClient client = iClient as BotwinderClient;
 			throw new NotImplementedException();
 		}
 	}

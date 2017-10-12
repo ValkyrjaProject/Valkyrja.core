@@ -12,13 +12,13 @@ using guid = System.UInt64;
 
 namespace Botwinder.core
 {
-	public partial class BotwinderClient<TUser> : IBotwinderClient<TUser>, IDisposable where TUser : UserData, new()
+	public partial class BotwinderClient : IBotwinderClient, IDisposable
 	{
 		private readonly Regex RegexPingHelp = new Regex(".*(ping).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		private readonly Regex RegexMentionHelp = new Regex(".*(help|commands).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		private readonly Regex RegexPrefixHelp = new Regex(".*(command character|prefix).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-		private async Task HandleMentionResponse(Server<TUser> server, SocketTextChannel channel, SocketMessage message)
+		private async Task HandleMentionResponse(Server server, SocketTextChannel channel, SocketMessage message)
 		{
 			if( this.GlobalConfig.LogDebug )
 				Console.WriteLine("BotwinderClient: MentionReceived");
@@ -38,10 +38,10 @@ namespace Botwinder.core
 
 		private Task InitCommands()
 		{
-			Command<TUser> newCommand = null;
+			Command newCommand = null;
 
 // !global
-			newCommand = new Command<TUser>("global");
+			newCommand = new Command("global");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Display all teh numbers.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
@@ -82,7 +82,7 @@ namespace Botwinder.core
 			this.Commands.Add(newCommand.Id, newCommand);
 
 // !getServer
-			newCommand = new Command<TUser>("getServer");
+			newCommand = new Command("getServer");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Display some info about specific server with id/name, or owners id/username.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
@@ -123,7 +123,7 @@ namespace Botwinder.core
 			this.Commands.Add(newCommand.Id, newCommand);
 
 // !getInvite
-			newCommand = new Command<TUser>("getInvite");
+			newCommand = new Command("getInvite");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Get an invite url with serverid.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
@@ -149,7 +149,7 @@ namespace Botwinder.core
 			this.Commands.Add(newCommand.Id, newCommand);
 
 // !maintenance
-			newCommand = new Command<TUser>("maintenance");
+			newCommand = new Command("maintenance");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Performe maintenance";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
@@ -160,7 +160,7 @@ namespace Botwinder.core
 			this.Commands.Add(newCommand.Id, newCommand);
 
 // !restart
-			newCommand = new Command<TUser>("restart");
+			newCommand = new Command("restart");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Shut down the bot.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
@@ -173,7 +173,7 @@ namespace Botwinder.core
 			this.Commands.Add("shutdown", newCommand.CreateAlias("shutdown"));
 
 // !getExceptions
-			newCommand = new Command<TUser>("getExceptions");
+			newCommand = new Command("getExceptions");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Get a list of exceptions.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
@@ -196,7 +196,7 @@ namespace Botwinder.core
 			this.Commands.Add(newCommand.Id, newCommand);
 
 // !getException
-			newCommand = new Command<TUser>("getException");
+			newCommand = new Command("getException");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Get an exception stack for specific ID.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
@@ -212,7 +212,7 @@ namespace Botwinder.core
 			this.Commands.Add(newCommand.Id, newCommand);
 
 // !blacklist
-			newCommand = new Command<TUser>("blacklist");
+			newCommand = new Command("blacklist");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Add or remove an ID to or from the blacklist.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
@@ -272,7 +272,7 @@ namespace Botwinder.core
 			this.Commands.Add(newCommand.Id, newCommand);
 
 // !subscriber
-			newCommand = new Command<TUser>("subscriber");
+			newCommand = new Command("subscriber");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Add or remove an ID to or from the subscribers, use with optional bonus or premium parameter.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
@@ -340,7 +340,7 @@ namespace Botwinder.core
 			this.Commands.Add(newCommand.Id, newCommand);
 
 // !partner
-			newCommand = new Command<TUser>("partner");
+			newCommand = new Command("partner");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Add or remove an ID to or from the partners, use with optional premium parameter.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
@@ -402,7 +402,7 @@ namespace Botwinder.core
 			this.Commands.Add(newCommand.Id, newCommand);
 
 // !operations
-			newCommand = new Command<TUser>("operations");
+			newCommand = new Command("operations");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Display info about all queued or running operations on your server.";
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
@@ -417,7 +417,7 @@ namespace Botwinder.core
 				response.AppendLine();
 				lock( this.OperationsLock )
 				{
-					foreach( Operation<TUser> op in this.CurrentOperations )
+					foreach( Operation op in this.CurrentOperations )
 					{
 						if( !allOperations && op.CommandArgs.Server.Id != e.Server.Id )
 							continue;
@@ -439,13 +439,13 @@ namespace Botwinder.core
 			this.Commands.Add(newCommand.Id, newCommand);
 
 // !cancel
-			newCommand = new Command<TUser>("cancel");
+			newCommand = new Command("cancel");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Cancel queued or running operation - use in the same channel, and with the name of the command as parameter. (nuke, archive, etc...)";
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
 			newCommand.OnExecute += async e => {
 				string responseString = "Operation not found.";
-				Operation<TUser> operation = null;
+				Operation operation = null;
 
 				if( !string.IsNullOrEmpty(e.TrimmedMessage) &&
 				    (operation = this.CurrentOperations.FirstOrDefault(
@@ -458,7 +458,7 @@ namespace Botwinder.core
 			this.Commands.Add(newCommand.Id, newCommand);
 
 // !say
-			newCommand = new Command<TUser>("say");
+			newCommand = new Command("say");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Make the bot say something!";
 			newCommand.RequiredPermissions = PermissionType.SubModerator;
@@ -472,7 +472,7 @@ namespace Botwinder.core
 			this.Commands.Add(newCommand.Id, newCommand);
 
 // !ping
-			newCommand = new Command<TUser>("ping");
+			newCommand = new Command("ping");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Measure how long does it take to receive a message and handle it as a command.";
 			newCommand.RequiredPermissions = PermissionType.Everyone;
@@ -484,7 +484,7 @@ namespace Botwinder.core
 			this.Commands.Add(newCommand.Id, newCommand);
 
 // !help
-			newCommand = new Command<TUser>("help");
+			newCommand = new Command("help");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "PMs a list of Custom Commands for the server if used without a parameter. Use with a parameter to search for specific commands.";
 			newCommand.RequiredPermissions = PermissionType.Everyone;
@@ -511,7 +511,7 @@ namespace Botwinder.core
 					commandStrings.AppendLine();
 				}
 
-				void AddCommand(Command<TUser> cmd)
+				void AddCommand(Command cmd)
 				{
 					commandStrings.AppendLine($"\n```diff\n{(cmd.CanExecute(this, e.Server, e.Channel, e.Message.Author as SocketGuildUser) ? "+" : "-")}" +
 					                          $"  {prefix}{cmd.Id}```" +
@@ -545,13 +545,13 @@ namespace Botwinder.core
 						expression += "(" + expression;
 					Regex regex = new Regex($"\\w*({expression}", RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(10f));
 
-					foreach( Command<TUser> cmd in e.Server.Commands.Values )
+					foreach( Command cmd in e.Server.Commands.Values )
 					{
 						if( !cmd.IsHidden &&
 						    cmd.RequiredPermissions != PermissionType.OwnerOnly &&
 						    regex.Match(cmd.Id).Success )
 						{
-							Command<TUser> command = cmd;
+							Command command = cmd;
 							if( cmd.IsAlias && e.Server.Commands.ContainsKey(cmd.ParentId) )
 								command = e.Server.Commands[cmd.ParentId];
 
@@ -629,7 +629,7 @@ namespace Botwinder.core
 
 /*
 // !command
-			newCommand = new Command<TUser>("command");
+			newCommand = new Command("command");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;

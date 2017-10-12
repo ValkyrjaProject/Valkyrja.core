@@ -10,7 +10,7 @@ using guid = System.UInt64;
 
 namespace Botwinder.core
 {
-	public partial class BotwinderClient<TUser> : IBotwinderClient<TUser>, IDisposable where TUser : UserData, new()
+	public partial class BotwinderClient : IBotwinderClient, IDisposable
 	{
 		public async Task SendMessageToChannel(SocketTextChannel channel, string message)
 		{
@@ -84,7 +84,7 @@ namespace Botwinder.core
 			await this.Events.LogEntryAdded(logEntry);
 		}
 
-		public async Task LogException(Exception exception, CommandArguments<TUser> args) =>
+		public async Task LogException(Exception exception, CommandArguments args) =>
 			await LogException(exception, "--Command: "+ args.Command.Id + " | Parameters: " + args.TrimmedMessage, args.Server.Id);
 
 		public async Task LogException(Exception exception, string data, guid serverId = 0)
@@ -156,7 +156,7 @@ namespace Botwinder.core
 			Environment.Exit(0);
 		}
 
-		public List<UserData> GetMentionedUsersData(ServerContext dbContext, CommandArguments<TUser> e)
+		public List<UserData> GetMentionedUsersData(ServerContext dbContext, CommandArguments e)
 		{
 			List<guid> mentionedUserIds = new List<guid>();
 

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Botwinder.entities
 {
-	public class Operation<TUser> where TUser : UserData, new()
+	public class Operation
 	{
 		public enum State
 		{
@@ -17,13 +17,13 @@ namespace Botwinder.entities
 			Canceled
 		}
 
-		public CommandArguments<TUser> CommandArgs = null;
+		public CommandArguments CommandArgs = null;
 		public State CurrentState = State.Ready;
 		public DateTime TimeCreated = DateTime.UtcNow;
 		public DateTime TimeStarted = DateTime.MinValue;
 		public float AllocatedMemoryStarted = 0f;
 
-		private Operation(CommandArguments<TUser> commandArgs, float memory)
+		private Operation(CommandArguments commandArgs, float memory)
 		{
 			this.CommandArgs = commandArgs;
 			this.AllocatedMemoryStarted = memory;
@@ -31,9 +31,9 @@ namespace Botwinder.entities
 		}
 
 		/// <summary> Create a new Operation and add it to the queue. </summary>
-		public static Operation<TUser> Create(CommandArguments<TUser> e)
+		public static Operation Create(CommandArguments e)
 		{
-			Operation<TUser> op = new Operation<TUser>(e, GC.GetTotalMemory(false) / 1000000f);
+			Operation op = new Operation(e, GC.GetTotalMemory(false) / 1000000f);
 			lock(e.Client.OperationsLock)
 				e.Client.CurrentOperations.Add(op);
 			return op;
@@ -93,7 +93,7 @@ namespace Botwinder.entities
 		{
 			this.CommandArgs.Client.CurrentShard.OperationsRan++;
 
-			Operation<TUser> alreadyInQueue = null;
+			Operation alreadyInQueue = null;
 			lock(this.CommandArgs.Client.OperationsLock)
 				alreadyInQueue = this.CommandArgs.Client.CurrentOperations.FirstOrDefault(o => o.CommandArgs.Command.Id == this.CommandArgs.Command.Id && o.CommandArgs.Channel.Id == this.CommandArgs.Channel.Id && o != this);
 

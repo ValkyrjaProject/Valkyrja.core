@@ -14,7 +14,7 @@ using guid = System.UInt64;
 
 namespace Botwinder.core
 {
-	public partial class BotwinderClient<TUser> : IBotwinderClient<TUser>, IDisposable where TUser : UserData, new()
+	public partial class BotwinderClient : IBotwinderClient, IDisposable
 	{
 		public readonly DbConfig DbConfig;
 		private GlobalContext GlobalDb;
@@ -48,9 +48,9 @@ namespace Botwinder.core
 		private const string GameStatusUrl = "at http://botwinder.info";
 		private readonly Regex RegexCommandParams = new Regex("\"[^\"]+\"|\\S+", RegexOptions.Compiled);
 
-		private readonly ConcurrentDictionary<guid, Server<TUser>> Servers = new ConcurrentDictionary<guid, Server<TUser>>();
-		private readonly Dictionary<string, Command<TUser>> Commands = new Dictionary<string, Command<TUser>>();
-		public List<Operation<TUser>> CurrentOperations{ get; set; } = new List<Operation<TUser>>();
+		private readonly ConcurrentDictionary<guid, Server> Servers = new ConcurrentDictionary<guid, Server>();
+		private readonly Dictionary<string, Command> Commands = new Dictionary<string, Command>();
+		public List<Operation> CurrentOperations{ get; set; } = new List<Operation>();
 		public Object OperationsLock{ get; set; } = new Object();
 		public Object DbLock{ get; set; } = new Object();
 
@@ -280,7 +280,7 @@ namespace Botwinder.core
 				if( channel == null || !this.Servers.ContainsKey(channel.Guild.Id) )
 					return;
 
-				Server<TUser> server = this.Servers[channel.Guild.Id];
+				Server server = this.Servers[channel.Guild.Id];
 				if( server.Config.IgnoreBots && message.Author.IsBot ||
 				    server.Config.IgnoreEveryone && message.MentionedRoles.Any(r => r.IsEveryone) )
 					return;
@@ -310,7 +310,7 @@ namespace Botwinder.core
 				if( channel == null || !this.Servers.ContainsKey(channel.Guild.Id) )
 					return;
 
-				Server<TUser> server = this.Servers[channel.Guild.Id];
+				Server server = this.Servers[channel.Guild.Id];
 				if( server.Config.IgnoreBots && updatedMessage.Author.IsBot ||
 				    server.Config.IgnoreEveryone && updatedMessage.MentionedRoles.Any(r => r.IsEveryone) )
 					return;
@@ -452,7 +452,7 @@ namespace Botwinder.core
 
 		private async Task UpdateServerStats()
 		{
-			foreach( KeyValuePair<guid, Server<TUser>> pair in this.Servers )
+			foreach( KeyValuePair<guid, Server> pair in this.Servers )
 			{
 				ServerStats stats = null;
 				lock(this.DbLock)
@@ -497,7 +497,7 @@ namespace Botwinder.core
 //Modules
 		private async Task InitModules()
 		{
-			List<Command<TUser>> newCommands;
+			List<Command> newCommands;
 			foreach( IModule module in this.Modules )
 			{
 				try
@@ -506,7 +506,7 @@ namespace Botwinder.core
 						await LogException(e, "--ModuleInit." + module.ToString() + " | " + d, id);
 					newCommands = await module.Init(this);
 
-					foreach( Command<TUser> cmd in newCommands )
+					foreach( Command cmd in newCommands )
 					{
 						if( this.Commands.ContainsKey(cmd.Id) )
 						{
@@ -565,7 +565,7 @@ namespace Botwinder.core
 			}
 		}
 
-		private async Task<bool> HandleCommand(Server<TUser> server, SocketTextChannel channel, SocketMessage message, string prefix)
+		private async Task<bool> HandleCommand(Server server, SocketTextChannel channel, SocketMessage message, string prefix)
 		{
 			GetCommandAndParams(message.Content.Substring(prefix.Length), out string commandString, out string trimmedMessage, out string[] parameters);
 
@@ -576,12 +576,12 @@ namespace Botwinder.core
 			    (server.CustomAliases.ContainsKey(commandString) &&
 			     server.Commands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId)) )
 			{
-				Command<TUser> command = server.Commands[commandString];
+				Command command = server.Commands[commandString];
 				if( !string.IsNullOrEmpty(command.ParentId) ) //Internal, not-custom alias.
 					command = server.Commands[command.ParentId];
 
 				CommandOptions commandOptions = server.GetCommandOptions(commandString);
-				CommandArguments<TUser> args = new CommandArguments<TUser>(this, command, server, channel, message, trimmedMessage, parameters, commandOptions);
+				CommandArguments args = new CommandArguments(this, command, server, channel, message, trimmedMessage, parameters, commandOptions);
 
 				if( command.CanExecute(this, server, channel, message.Author as SocketGuildUser) )
 					return await command.Execute(args);
@@ -687,7 +687,7 @@ namespace Botwinder.core
 				while( !this.IsInitialized )
 					await Task.Delay(1000);
 
-				Server<TUser> server;
+				Server server;
 				if( this.Servers.ContainsKey(guild.Id) )
 				{
 					server = this.Servers[guild.Id];
@@ -695,7 +695,7 @@ namespace Botwinder.core
 				}
 				else
 				{
-					server = new Server<TUser>(guild, this.Commands);
+					server = new Server(guild, this.Commands);
 					server.LoadConfig(this.DbConfig.GetDbConnectionString());
 					server.Localisation = GlobalContext.Create(this.DbConfig.GetDbConnectionString()).Localisations.FirstOrDefault(l => l.Id == server.Config.LocalisationId);
 					this.Servers.Add(server.Id, server);
@@ -711,9 +711,9 @@ namespace Botwinder.core
 		{
 			try
 			{
-				List<Server<TUser>> serversToLeave = new List<Server<TUser>>();
+				List<Server> serversToLeave = new List<Server>();
 
-				foreach( KeyValuePair<guid, Server<TUser>> pair in this.Servers )
+				foreach( KeyValuePair<guid, Server> pair in this.Servers )
 				{
 					try
 					{
@@ -760,7 +760,7 @@ namespace Botwinder.core
 					}
 				}
 
-				foreach( Server<TUser> server in serversToLeave )
+				foreach( Server server in serversToLeave )
 				{
 					await server.Guild.LeaveAsync();
 				}

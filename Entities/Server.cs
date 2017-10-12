@@ -9,7 +9,7 @@ using guid = System.UInt64;
 
 namespace Botwinder.entities
 {
-	public class Server<TUser> where TUser: UserData, new()
+	public class Server
 	{
 		public readonly guid Id;
 
@@ -18,7 +18,7 @@ namespace Botwinder.entities
 		private string DbConnectionString;
 		public ServerConfig Config;
 		public Localisation Localisation;
-		public readonly Dictionary<string, Command<TUser>> Commands;
+		public readonly Dictionary<string, Command> Commands;
 		public Dictionary<string, CustomCommand> CustomCommands;
 		public Dictionary<string, CustomAlias> CustomAliases;
 		private CommandOptions CachedCommandOptions;
@@ -31,11 +31,11 @@ namespace Botwinder.entities
 		public Dictionary<guid, RoleConfig> Roles;
 
 
-		public Server(SocketGuild guild, Dictionary<string, Command<TUser>> allCommands)
+		public Server(SocketGuild guild, Dictionary<string, Command> allCommands)
 		{
 			this.Id = guild.Id;
 			this.Guild = guild;
-			this.Commands = new Dictionary<string, Command<TUser>>(allCommands);
+			this.Commands = new Dictionary<string, Command>(allCommands);
 		}
 
 		public void ReloadConfig(string dbConnectionString)

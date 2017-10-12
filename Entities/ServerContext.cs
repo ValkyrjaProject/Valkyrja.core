@@ -68,14 +68,10 @@ namespace Botwinder.entities
 				.HasKey(p => new{p.ServerId, p.UserId});
 
 			modelBuilder.Entity<Username>()
-				.HasOne(p => p.UserData)
-				.WithMany(p => p.Usernames)
-				.HasForeignKey(p => new{p.ServerId, p.UserId});
+				.HasKey(p => p.Id);
 
 			modelBuilder.Entity<Nickname>()
-				.HasOne(p => p.UserData)
-				.WithMany(p => p.Nicknames)
-				.HasForeignKey(p => new{p.ServerId, p.UserId});
+				.HasKey(p => p.Id);
 		}
 
 		public static ServerContext Create(string connectionString)
