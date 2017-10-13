@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Pomelo.EntityFrameworkCore.MySql;
@@ -82,6 +83,17 @@ namespace Botwinder.entities
 			ServerContext newContext = new ServerContext(optionsBuilder.Options);
 			newContext.Database.EnsureCreated();
 			return newContext;
+		}
+
+		public UserData GetOrAddUser(guid serverId, guid userId)
+		{
+			UserData userData = this.UserDatabase.FirstOrDefault(u => u.ServerId == serverId && u.UserId == userId);
+			if( userData == null )
+			{
+				userData = new UserData();
+			}
+
+			return userData;
 		}
 	}
 }
