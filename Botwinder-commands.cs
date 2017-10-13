@@ -77,6 +77,7 @@ namespace Botwinder.core
 				                 $"\n**Shards: `{dbContext.Shards.Count()}`**\n\n" +
 				                 $"{shards.ToString()}";
 
+				dbContext.Dispose();
 				await SendMessageToChannel(e.Channel, message);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
@@ -188,6 +189,7 @@ namespace Botwinder.core
 					response.AppendLine(exception.GetMessage());
 				}
 
+				dbContext.Dispose();
 				string responseString = response.ToString();
 				if( string.IsNullOrWhiteSpace(responseString) )
 					responseString = "I did not record any errors :stuck_out_tongue:";
@@ -207,6 +209,7 @@ namespace Botwinder.core
 				if( !string.IsNullOrEmpty(e.TrimmedMessage) && int.TryParse(e.TrimmedMessage, out int id) && (exception = dbContext.Exceptions.FirstOrDefault(ex => ex.Id == id)) != null )
 					responseString = exception.GetStack();
 
+				dbContext.Dispose();
 				await SendMessageToChannel(e.Channel, responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
@@ -267,6 +270,7 @@ namespace Botwinder.core
 						break;
 				}
 
+				dbContext.Dispose();
 				await SendMessageToChannel(e.Channel, responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
@@ -335,6 +339,7 @@ namespace Botwinder.core
 						break;
 				}
 
+				dbContext.Dispose();
 				await SendMessageToChannel(e.Channel, responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
@@ -397,6 +402,7 @@ namespace Botwinder.core
 						break;
 				}
 
+				dbContext.Dispose();
 				await SendMessageToChannel(e.Channel, responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
