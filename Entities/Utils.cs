@@ -42,6 +42,59 @@ namespace Botwinder.entities
 
 	public static class Extensions
 	{
+		public static string ToString(this guid[] self)
+		{
+			if( self == null || !self.Any() )
+				return "Nobody.";
+
+			StringBuilder builder = new StringBuilder();
+			for(int i = 0; i < self.Length; i++)
+			{
+				builder.Append(i == 0 ? "<@" : i < self.Length-1 ? ">, <@" : "> and <@" + self[i].ToString());
+			}
+
+			if( self.Length > 0 )
+				builder.Append(">");
+
+			return builder.ToString();
+		}
+
+		public static string ToString(this List<guid> self)
+		{
+			if( self == null || !self.Any() )
+				return "Nobody.";
+
+			StringBuilder builder = new StringBuilder();
+			for(int i = 0; i < self.Count; i++)
+			{
+				builder.Append(i == 0 ? "<@" : i < self.Count-1 ? ">, <@" : "> and <@" + self[i].ToString());
+			}
+
+			if( self.Count > 0 )
+				builder.Append(">");
+
+			return builder.ToString();
+		}
+
+		public static string ToString(this IEnumerable<guid> self)
+		{
+			if( self == null || !self.Any() )
+				return "Nobody.";
+
+			StringBuilder builder = new StringBuilder();
+			int count = self.Count();
+			int i = -1;
+			foreach(guid element in self)
+			{
+				builder.Append(++i == 0 ? "<@" : i < count-1 ? ">, <@" : "> and <@" + element.ToString());
+			}
+
+			if( count > 0 )
+				builder.Append(">");
+
+			return builder.ToString();
+		}
+
 		public static string ToString(this string[] self)
 		{
 			if( self == null || !self.Any() )
