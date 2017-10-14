@@ -276,8 +276,7 @@ namespace Botwinder.core
 				this.CurrentShard.MessagesTotal++;
 				this.MessagesThisMinute++;
 
-				SocketTextChannel channel = message.Channel as SocketTextChannel;
-				if( channel == null || !this.Servers.ContainsKey(channel.Guild.Id) )
+				if( !(message.Channel is SocketTextChannel channel) || !this.Servers.ContainsKey(channel.Guild.Id) )
 					return;
 
 				Server server = this.Servers[channel.Guild.Id];
@@ -306,8 +305,7 @@ namespace Botwinder.core
 		{
 			try
 			{
-				SocketTextChannel channel = iChannel as SocketTextChannel;
-				if( channel == null || !this.Servers.ContainsKey(channel.Guild.Id) )
+				if( !(iChannel is SocketTextChannel channel) || !this.Servers.ContainsKey(channel.Guild.Id) )
 					return;
 
 				Server server = this.Servers[channel.Guild.Id];
