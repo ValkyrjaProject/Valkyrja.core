@@ -179,7 +179,24 @@ namespace Botwinder.core
 				}
 			}
 
-			return dbContext.UserDatabase.Where(u => u.ServerId == e.Server.Id && mentionedUserIds.Contains(u.UserId)).ToList();
+			List<UserData> found = dbContext.UserDatabase.Where(u => u.ServerId == e.Server.Id && mentionedUserIds.Contains(u.UserId)).ToList();
+			if( found.Count < mentionedUserIds.Count )
+			{
+				for( int i = 0; i < mentionedUserIds.Count; i++ )
+				{
+					if(found.Any(u => u.UserId == mentionedUserIds[i]))
+						continue;
+
+					UserData newUserData = new UserData(){
+						ServerId = e.Server.Id,
+						UserId = mentionedUserIds[i]
+					};
+
+					dbContext.UserDatabase.Add(newUserData); //No need to save this here.
+					found.Add(newUserData);
+				}
+			}
+			return found;
 		}
 	}
 }

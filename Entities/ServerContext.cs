@@ -90,7 +90,11 @@ namespace Botwinder.entities
 			UserData userData = this.UserDatabase.FirstOrDefault(u => u.ServerId == serverId && u.UserId == userId);
 			if( userData == null )
 			{
-				userData = new UserData();
+				userData = new UserData(){
+					ServerId = serverId,
+					UserId = userId
+				};
+				this.UserDatabase.Add(userData);
 			}
 
 			return userData;
