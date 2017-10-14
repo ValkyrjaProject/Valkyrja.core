@@ -149,6 +149,7 @@ namespace Botwinder.core
 			this.Events.GuildAvailable += OnGuildAvailable;
 			this.Events.JoinedGuild += OnGuildJoined;
 			this.Events.LeftGuild += OnGuildLeft;
+			this.Events.GuildUpdated += OnGuildUpdated;
 
 			await this.DiscordClient.LoginAsync(TokenType.Bot, this.GlobalConfig.DiscordToken);
 			await this.DiscordClient.StartAsync();
@@ -655,6 +656,16 @@ namespace Botwinder.core
 			{
 				await LogException(exception, "--OnGuildJoined", guild.Id);
 			}
+		}
+
+#pragma warning disable 1998
+		private async Task OnGuildUpdated(SocketGuild originalGuild, SocketGuild updatedGuild)
+#pragma warning restore 1998
+		{
+			if( !this.Servers.ContainsKey(originalGuild.Id) )
+				return;
+
+			this.Servers[originalGuild.Id].Guild = updatedGuild;
 		}
 
 		private async Task OnGuildLeft(SocketGuild guild)

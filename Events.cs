@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -51,6 +52,35 @@ namespace Botwinder.entities
 		public Func<SocketUser, SocketVoiceState, SocketVoiceState, Task> UserVoiceStateUpdated = null;
 		public Func<SocketUser, SocketGuild, Task> UserBanned = null;
 		public Func<SocketUser, SocketGuild, Task> UserUnbanned = null;
+
+		/// <summary> An event used to pass a ban instruction to the responsible module. </summary>
+		/// <param name="Server"> Server on which to ban. </param>
+		/// <param name="List<UserData>"> Users to be banned. </param>
+		/// <param name="TimeSpan"> Duration of the ban. </param>
+		/// <param name="string"> Reason for the ban. </param>
+		/// <param name="SocketGuildUser"> Who issued the ban. </param>
+		/// <param name="bool"> Silent? True to not PM the users. </param>
+		/// <param name="bool"> True to prune recent messages. </param>
+		public Func<Server, List<UserData>, TimeSpan, string, SocketGuildUser, bool, bool, Task> BanUsers = null;
+
+		/// <summary> An event used to pass an unban instruction to the responsible module. </summary>
+		/// <param name="Server"> Server on which to unban. </param>
+		/// <param name="List<UserData>"> Users to be unbanned. </param>
+		public Func<Server, List<UserData>, Task> UnBanUsers = null;
+
+		/// <summary> An event used to pass a mute instruction to the responsible module. </summary>
+		/// <param name="Server"> Server on which to mute. </param>
+		/// <param name="List<UserData>"> Users to be muted. </param>
+		/// <param name="TimeSpan"> Duration of the mute. </param>
+		/// <param name="IRole"> MutedRole. </param>
+		/// <param name="SocketGuildUser"> Who issued the mute. </param>
+		public Func<Server, List<UserData>, TimeSpan, IRole, SocketGuildUser, Task> MuteUsers = null;
+
+		/// <summary> An event used to pass a mute instruction to the responsible module. </summary>
+		/// <param name="Server"> Server on which to mute. </param>
+		/// <param name="List<UserData>"> Users to be muted. </param>
+		/// <param name="IRole"> MutedRole. </param>
+		public Func<Server, List<UserData>, IRole, Task> UnMuteUsers = null;
 
 
 		public Events(DiscordSocketClient discordClient)
@@ -173,35 +203,59 @@ namespace Botwinder.entities
 		}
 
 //Role events
-		private Task OnRoleCreated(SocketRole arg)
+		private Task OnRoleCreated(SocketRole role)
 		{
-			throw new NotImplementedException();
+			if( this.RoleCreated == null )
+				return Task.CompletedTask;
+
+			Task.Run(async () => await this.RoleCreated(role));
+			return Task.CompletedTask;
 		}
 
-		private Task OnRoleUpdated(SocketRole arg1, SocketRole arg2)
+		private Task OnRoleUpdated(SocketRole originalRole, SocketRole updatedRole)
 		{
-			throw new NotImplementedException();
+			if( this.RoleUpdated == null )
+				return Task.CompletedTask;
+
+			Task.Run(async () => await this.RoleUpdated(originalRole, updatedRole));
+			return Task.CompletedTask;
 		}
 
-		private Task OnRoleDeleted(SocketRole arg)
+		private Task OnRoleDeleted(SocketRole role)
 		{
-			throw new NotImplementedException();
+			if( this.RoleDeleted == null )
+				return Task.CompletedTask;
+
+			Task.Run(async () => await this.RoleDeleted(role));
+			return Task.CompletedTask;
 		}
 
 //Channel events
-		private Task OnChannelCreated(SocketChannel arg)
+		private Task OnChannelCreated(SocketChannel channel)
 		{
-			throw new NotImplementedException();
+			if( this.ChannelCreated == null )
+				return Task.CompletedTask;
+
+			Task.Run(async () => await this.ChannelCreated(channel));
+			return Task.CompletedTask;
 		}
 
-		private Task OnChannelUpdated(SocketChannel arg1, SocketChannel arg2)
+		private Task OnChannelUpdated(SocketChannel originalChannel, SocketChannel updatedChannel)
 		{
-			throw new NotImplementedException();
+			if( this.ChannelUpdated == null )
+				return Task.CompletedTask;
+
+			Task.Run(async () => await this.ChannelUpdated(originalChannel, updatedChannel));
+			return Task.CompletedTask;
 		}
 
-		private Task OnChannelDestroyed(SocketChannel arg)
+		private Task OnChannelDestroyed(SocketChannel channel)
 		{
-			throw new NotImplementedException();
+			if( this.ChannelDestroyed == null )
+				return Task.CompletedTask;
+
+			Task.Run(async () => await this.ChannelDestroyed(channel));
+			return Task.CompletedTask;
 		}
 
 //Message events
@@ -266,24 +320,40 @@ namespace Botwinder.entities
 		}
 
 //User events
-		private Task OnUserJoined(SocketGuildUser arg)
+		private Task OnUserJoined(SocketGuildUser user)
 		{
-			throw new NotImplementedException();
+			if( this.UserJoined == null )
+				return Task.CompletedTask;
+
+			Task.Run(async () => await this.UserJoined(user));
+			return Task.CompletedTask;
 		}
 
-		private Task OnUserLeft(SocketGuildUser arg)
+		private Task OnUserLeft(SocketGuildUser user)
 		{
-			throw new NotImplementedException();
+			if( this.UserLeft == null )
+				return Task.CompletedTask;
+
+			Task.Run(async () => await this.UserLeft(user));
+			return Task.CompletedTask;
 		}
 
-		private Task OnUserTyping(SocketUser arg1, ISocketMessageChannel arg2)
+		private Task OnUserTyping(SocketUser user, ISocketMessageChannel channel)
 		{
-			throw new NotImplementedException();
+			if( this.UserTyping == null )
+				return Task.CompletedTask;
+
+			Task.Run(async () => await this.UserTyping(user, channel));
+			return Task.CompletedTask;
 		}
 
-		private Task OnUserUpdated(SocketUser arg1, SocketUser arg2)
+		private Task OnUserUpdated(SocketUser originalUser, SocketUser updatedUser)
 		{
-			throw new NotImplementedException();
+			if( this.UserUpdated == null )
+				return Task.CompletedTask;
+
+			Task.Run(async () => await this.UserUpdated(originalUser, updatedUser));
+			return Task.CompletedTask;
 		}
 
 		private Task OnGuildMemberUpdated(SocketGuildUser originalUser, SocketGuildUser updatedUser)
@@ -295,19 +365,31 @@ namespace Botwinder.entities
 			return Task.CompletedTask;
 		}
 
-		private Task OnUserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
+		private Task OnUserVoiceStateUpdated(SocketUser user, SocketVoiceState originalState, SocketVoiceState updatedState)
 		{
-			throw new NotImplementedException();
+			if( this.UserVoiceStateUpdated == null )
+				return Task.CompletedTask;
+
+			Task.Run(async () => await this.UserVoiceStateUpdated(user, originalState, updatedState));
+			return Task.CompletedTask;
 		}
 
-		private Task OnUserBanned(SocketUser arg1, SocketGuild arg2)
+		private Task OnUserBanned(SocketUser user, SocketGuild guild)
 		{
-			throw new NotImplementedException();
+			if( this.UserBanned == null )
+				return Task.CompletedTask;
+
+			Task.Run(async () => await this.UserBanned(user, guild));
+			return Task.CompletedTask;
 		}
 
-		private Task OnUserUnbanned(SocketUser arg1, SocketGuild arg2)
+		private Task OnUserUnbanned(SocketUser user, SocketGuild guild)
 		{
-			throw new NotImplementedException();
+			if( this.UserUnbanned == null )
+				return Task.CompletedTask;
+
+			Task.Run(async () => await this.UserUnbanned(user, guild));
+			return Task.CompletedTask;
 		}
 
 	}

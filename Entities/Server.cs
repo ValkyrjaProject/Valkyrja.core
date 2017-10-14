@@ -13,7 +13,7 @@ namespace Botwinder.entities
 	{
 		public readonly guid Id;
 
-		public readonly SocketGuild Guild;
+		public SocketGuild Guild;
 
 		private string DbConnectionString;
 		public ServerConfig Config;
