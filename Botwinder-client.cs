@@ -359,7 +359,7 @@ namespace Botwinder.core
 				if( this.GlobalConfig.LogDebug )
 					Console.WriteLine("BotwinderClient: MainUpdate loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 
-				DateTime frameTime = DateTime.Now;
+				DateTime frameTime = DateTime.UtcNow;
 
 				if( !this.IsInitialized )
 				{
@@ -410,7 +410,7 @@ namespace Botwinder.core
 
 				await UpdateModules();
 
-				TimeSpan deltaTime = DateTime.Now - frameTime;
+				TimeSpan deltaTime = DateTime.UtcNow - frameTime;
 				if( this.GlobalConfig.LogDebug )
 					Console.WriteLine($"BotwinderClient: MainUpdate loop took: {deltaTime.TotalMilliseconds} ms");
 				await Task.Delay(TimeSpan.FromSeconds(1f / this.GlobalConfig.TargetFps) - deltaTime);

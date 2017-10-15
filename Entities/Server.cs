@@ -24,6 +24,11 @@ namespace Botwinder.entities
 		private CommandOptions CachedCommandOptions;
 		private List<CommandChannelOptions> CachedCommandChannelOptions;
 
+		public DateTime ClearAntispamMuteTime = DateTime.UtcNow;
+		public Dictionary<guid, int> AntispamMuteCount = new Dictionary<guid, int>();
+		public Dictionary<guid, int> AntispamMessageCount = new Dictionary<guid, int>();
+		public Dictionary<guid, SocketMessage[]> AntispamRecentMessages = new Dictionary<guid, SocketMessage[]>();
+
 		public List<guid> IgnoredChannels;
 		public List<guid> MutedChannels = new List<guid>();
 		public List<guid> TemporaryChannels = new List<guid>();

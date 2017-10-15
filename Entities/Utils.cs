@@ -16,6 +16,7 @@ namespace Botwinder.entities
 	{
 		public static Random Random{ get; set; } = new Random();
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static DateTime GetTimeFromId(guid id)
 		{
 			return new DateTime((long)(((id / 4194304) + 1420070400000) * 10000 + 621355968000000000));
