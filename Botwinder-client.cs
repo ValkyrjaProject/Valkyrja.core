@@ -9,7 +9,7 @@ using System.Diagnostics;
 using Botwinder.entities;
 using Discord;
 using Discord.WebSocket;
-
+using Microsoft.EntityFrameworkCore;
 using guid = System.UInt64;
 
 namespace Botwinder.core
@@ -150,6 +150,9 @@ namespace Botwinder.core
 			this.Events.JoinedGuild += OnGuildJoined;
 			this.Events.LeftGuild += OnGuildLeft;
 			this.Events.GuildUpdated += OnGuildUpdated;
+			this.Events.UserJoined += OnUserJoined;
+			this.Events.UserUpdated += OnUserUpdated;
+			this.Events.GuildMembersDownloaded += OnGuildMembersDownloaded;
 
 			await this.DiscordClient.LoginAsync(TokenType.Bot, this.GlobalConfig.DiscordToken);
 			await this.DiscordClient.StartAsync();
@@ -777,6 +780,84 @@ namespace Botwinder.core
 			catch(Exception exception)
 			{
 				await LogException(exception, "--BailBadServers");
+			}
+		}
+
+		private Task OnGuildMembersDownloaded(SocketGuild guild)
+		{
+			List<Username> usernames;
+			List<Nickname> nicknames;
+
+			lock(this.DbLock)
+			{
+				usernames = this.ServerDb.Usernames.Where(u => u.ServerId == guild.Id).ToList();
+				nicknames = this.ServerDb.Nicknames.Where(u => u.ServerId == guild.Id).ToList();
+			}
+
+			foreach( SocketGuildUser user in guild.Users )
+			{
+				if( !usernames.Any(u => u.UserId == user.Id && u.Name == user.Username) )
+				{
+					usernames.Add(new Username(){
+						ServerId = user.Guild.Id,
+						UserId = user.Id,
+						Name = user.Username
+					});
+				}
+
+				if( !string.IsNullOrEmpty(user.Nickname) &&
+				    !nicknames.Any(u => u.UserId == user.Id && u.Name == user.Nickname) )
+				{
+					nicknames.Add(new Nickname(){
+						ServerId = user.Guild.Id,
+						UserId = user.Id,
+						Name = user.Nickname
+					});
+				}
+			}
+
+			return Task.CompletedTask;
+		}
+
+// User events
+		private Task OnUserJoined(SocketGuildUser user)
+		{
+			lock(this.DbLock)
+				UpdateUsernames(this.ServerDb, user);
+
+			return Task.CompletedTask;
+		}
+
+		private Task OnUserUpdated(SocketUser originalUser, SocketUser updatedUser)
+		{
+			if( updatedUser is SocketGuildUser )
+			{
+				lock(this.DbLock)
+					UpdateUsernames(this.ServerDb, updatedUser as SocketGuildUser);
+			}
+
+			return Task.CompletedTask;
+		}
+
+		private void UpdateUsernames(ServerContext dbContext, SocketGuildUser user)
+		{
+			if( !dbContext.Usernames.Any(u => u.ServerId == user.Guild.Id && u.UserId == user.Id && u.Name == user.Username) )
+			{
+				dbContext.Usernames.Add(new Username(){
+					ServerId = user.Guild.Id,
+					UserId = user.Id,
+					Name = user.Username
+				});
+			}
+
+			if( !string.IsNullOrEmpty(user.Nickname) &&
+			    !dbContext.Nicknames.Any(u => u.ServerId == user.Guild.Id && u.UserId == user.Id && u.Name == user.Nickname) )
+			{
+				dbContext.Nicknames.Add(new Nickname(){
+					ServerId = user.Guild.Id,
+					UserId = user.Id,
+					Name = user.Nickname
+				});
 			}
 		}
 	}
