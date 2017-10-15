@@ -13,7 +13,7 @@ namespace Botwinder.entities
 
 		/// <summary> Initialise the module, startup call only. </summary>
 		/// <returns> Return a list of Commands for this module. </returns>
-		Task<List<Command>> Init(IBotwinderClient client);
+		List<Command> Init(IBotwinderClient client);
 
 		/// <summary> Main Update loop for this module. Do whatever you want. </summary>
 		Task Update(IBotwinderClient client);
@@ -31,7 +31,7 @@ namespace Botwinder.entities
 	{
 		public Func<Exception, string, guid, Task> HandleException{ get; set; }
 
-		public async Task<List<Command>> Init(IBotwinderClient iClient)
+		public List<Command> Init(IBotwinderClient iClient)
 		{
 			//This way you can actually use all the sweets that the client offers...
 			BotwinderClient client = iClient as BotwinderClient;
