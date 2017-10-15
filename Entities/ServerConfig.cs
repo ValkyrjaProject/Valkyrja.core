@@ -43,9 +43,6 @@ namespace Botwinder.entities
 		[Column("execute_on_edit")]
 		public bool ExecuteOnEdit{ get; set; } = true;
 
-		[Column("antispam_priority")]
-		public bool AntispamPriority{ get; set; } = false;
-
 		[Column("antispam_invites")]
 		public bool AntispamInvites{ get; set; } = false;
 

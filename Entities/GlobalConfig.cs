@@ -80,9 +80,6 @@ namespace Botwinder.entities
 		[Column("antispam_clear_interval")]
 		public Int64 AntispamClearInterval{ get; set; } = 0;
 
-		[Column("antispam_permit_duration")]
-		public Int64 AntispamPermitDuration{ get; set; } = 0;
-
 		[Column("antispam_safety_limit")]
 		public Int64 AntispamSafetyLimit{ get; set; } = 0;
 

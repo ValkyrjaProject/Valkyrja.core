@@ -61,12 +61,30 @@ namespace Botwinder.entities
 		/// <param name="SocketGuildUser"> Who issued the ban. </param>
 		/// <param name="bool"> Silent? True to not PM the users. </param>
 		/// <param name="bool"> True to prune recent messages. </param>
+		public Func<Server, UserData, TimeSpan, string, SocketGuildUser, bool, bool, Task> BanUser = null;
+
+		/// <summary> An event used to pass a ban instruction to the responsible module. </summary>
+		/// <param name="Server"> Server on which to ban. </param>
+		/// <param name="List<UserData>"> Users to be banned. </param>
+		/// <param name="TimeSpan"> Duration of the ban. </param>
+		/// <param name="string"> Reason for the ban. </param>
+		/// <param name="SocketGuildUser"> Who issued the ban. </param>
+		/// <param name="bool"> Silent? True to not PM the users. </param>
+		/// <param name="bool"> True to prune recent messages. </param>
 		public Func<Server, List<UserData>, TimeSpan, string, SocketGuildUser, bool, bool, Task> BanUsers = null;
 
 		/// <summary> An event used to pass an unban instruction to the responsible module. </summary>
 		/// <param name="Server"> Server on which to unban. </param>
 		/// <param name="List<UserData>"> Users to be unbanned. </param>
 		public Func<Server, List<UserData>, Task> UnBanUsers = null;
+
+		/// <summary> An event used to pass a mute instruction to the responsible module. </summary>
+		/// <param name="Server"> Server on which to mute. </param>
+		/// <param name="List<UserData>"> User to be muted. </param>
+		/// <param name="TimeSpan"> Duration of the mute. </param>
+		/// <param name="IRole"> MutedRole. </param>
+		/// <param name="SocketGuildUser"> Who issued the mute. </param>
+		public Func<Server, UserData, TimeSpan, IRole, SocketGuildUser, Task> MuteUser = null;
 
 		/// <summary> An event used to pass a mute instruction to the responsible module. </summary>
 		/// <param name="Server"> Server on which to mute. </param>
