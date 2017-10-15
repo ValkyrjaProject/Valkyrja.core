@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Discord;
 using Discord.WebSocket;
 
 using guid = System.UInt64;
@@ -62,6 +63,18 @@ namespace Botwinder.entities
 			this.CustomCommands = dbContext.CustomCommands.Where(c => c.ServerId == this.Id).ToDictionary(c => c.CommandId);
 			this.CustomAliases = dbContext.CustomAliases.Where(c => c.ServerId == this.Id).ToDictionary(c => c.Alias);
 			this.Roles = dbContext.Roles.Where(c => c.ServerId == this.Id).ToDictionary(c => c.RoleId);
+
+			SocketRole role;
+			if( this.Config.MuteRoleId != 0 && (role = this.Guild.GetRole(this.Config.MuteRoleId)) != null )
+			{
+				foreach( SocketTextChannel channel in this.Guild.TextChannels )
+				{
+					if( this.Config.MuteIgnoreChannelId == channel.Id )
+						continue;
+
+					channel.AddPermissionOverwriteAsync(role, new OverwritePermissions(sendMessages: PermValue.Deny)).GetAwaiter().GetResult();
+				}
+			}
 		}
 
 		public void LoadConfig(string dbConnectionString)
