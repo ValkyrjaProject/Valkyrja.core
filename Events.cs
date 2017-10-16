@@ -38,6 +38,8 @@ namespace Botwinder.entities
 		public Func<SocketChannel, Task> ChannelDestroyed = null;
 
 		public Func<SocketMessage, Task> MessageReceived = null;
+		/// <summary> Expects true to cancel the execution of other message events. </summary>
+		public Func<SocketMessage, Task<bool>> PriorityMessageReceived = null;
 		public Func<SocketMessage, SocketMessage, ISocketMessageChannel, Task> MessageUpdated = null;
 		public Func<SocketMessage, ISocketMessageChannel, Task> MessageDeleted = null;
 
@@ -279,10 +281,11 @@ namespace Botwinder.entities
 //Message events
 		private Task OnMessageReceived(SocketMessage message)
 		{
-			if( this.MessageReceived == null )
+			if( this.PriorityMessageReceived != null && this.PriorityMessageReceived(message).GetAwaiter().GetResult() )
 				return Task.CompletedTask;
 
-			Task.Run(async () => await this.MessageReceived(message));
+			if( this.MessageReceived != null )
+				Task.Run(async () => await this.MessageReceived(message));
 			return Task.CompletedTask;
 		}
 

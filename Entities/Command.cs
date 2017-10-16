@@ -183,7 +183,7 @@ namespace Botwinder.entities
 		}
 	}
 
-	public class CommandArguments //todo ...
+	public class CommandArguments
 	{
 		/// <summary> Reference to the client. </summary>
 		public IBotwinderClient Client{ get; private set; }
