@@ -33,7 +33,7 @@ namespace Botwinder.entities
 		public bool EnforceRequirements{ get; set; } = false;
 
 		[Column("verification_enabled")]
-		public bool VerificationEnabled{ get; set; } = false;
+		public bool VerificationEnabled{ get; set; } = false; //todo - not implemented
 
 		[Column("timers_enabled")]
 		public bool TimersEnabled{ get; set; } = false;
@@ -54,7 +54,7 @@ namespace Botwinder.entities
 		public Int64 TotalShards{ get; set; } = 1;
 
 		[Column("initial_update_delay")]
-		public Int64 InitialUpdateDelay{ get; set; } = 1;
+		public Int64 InitialUpdateDelay{ get; set; } = 3;
 
 		[Column("command_prefix", TypeName = "varchar(255)")]
 		public string CommandPrefix{ get; set; } = "!";
