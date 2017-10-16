@@ -43,7 +43,7 @@ namespace Botwinder.entities
 
 	public static class Extensions
 	{
-		public static string ToString(this guid[] self)
+		public static string ToMentions(this guid[] self)
 		{
 			if( self == null || !self.Any() )
 				return "Nobody.";
@@ -60,7 +60,7 @@ namespace Botwinder.entities
 			return builder.ToString();
 		}
 
-		public static string ToString(this List<guid> self)
+		public static string ToMentions(this List<guid> self)
 		{
 			if( self == null || !self.Any() )
 				return "Nobody.";
@@ -77,7 +77,7 @@ namespace Botwinder.entities
 			return builder.ToString();
 		}
 
-		public static string ToString(this IEnumerable<guid> self)
+		public static string ToMentions(this IEnumerable<guid> self)
 		{
 			if( self == null || !self.Any() )
 				return "Nobody.";
@@ -96,7 +96,7 @@ namespace Botwinder.entities
 			return builder.ToString();
 		}
 
-		public static string ToString(this string[] self)
+		public static string ToNames(this string[] self)
 		{
 			if( self == null || !self.Any() )
 				return "None.";
@@ -113,7 +113,7 @@ namespace Botwinder.entities
 			return builder.ToString();
 		}
 
-		public static string ToString(this List<string> self)
+		public static string ToNames(this List<string> self)
 		{
 			if( self == null || !self.Any() )
 				return "None.";
@@ -130,7 +130,7 @@ namespace Botwinder.entities
 			return builder.ToString();
 		}
 
-		public static string ToString(this IEnumerable<string> self)
+		public static string ToNames(this IEnumerable<string> self)
 		{
 			if( self == null || !self.Any() )
 				return "None.";

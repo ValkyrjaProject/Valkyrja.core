@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Discord.Net;
 using Discord.WebSocket;
 
@@ -159,14 +160,15 @@ namespace Botwinder.entities
 				if( this.Type == CommandType.Standard )
 				{
 					Task task = this.OnExecute(e);
-					if( await Task.WhenAny(task, Task.Delay(GlobalConfig.CommandExecutionTimeout)) == task )
-					{
+					/*if( await Task.WhenAny(task, Task.Delay(GlobalConfig.CommandExecutionTimeout)) == task ) //todo
+					{*/
 						await task;
-					}
+					/*}
 					else
 					{
 						await e.Client.SendMessageToChannel(e.Channel, "Command execution timed out. _(Please wait a moment before trying again.)_");
-					}
+						throw new TimeoutException();
+					}*/
 				}
 				else
 				{

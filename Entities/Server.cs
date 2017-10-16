@@ -54,6 +54,7 @@ namespace Botwinder.entities
 			{
 				this.Config = new ServerConfig(){ServerId = this.Id, Name = this.Guild.Name};
 				dbContext.ServerConfigurations.Add(this.Config);
+				dbContext.SaveChanges();
 			}
 
 			this.CustomCommands?.Clear();
@@ -63,6 +64,8 @@ namespace Botwinder.entities
 			this.CustomCommands = dbContext.CustomCommands.Where(c => c.ServerId == this.Id).ToDictionary(c => c.CommandId);
 			this.CustomAliases = dbContext.CustomAliases.Where(c => c.ServerId == this.Id).ToDictionary(c => c.Alias);
 			this.Roles = dbContext.Roles.Where(c => c.ServerId == this.Id).ToDictionary(c => c.RoleId);
+
+			dbContext.Dispose();
 
 			SocketRole role;
 			if( this.Config.MuteRoleId != 0 && (role = this.Guild.GetRole(this.Config.MuteRoleId)) != null )
@@ -84,6 +87,7 @@ namespace Botwinder.entities
 			this.TemporaryChannels = dbContext.Channels.Where(c => c.ServerId == this.Id && c.Temporary).Select(c => c.ChannelId).ToList();
 			this.MutedChannels = dbContext.Channels.Where(c => c.ServerId == this.Id && c.MutedUntil > DateTime.MinValue).Select(c => c.ChannelId).ToList();
 
+			dbContext.Dispose();
 			ReloadConfig(dbConnectionString);
 		}
 
