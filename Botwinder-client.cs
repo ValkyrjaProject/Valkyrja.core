@@ -506,7 +506,7 @@ namespace Botwinder.core
 				{
 					module.HandleException += async (e, d, id) =>
 						await LogException(e, "--ModuleInit." + module.ToString() + " | " + d, id);
-					newCommands = await module.Init(this);
+					newCommands = module.Init(this);
 
 					foreach( Command cmd in newCommands )
 					{

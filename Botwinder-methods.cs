@@ -164,20 +164,20 @@ namespace Botwinder.core
 			{
 				mentionedUserIds.AddRange(e.Message.MentionedUsers.Select(u => u.Id));
 			}
-			else
+			else if( e.MessageArgs != null && e.MessageArgs.Length > 0 )
 			{
-				if( e.MessageArgs != null && e.MessageArgs.Length > 0 )
+				foreach( string param in e.MessageArgs )
 				{
-					foreach(string param in e.MessageArgs)
-					{
-						guid id;
-						if( guid.TryParse(param, out id) )
-							mentionedUserIds.Add(id);
-						else
-							break;
-					}
+					guid id;
+					if( guid.TryParse(param, out id) )
+						mentionedUserIds.Add(id);
+					else
+						break;
 				}
 			}
+
+			if( !mentionedUserIds.Any() )
+				return new List<UserData>();
 
 			List<UserData> found = dbContext.UserDatabase.Where(u => u.ServerId == e.Server.Id && mentionedUserIds.Contains(u.UserId)).ToList();
 			if( found.Count < mentionedUserIds.Count )
