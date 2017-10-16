@@ -128,7 +128,7 @@ namespace Botwinder.entities
 		public Int64 QuickbanDuration{ get; set; } = 12;
 
 		[Column("quickban_reason", TypeName = "text")]
-		public string QuickbanReason{ get; set; } = "";
+		public string QuickbanReason{ get; set; }
 
 		[Column("mute_roleid")]
 		public guid MuteRoleId{ get; set; } = 0;

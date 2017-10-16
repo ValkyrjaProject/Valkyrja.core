@@ -49,7 +49,7 @@ namespace Botwinder.entities
 		[Column("ignored")]
 		public bool Ignored{ get; set; } = false;
 
-		[Column("count_messages")]
+		[Column("count_message")]
 		public Int64 CountMessages{ get; set; } = 0;
 
 		[Column("count_attachments")]

@@ -35,7 +35,7 @@ namespace Botwinder.entities
 		public DateTime DateTime{ get; set; } = DateTime.UtcNow;
 
 		[Column("message", TypeName = "text")]
-		public string Message{ get; set; } = "";
+		public string Message{ get; set; }
 	}
 
 	public enum LogType
@@ -64,7 +64,7 @@ namespace Botwinder.entities
 		public string Message{ get; set; } = "";
 
 		[Column("stack", TypeName = "text")]
-		public string Stack{ get; set; } = "";
+		public string Stack{ get; set; }
 
 		[Column("data", TypeName = "varchar(255)")]
 		public string Data{ get; set; } = "";
