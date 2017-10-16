@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Botwinder.entities;
+using Discord.Net.Queue;
 using Discord.WebSocket;
 
 using guid = System.UInt64;
@@ -146,6 +147,35 @@ namespace Botwinder.core
 				}
 
 				await SendMessageToChannel(e.Channel, foundServer.InviteUrl);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
+// !clearInvite
+			newCommand = new Command("clearInvite");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Clear the Invite url to be re-created, with serverid.";
+			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.OnExecute += async e => {
+				guid id;
+				if( string.IsNullOrEmpty(e.TrimmedMessage) ||
+				    !guid.TryParse(e.TrimmedMessage, out id) )
+				{
+					await SendMessageToChannel(e.Channel, "Invalid parameters.");
+					return;
+				}
+
+				string response = "Server not found.";
+				ServerContext dbContext = ServerContext.Create(this.DbConfig.GetDbConnectionString());
+				ServerConfig foundServer = dbContext.ServerConfigurations.FirstOrDefault(s => s.ServerId == id);
+				if( foundServer != null )
+				{
+					response = "Done.";
+					foundServer.InviteUrl = "";
+					dbContext.SaveChanges();
+				}
+
+				await SendMessageToChannel(e.Channel, response);
+				dbContext.Dispose();
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 

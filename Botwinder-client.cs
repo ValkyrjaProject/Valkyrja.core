@@ -488,11 +488,14 @@ namespace Botwinder.core
 				stats.IsDiscordPartner = pair.Value.Guild.VoiceRegionId.StartsWith("vip");
 				stats.UserCount = pair.Value.Guild.MemberCount;
 
-				try
+				if( string.IsNullOrEmpty(pair.Value.Config.InviteUrl) )
 				{
-					pair.Value.Config.InviteUrl = (await pair.Value.Guild.DefaultChannel.CreateInviteAsync()).Url;
+					try
+					{
+						pair.Value.Config.InviteUrl = (await pair.Value.Guild.DefaultChannel.CreateInviteAsync()).Url;
+					}
+					catch(Exception) { }
 				}
-				catch(Exception) { }
 			}
 		}
 
