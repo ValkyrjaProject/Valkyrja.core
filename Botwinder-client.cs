@@ -252,7 +252,7 @@ namespace Botwinder.core
 
 		private async Task OnDisconnected(Exception exception)
 		{
-			Console.WriteLine("BotwinderClient: Disconnected.");
+			Console.WriteLine($"BotwinderClient: Disconnected with {this.Servers.Count} servers.");
 			this.IsConnected = false;
 			this.CurrentShard.Disconnects++;
 
