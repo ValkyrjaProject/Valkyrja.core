@@ -94,6 +94,16 @@ namespace Botwinder.core
 		{
 			LoadConfig();
 
+			lock(this.DbLock)
+			{
+				if( this.GlobalConfig.TotalShards != this.GlobalDb.Shards.Count() )
+				{
+					Console.WriteLine("BotwinderClient: TotalShards does not match the Shards count!!!");
+					Dispose();
+					Environment.Exit(1);
+				}
+			}
+
 			//Find a shard for grabs.
 			Shard GetShard(){
 				lock(this.DbLock)
