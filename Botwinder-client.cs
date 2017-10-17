@@ -272,6 +272,9 @@ namespace Botwinder.core
 // Message events
 		private async Task OnMessageReceived(SocketMessage message)
 		{
+			if( !this.IsConnected )
+				return;
+
 			try
 			{
 				if( this.GlobalConfig.LogDebug )
@@ -307,6 +310,9 @@ namespace Botwinder.core
 
 		private async Task OnMessageUpdated(SocketMessage originalMessage, SocketMessage updatedMessage, ISocketMessageChannel iChannel)
 		{
+			if( !this.IsConnected )
+				return;
+
 			try
 			{
 				if( !(iChannel is SocketTextChannel channel) || !this.Servers.ContainsKey(channel.Guild.Id) )
