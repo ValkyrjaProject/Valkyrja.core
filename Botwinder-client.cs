@@ -374,7 +374,7 @@ namespace Botwinder.core
 					try
 					{
 						this.IsInitialized = true;
-						await this.Events.Initialize();
+						//await this.Events.Initialize();
 					}
 					catch(Exception exception)
 					{
