@@ -139,20 +139,20 @@ namespace Botwinder.core
 			this.DiscordClient.Ready += OnReady;
 			this.DiscordClient.Disconnected += OnDisconnected;
 			this.Events = new Events(this.DiscordClient);
-			this.Events.MessageReceived += OnMessageReceived;
+			/*this.Events.MessageReceived += OnMessageReceived;
 			this.Events.MessageUpdated += OnMessageUpdated;
 			this.Events.LogEntryAdded += Log;
 			this.Events.Exception += Log;
 			this.Events.Connected += async () => await this.DiscordClient.SetGameAsync(GameStatusUrl);
 			this.Events.Initialize += InitCommands;
-			this.Events.Initialize += InitModules;
+			this.Events.Initialize += InitModules;*/
 			this.Events.GuildAvailable += OnGuildAvailable;
 			this.Events.JoinedGuild += OnGuildJoined;
-			this.Events.LeftGuild += OnGuildLeft;
+			/*this.Events.LeftGuild += OnGuildLeft;
 			this.Events.GuildUpdated += OnGuildUpdated;
 			this.Events.UserJoined += OnUserJoined;
 			this.Events.UserUpdated += OnUserUpdated;
-			this.Events.GuildMembersDownloaded += OnGuildMembersDownloaded;
+			this.Events.GuildMembersDownloaded += OnGuildMembersDownloaded;*/
 
 			await this.DiscordClient.LoginAsync(TokenType.Bot, this.GlobalConfig.DiscordToken);
 			await this.DiscordClient.StartAsync();
@@ -407,14 +407,14 @@ namespace Botwinder.core
 
 				try
 				{
-					await Update();
+					//await Update();
 				}
 				catch(Exception exception)
 				{
 					await LogException(exception, "--Update");
 				}
 
-				await UpdateModules();
+				//await UpdateModules();
 
 				TimeSpan deltaTime = DateTime.UtcNow - frameTime;
 				if( this.GlobalConfig.LogDebug )
@@ -654,7 +654,7 @@ namespace Botwinder.core
 			{
 				await OnGuildAvailable(guild);
 
-				string msg = Localisation.SystemStrings.GuildJoined;
+				/*string msg = Localisation.SystemStrings.GuildJoined;
 				if( !IsPartner(guild.Id) && !IsSubscriber(guild.OwnerId) )
 					msg += Localisation.SystemStrings.GuildJoinedTrial;
 
@@ -662,7 +662,7 @@ namespace Botwinder.core
 				{
 					await guild.Owner.SendMessageSafe(msg);
 				}
-				catch(Exception) { }
+				catch(Exception) { }*/
 			}
 			catch(Exception exception)
 			{
@@ -712,13 +712,13 @@ namespace Botwinder.core
 				if( this.Servers.ContainsKey(guild.Id) )
 				{
 					server = this.Servers[guild.Id];
-					server.ReloadConfig(this.DbConfig.GetDbConnectionString());
+					//server.ReloadConfig(this.DbConfig.GetDbConnectionString());
 				}
 				else
 				{
 					server = new Server(guild, this.Commands);
-					server.LoadConfig(this.DbConfig.GetDbConnectionString());
-					server.Localisation = GlobalContext.Create(this.DbConfig.GetDbConnectionString()).Localisations.FirstOrDefault(l => l.Id == server.Config.LocalisationId);
+					//server.LoadConfig(this.DbConfig.GetDbConnectionString());
+					//server.Localisation = GlobalContext.Create(this.DbConfig.GetDbConnectionString()).Localisations.FirstOrDefault(l => l.Id == server.Config.LocalisationId);
 					this.Servers.Add(server.Id, server);
 				}
 			}
