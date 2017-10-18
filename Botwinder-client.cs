@@ -197,6 +197,9 @@ namespace Botwinder.core
 				{
 					this.GlobalConfig = new GlobalConfig(){ConfigName = this.DbConfig.ConfigName};
 					this.GlobalDb.GlobalConfigs.Add(this.GlobalConfig);
+					this.GlobalDb.SaveChanges();
+					Console.WriteLine("BotwinderClient: Configuration created.");
+					Environment.Exit(0);
 				}
 			}
 
