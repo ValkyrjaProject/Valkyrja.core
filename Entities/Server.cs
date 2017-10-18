@@ -75,7 +75,9 @@ namespace Botwinder.entities
 					if( this.Config.MuteIgnoreChannelId == channel.Id )
 						continue;
 
-					channel.AddPermissionOverwriteAsync(role, new OverwritePermissions(sendMessages: PermValue.Deny)).GetAwaiter().GetResult();
+					try{
+						channel.AddPermissionOverwriteAsync(role, new OverwritePermissions(sendMessages: PermValue.Deny)).GetAwaiter().GetResult();
+					} catch(Exception) { }
 				}
 			}
 		}
