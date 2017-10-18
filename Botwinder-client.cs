@@ -68,23 +68,32 @@ namespace Botwinder.core
 
 		public void Dispose()
 		{
-			this.CurrentShard.IsTaken = false;
-			this.CurrentShard.IsConnecting = false;
+			if( this.CurrentShard != null )
+			{
+				this.CurrentShard.IsTaken = false;
+				this.CurrentShard.IsConnecting = false;
+			}
+
 			lock(this.DbLock)
 			{
-				this.GlobalDb.SaveChanges();
-				this.ServerDb.SaveChanges();
+				if( this.GlobalDb != null )
+					this.GlobalDb.SaveChanges();
+				if( this.ServerDb != null )
+					this.ServerDb.SaveChanges();
 			}
 
 			Task.Delay(500).Wait();
 
-			this.DiscordClient.Dispose();
+			if( this.DiscordClient != null )
+				this.DiscordClient.Dispose();
 			this.DiscordClient = null;
 
-			this.GlobalDb.Dispose();
+			if( this.GlobalDb != null )
+				this.GlobalDb.Dispose();
 			this.GlobalDb = null;
 
-			this.ServerDb.Dispose();
+			if( this.ServerDb != null )
+				this.ServerDb.Dispose();
 			this.ServerDb = null;
 
 			//todo
