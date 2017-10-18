@@ -111,23 +111,17 @@ namespace Botwinder.core
 				return this.CurrentShard;
 			}
 
-			if( this.GlobalConfig.LogDebug )
-				lock(this.DbLock)
-					this.CurrentShard = this.GlobalDb.Shards.First();
-			else
+			Console.WriteLine("BotwinderClient: Waiting for a shard...");
+			while( GetShard() == null )
 			{
-				Console.WriteLine("BotwinderClient: Waiting for a shard...");
-				while( GetShard() == null )
-				{
-					await Task.Delay(Utils.Random.Next(5000, 10000));
-				}
-
-
-				Console.WriteLine("BotwinderClient: Shard taken.");
-				this.CurrentShard.IsTaken = true;
-				lock(this.DbLock)
-					this.GlobalDb.SaveChanges();
+				await Task.Delay(Utils.Random.Next(5000, 10000));
 			}
+
+
+			Console.WriteLine("BotwinderClient: Shard taken.");
+			this.CurrentShard.IsTaken = true;
+			lock(this.DbLock)
+				this.GlobalDb.SaveChanges();
 
 			this.CurrentShard.ResetStats(this.TimeStarted);
 
@@ -199,29 +193,26 @@ namespace Botwinder.core
 		private async Task OnConnecting()
 		{
 			//Some other node is already connecting, wait.
-			if( !this.GlobalConfig.LogDebug )
-			{
-				bool IsAnyShardConnecting(){
-					lock(this.DbLock)
-						return this.GlobalDb.Shards.Any(s => s.IsConnecting);
-				}
-
-				bool awaited = false;
-				while( IsAnyShardConnecting() )
-				{
-					if( !awaited )
-						Console.WriteLine("BotwinderClient: Waiting for other shards to connect...");
-
-					awaited = true;
-					await Task.Delay(Utils.Random.Next(5000, 10000));
-				}
-
-				this.CurrentShard.IsConnecting = true;
+			bool IsAnyShardConnecting(){
 				lock(this.DbLock)
-					this.GlobalDb.SaveChanges();
-				if( awaited )
-					await Task.Delay(5000); //Ensure sufficient delay between connecting shards.
+					return this.GlobalDb.Shards.Any(s => s.IsConnecting);
 			}
+
+			bool awaited = false;
+			while( IsAnyShardConnecting() )
+			{
+				if( !awaited )
+					Console.WriteLine("BotwinderClient: Waiting for other shards to connect...");
+
+				awaited = true;
+				await Task.Delay(Utils.Random.Next(5000, 10000));
+			}
+
+			this.CurrentShard.IsConnecting = true;
+			lock(this.DbLock)
+				this.GlobalDb.SaveChanges();
+			if( awaited )
+				await Task.Delay(5000); //Ensure sufficient delay between connecting shards.
 
 			Console.WriteLine("BotwinderClient: Connecting...");
 		}

@@ -33,7 +33,7 @@ namespace Botwinder.core
 			else if( this.RegexPrefixHelp.Match(message.Content).Success )
 				responseString = string.IsNullOrEmpty(server.Config.CommandPrefix) ? Localisation.SystemStrings.MentionPrefixEmpty : string.Format(Localisation.SystemStrings.MentionPrefix, server.Config.CommandPrefix);
 
-			if( string.IsNullOrEmpty(responseString) )
+			if( !string.IsNullOrEmpty(responseString) )
 				await SendMessageToChannel(channel, responseString);
 		}
 
