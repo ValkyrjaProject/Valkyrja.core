@@ -192,7 +192,12 @@ namespace Botwinder.core
 				if( save )
 					this.GlobalDb.SaveChanges();
 
-				this.GlobalConfig = this.GlobalDb.GlobalConfigs.First(c => c.ConfigName == this.DbConfig.ConfigName);
+				this.GlobalConfig = this.GlobalDb.GlobalConfigs.FirstOrDefault(c => c.ConfigName == this.DbConfig.ConfigName);
+				if( this.GlobalConfig == null )
+				{
+					this.GlobalConfig = new GlobalConfig(){ConfigName = this.DbConfig.ConfigName};
+					this.GlobalDb.GlobalConfigs.Add(this.GlobalConfig);
+				}
 			}
 
 			Console.WriteLine("BotwinderClient: Configuration loaded.");
