@@ -105,7 +105,7 @@ namespace Botwinder.core
 
 			lock(this.DbLock)
 			{
-				if( this.GlobalConfig.TotalShards != this.GlobalDb.Shards.Count() )
+				if( this.GlobalConfig.TotalShards > this.GlobalDb.Shards.Count() )
 				{
 					Console.WriteLine("BotwinderClient: TotalShards does not match the Shards count!!!");
 					Dispose();
