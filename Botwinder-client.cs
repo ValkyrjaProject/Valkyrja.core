@@ -417,6 +417,9 @@ namespace Botwinder.core
 
 				try
 				{
+					if( this.GlobalConfig.LogDebug )
+						Console.WriteLine("BotwinderClient: Update loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+
 					await Update();
 				}
 				catch(Exception exception)
@@ -437,15 +440,24 @@ namespace Botwinder.core
 		{
 			if( this.GlobalConfig.EnforceRequirements )
 			{
+				if( this.GlobalConfig.LogDebug )
+					Console.WriteLine("BotwinderClient: BailBadServers loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 				await BailBadServers();
 			}
 
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine("BotwinderClient: UpdateShardStats loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 			UpdateShardStats();
+
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine("BotwinderClient: UpdateServerStats loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 			await UpdateServerStats();
 
 			lock(this.DbLock)
 			{
-				this.GlobalDb.SaveChanges(); //Note that this method checks for changes first.
+				if( this.GlobalConfig.LogDebug )
+					Console.WriteLine("BotwinderClient: SaveDatabase loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+				this.GlobalDb.SaveChanges();
 				this.ServerDb.SaveChanges();
 			}
 
