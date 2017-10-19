@@ -101,6 +101,9 @@ namespace Botwinder.core
 				DateTime = DateTime.UtcNow
 			};
 			await this.Events.Exception(exceptionEntry);
+
+			if( exception.InnerException != null )
+				await LogException(exception.InnerException, "InnerException | " + data, serverId);
 		}
 
 		public async Task LogMaintenanceAndExit()
