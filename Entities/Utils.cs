@@ -51,7 +51,7 @@ namespace Botwinder.entities
 			StringBuilder builder = new StringBuilder();
 			for(int i = 0; i < self.Length; i++)
 			{
-				builder.Append(i == 0 ? "<@" : i < self.Length-1 ? ">, <@" : "> and <@" + self[i].ToString());
+				builder.Append((i == 0 ? "<@" : i < self.Length-1 ? ">, <@" : "> and <@") + self[i].ToString());
 			}
 
 			if( self.Length > 0 )
@@ -68,7 +68,7 @@ namespace Botwinder.entities
 			StringBuilder builder = new StringBuilder();
 			for(int i = 0; i < self.Count; i++)
 			{
-				builder.Append(i == 0 ? "<@" : i < self.Count-1 ? ">, <@" : "> and <@" + self[i].ToString());
+				builder.Append((i == 0 ? "<@" : i < self.Count-1 ? ">, <@" : "> and <@") + self[i].ToString());
 			}
 
 			if( self.Count > 0 )
@@ -87,7 +87,7 @@ namespace Botwinder.entities
 			int i = -1;
 			foreach(guid element in self)
 			{
-				builder.Append(++i == 0 ? "<@" : i < count-1 ? ">, <@" : "> and <@" + element.ToString());
+				builder.Append((++i == 0 ? "<@" : i < count-1 ? ">, <@" : "> and <@") + element.ToString());
 			}
 
 			if( count > 0 )
@@ -104,7 +104,7 @@ namespace Botwinder.entities
 			StringBuilder builder = new StringBuilder();
 			for(int i = 0; i < self.Length; i++)
 			{
-				builder.Append(i == 0 ? "`" : i < self.Length-1 ? "`, `" : "` and `" + self[i]);
+				builder.Append((i == 0 ? "`" : i < self.Length-1 ? "`, `" : "` and `") + self[i]);
 			}
 
 			if( self.Length > 0 )
@@ -121,7 +121,7 @@ namespace Botwinder.entities
 			StringBuilder builder = new StringBuilder();
 			for(int i = 0; i < self.Count; i++)
 			{
-				builder.Append(i == 0 ? "`" : i < self.Count-1 ? "`, `" : "` and `" + self[i]);
+				builder.Append((i == 0 ? "`" : i < self.Count-1 ? "`, `" : "` and `") + self[i]);
 			}
 
 			if( self.Count > 0 )
@@ -140,7 +140,7 @@ namespace Botwinder.entities
 			int i = -1;
 			foreach(string element in self)
 			{
-				builder.Append(++i == 0 ? "`" : i < count-1 ? "`, `" : "` and `" + element);
+				builder.Append((++i == 0 ? "`" : i < count-1 ? "`, `" : "` and `") + element);
 			}
 
 			if( count > 0 )
