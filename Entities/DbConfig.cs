@@ -16,6 +16,8 @@ namespace Botwinder.entities
 		public string Password = "db_password";
 		public string Database = "db_botwinder";
 		public string ConfigName = "default";
+		public int ForceShardId = 0;
+		public bool UseShardLock = false;
 
 		public string GetDbConnectionString()
 		{

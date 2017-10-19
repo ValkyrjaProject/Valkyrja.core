@@ -105,32 +105,38 @@ namespace Botwinder.core
 
 			lock(this.DbLock)
 			{
-				if( this.GlobalConfig.TotalShards > this.GlobalDb.Shards.Count() )
+				if( this.GlobalConfig.TotalShards > this.GlobalDb.Shards.Count() ||
+				    this.DbConfig.ForceShardId > this.GlobalDb.Shards.Count() )
 				{
-					Console.WriteLine("BotwinderClient: TotalShards does not match the Shards count!!!");
+					Console.WriteLine("BotwinderClient: TotalShards (or forceId) exceeds the Shards count!!!");
 					Dispose();
 					Environment.Exit(1);
 				}
 			}
 
 			//Find a shard for grabs.
-			Shard GetShard(){
-				lock(this.DbLock)
-					this.CurrentShard = this.GlobalDb.Shards.FirstOrDefault(s => s.IsTaken == false);
-				return this.CurrentShard;
-			}
-
-			Console.WriteLine("BotwinderClient: Waiting for a shard...");
-			while( GetShard() == null )
+			if( this.DbConfig.ForceShardId > 0 )
+				this.CurrentShard = this.GlobalDb.Shards.FirstOrDefault(s => s.Id == this.DbConfig.ForceShardId);
+			else
 			{
-				await Task.Delay(Utils.Random.Next(5000, 10000));
+				Shard GetShard()
+				{
+					lock(this.DbLock)
+						this.CurrentShard = this.GlobalDb.Shards.FirstOrDefault(s => s.IsTaken == false);
+					return this.CurrentShard;
+				}
+
+				Console.WriteLine("BotwinderClient: Waiting for a shard...");
+				while( GetShard() == null )
+				{
+					await Task.Delay(Utils.Random.Next(5000, 10000));
+				}
+
+				this.CurrentShard.IsTaken = true;
+				lock(this.DbLock)
+					this.GlobalDb.SaveChanges();
 			}
-
-
 			Console.WriteLine("BotwinderClient: Shard taken.");
-			this.CurrentShard.IsTaken = true;
-			lock(this.DbLock)
-				this.GlobalDb.SaveChanges();
 
 			this.CurrentShard.ResetStats(this.TimeStarted);
 
@@ -211,26 +217,30 @@ namespace Botwinder.core
 		private async Task OnConnecting()
 		{
 			//Some other node is already connecting, wait.
-			bool IsAnyShardConnecting(){
-				lock(this.DbLock)
-					return this.GlobalDb.Shards.Any(s => s.IsConnecting);
-			}
-
-			bool awaited = false;
-			while( IsAnyShardConnecting() )
+			if( this.DbConfig.UseShardLock )
 			{
-				if( !awaited )
-					Console.WriteLine("BotwinderClient: Waiting for other shards to connect...");
+				bool IsAnyShardConnecting()
+				{
+					lock(this.DbLock)
+						return this.GlobalDb.Shards.Any(s => s.IsConnecting);
+				}
 
-				awaited = true;
-				await Task.Delay(Utils.Random.Next(5000, 10000));
+				bool awaited = false;
+				while( IsAnyShardConnecting() )
+				{
+					if( !awaited )
+						Console.WriteLine("BotwinderClient: Waiting for other shards to connect...");
+
+					awaited = true;
+					await Task.Delay(Utils.Random.Next(5000, 10000));
+				}
+
+				this.CurrentShard.IsConnecting = true;
+				lock(this.DbLock)
+					this.GlobalDb.SaveChanges();
+				if( awaited )
+					await Task.Delay(5000); //Ensure sufficient delay between connecting shards.
 			}
-
-			this.CurrentShard.IsConnecting = true;
-			lock(this.DbLock)
-				this.GlobalDb.SaveChanges();
-			if( awaited )
-				await Task.Delay(5000); //Ensure sufficient delay between connecting shards.
 
 			Console.WriteLine("BotwinderClient: Connecting...");
 		}
@@ -241,9 +251,12 @@ namespace Botwinder.core
 
 			try
 			{
-				this.CurrentShard.IsConnecting = false;
-				lock(this.DbLock)
-					this.GlobalDb.SaveChanges();
+				if( this.DbConfig.UseShardLock )
+				{
+					this.CurrentShard.IsConnecting = false;
+					lock(this.DbLock)
+						this.GlobalDb.SaveChanges();
+				}
 
 				this.TimeConnected = DateTime.Now;
 				await this.DiscordClient.SetGameAsync(GameStatusConnecting);
