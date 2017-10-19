@@ -65,19 +65,24 @@ namespace Botwinder.entities
 		{
 			StringBuilder whoisString = new StringBuilder();
 
-			whoisString.AppendLine($"<@{this.UserId}>: `{this.UserId}` | `{user?.GetUsername()}`\n" +
-			                       $"    Account created at: {Utils.GetTimeFromId(this.UserId)}");
+			if( user != null )
+				whoisString.AppendLine($"<@{this.UserId}>: `{this.UserId}` | `{user.GetUsername()}`\n" +
+									   $"    Account created at: {Utils.GetTimeFromId(this.UserId)}");
+			else
+				whoisString.AppendLine($"<@{this.UserId}>: `{this.UserId}`\n" +
+									   $"    Account created at: {Utils.GetTimeFromId(this.UserId)}");
+
 			if( user?.JoinedAt != null )
 				whoisString.AppendLine("    Joined the server: " + Utils.GetTimestamp(user.JoinedAt.Value));
 
 			if( user != null )
-				whoisString.AppendLine("    Roles: " + user.Roles.Select(r => r.Name).ToString());
+				whoisString.AppendLine("    Roles: " + user.Roles.Select(r => r.Name).ToNames());
 
 			if( this.Verified )
 				whoisString.AppendLine("    Verified: `true`");
 
 			if( this.Ignored )
-				whoisString.AppendLine("    Ignored by Antispam: `true`");
+				whoisString.AppendLine("    Ignored by Logging: `true`");
 
 			if( this.MutedUntil > DateTime.UtcNow )
 				whoisString.AppendLine("    Muted until: " + Utils.GetTimestamp(this.MutedUntil));
@@ -89,13 +94,13 @@ namespace Botwinder.entities
 				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
 				.Select(u => u.Name).ToList();
 			whoisString.Append("    Known usernames: ");
-			whoisString.AppendLine(foundUsernames.ToString());
+			whoisString.AppendLine(foundUsernames.ToNames());
 
 			List<string> foundNicknames = dbContext.Nicknames
 				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
 				.Select(u => u.Name).ToList();
 			whoisString.Append("    Known nicknames: ");
-			whoisString.AppendLine(foundNicknames.ToString());
+			whoisString.AppendLine(foundNicknames.ToNames());
 
 			if( this.WarningCount > 0 || !string.IsNullOrEmpty(this.Notes) )
 				whoisString.AppendLine($"They have {this.WarningCount} warnings, with these notes: {this.Notes}");
