@@ -105,7 +105,7 @@ namespace Botwinder.core
 
 			lock(this.DbLock)
 			{
-				if( this.GlobalConfig.TotalShards > this.GlobalDb.Shards.Count() ||
+				if( (this.DbConfig.ForceShardId == 0 && this.GlobalConfig.TotalShards > this.GlobalDb.Shards.Count()) ||
 				    this.DbConfig.ForceShardId > this.GlobalDb.Shards.Count() + 1 ) //they start at 1...
 				{
 					Console.WriteLine("BotwinderClient: TotalShards (or forceId) exceeds the Shards count!!!");
