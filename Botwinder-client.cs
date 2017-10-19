@@ -165,6 +165,7 @@ namespace Botwinder.core
 			this.Events.GuildUpdated += OnGuildUpdated;
 			this.Events.UserJoined += OnUserJoined;
 			this.Events.UserUpdated += OnUserUpdated;
+			this.Events.GuildMemberUpdated += OnGuildMemberUpdated;
 			this.Events.GuildMembersDownloaded += OnGuildMembersDownloaded;
 
 			await this.DiscordClient.LoginAsync(TokenType.Bot, this.GlobalConfig.DiscordToken);
@@ -404,7 +405,7 @@ namespace Botwinder.core
 				    this.DiscordClient.LoginState != LoginState.LoggedIn ||
 				    DateTime.Now - this.TimeConnected < TimeSpan.FromSeconds(this.GlobalConfig.InitialUpdateDelay) )
 				{
-					await Task.Delay(1000);
+					await Task.Delay(10000);
 					continue;
 				}
 
@@ -860,6 +861,14 @@ namespace Botwinder.core
 		}
 
 // User events
+		private Task OnGuildMemberUpdated(SocketGuildUser originalUser, SocketGuildUser updatedUser)
+		{
+			lock(this.DbLock)
+				UpdateUsernames(this.ServerDb, updatedUser);
+
+			return Task.CompletedTask;
+		}
+
 		private Task OnUserJoined(SocketGuildUser user)
 		{
 			lock(this.DbLock)
