@@ -173,7 +173,7 @@ namespace Botwinder.entities
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static string GetUsername(this IUser self)
 		{
-			return string.IsNullOrEmpty(self.Username) ? "" : (self.Username+"#"+ self.DiscriminatorValue);
+			return self.Username + "#" + self.DiscriminatorValue;
 		}
 
 		public static async Task SendMessageSafe(this IUser self, string message, Embed embed = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed), message);

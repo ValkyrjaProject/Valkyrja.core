@@ -65,7 +65,7 @@ namespace Botwinder.entities
 		{
 			StringBuilder whoisString = new StringBuilder();
 
-			whoisString.AppendLine($"<@{this.UserId}>: `{this.UserId}` | `{user.GetUsername()}`\n" +
+			whoisString.AppendLine($"<@{this.UserId}>: `{this.UserId}` | `{user?.GetUsername()}`\n" +
 			                       $"    Account created at: {Utils.GetTimeFromId(this.UserId)}");
 			if( user?.JoinedAt != null )
 				whoisString.AppendLine("    Joined the server: " + Utils.GetTimestamp(user.JoinedAt.Value));
