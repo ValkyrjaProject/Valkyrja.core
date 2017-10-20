@@ -48,7 +48,7 @@ namespace Botwinder.core
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				StringBuilder shards = new StringBuilder();
-				GlobalContext dbContext = GlobalContext.Create(this.DbConfig.GetDbConnectionString());
+				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
 				Shard globalCount = new Shard();
 				foreach( Shard shard in dbContext.Shards )
 				{
@@ -99,7 +99,7 @@ namespace Botwinder.core
 				guid.TryParse(e.TrimmedMessage, out id);
 				StringBuilder response = new StringBuilder();
 				IEnumerable<ServerStats> foundServers = null;
-				if( !(foundServers = ServerContext.Create(this.DbConfig.GetDbConnectionString()).ServerStats.Where(s =>
+				if( !(foundServers = ServerContext.Create(this.DbConnectionString).ServerStats.Where(s =>
 					    s.ServerId == id || s.OwnerId == id ||
 					    s.ServerName.ToLower().Contains($"{e.TrimmedMessage.ToLower()}") ||
 					    s.OwnerName.ToLower().Contains($"{e.TrimmedMessage.ToLower()}")
@@ -134,7 +134,7 @@ namespace Botwinder.core
 				ServerConfig foundServer = null;
 				if( string.IsNullOrEmpty(e.TrimmedMessage) ||
 				    !guid.TryParse(e.TrimmedMessage, out id) ||
-				    (foundServer = ServerContext.Create(this.DbConfig.GetDbConnectionString()).ServerConfigurations.FirstOrDefault(s => s.ServerId == id)) == null )
+				    (foundServer = ServerContext.Create(this.DbConnectionString).ServerConfigurations.FirstOrDefault(s => s.ServerId == id)) == null )
 				{
 					await SendMessageToChannel(e.Channel, "Server not found.");
 					return;
@@ -165,7 +165,7 @@ namespace Botwinder.core
 				}
 
 				string response = "Server not found.";
-				ServerContext dbContext = ServerContext.Create(this.DbConfig.GetDbConnectionString());
+				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
 				ServerConfig foundServer = dbContext.ServerConfigurations.FirstOrDefault(s => s.ServerId == id);
 				if( foundServer != null )
 				{
@@ -213,7 +213,7 @@ namespace Botwinder.core
 				if( string.IsNullOrEmpty(e.TrimmedMessage) || !int.TryParse(e.TrimmedMessage, out int n) || n <= 0 )
 					n = 5;
 
-				GlobalContext dbContext = GlobalContext.Create(this.DbConfig.GetDbConnectionString());
+				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
 				foreach( ExceptionEntry exception in dbContext.Exceptions.Skip(Math.Max(0, dbContext.Exceptions.Count() - n)) )
 				{
 					response.AppendLine(exception.GetMessage());
@@ -235,7 +235,7 @@ namespace Botwinder.core
 			newCommand.OnExecute += async e => {
 				string responseString = "I couldn't find that exception.";
 				ExceptionEntry exception = null;
-				GlobalContext dbContext = GlobalContext.Create(this.DbConfig.GetDbConnectionString());
+				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
 				if( !string.IsNullOrEmpty(e.TrimmedMessage) && int.TryParse(e.TrimmedMessage, out int id) && (exception = dbContext.Exceptions.FirstOrDefault(ex => ex.Id == id)) != null )
 					responseString = exception.GetStack();
 
@@ -263,8 +263,8 @@ namespace Botwinder.core
 					id = e.Message.MentionedUsers.First().Id;
 				}
 
-				GlobalContext dbContext = GlobalContext.Create(this.DbConfig.GetDbConnectionString());
-				ServerStats server = ServerContext.Create(this.DbConfig.GetDbConnectionString()).ServerStats
+				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+				ServerStats server = ServerContext.Create(this.DbConnectionString).ServerStats
 					.FirstOrDefault(s => s.ServerId == id || s.OwnerId == id);
 				switch(e.MessageArgs[0])
 				{
@@ -325,7 +325,7 @@ namespace Botwinder.core
 					id = e.Message.MentionedUsers.First().Id;
 				}
 
-				GlobalContext dbContext = GlobalContext.Create(this.DbConfig.GetDbConnectionString());
+				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
 				Subscriber subscriber = dbContext.Subscribers.FirstOrDefault(s => s.UserId == id);
 				switch(e.MessageArgs[0]) //Nope - mentioned users above mean that there is a parameter.
 				{
@@ -394,7 +394,7 @@ namespace Botwinder.core
 					id = e.Message.MentionedUsers.First().Id;
 				}
 
-				GlobalContext dbContext = GlobalContext.Create(this.DbConfig.GetDbConnectionString());
+				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
 				PartneredServer partner = dbContext.PartneredServers.FirstOrDefault(s => s.ServerId == id);
 				switch(e.MessageArgs[0]) //Nope - mentioned users above mean that there is a parameter.
 				{

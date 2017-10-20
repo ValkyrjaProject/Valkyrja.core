@@ -29,31 +29,31 @@ namespace Botwinder.core
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsSubscriber(guid id)
 		{
-			return GlobalContext.Create(this.DbConfig.GetDbConnectionString()).PartneredServers.Any(u => u.ServerId == id);
+			return GlobalContext.Create(this.DbConnectionString).PartneredServers.Any(u => u.ServerId == id);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsPartner(guid id)
 		{
-			return GlobalContext.Create(this.DbConfig.GetDbConnectionString()).PartneredServers.Any(s => s.ServerId == id);
+			return GlobalContext.Create(this.DbConnectionString).PartneredServers.Any(s => s.ServerId == id);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsPremiumSubscriber(guid id)
 		{
-			return GlobalContext.Create(this.DbConfig.GetDbConnectionString()).Subscribers.Any(u => u.UserId == id && u.IsPremium);
+			return GlobalContext.Create(this.DbConnectionString).Subscribers.Any(u => u.UserId == id && u.IsPremium);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsBonusSubscriber(guid id)
 		{
-			return GlobalContext.Create(this.DbConfig.GetDbConnectionString()).Subscribers.Any(u => u.UserId == id && u.HasBonus);
+			return GlobalContext.Create(this.DbConnectionString).Subscribers.Any(u => u.UserId == id && u.HasBonus);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsPremiumPartner(guid id)
 		{
-			return GlobalContext.Create(this.DbConfig.GetDbConnectionString()).PartneredServers.Any(s => s.ServerId == id && s.IsPremium);
+			return GlobalContext.Create(this.DbConnectionString).PartneredServers.Any(s => s.ServerId == id && s.IsPremium);
 		}
 
 

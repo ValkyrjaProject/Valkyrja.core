@@ -24,6 +24,7 @@ namespace Botwinder.core
 
 		private DiscordSocketClient DiscordClient;
 		public Events Events;
+		public string DbConnectionString;
 
 		public readonly DateTime TimeStarted = DateTime.Now;
 		private DateTime TimeConnected = DateTime.MaxValue;
@@ -62,8 +63,9 @@ namespace Botwinder.core
 		public BotwinderClient()
 		{
 			this.DbConfig = DbConfig.Load();
-			this.GlobalDb = GlobalContext.Create(this.DbConfig.GetDbConnectionString());
-			this.ServerDb = ServerContext.Create(this.DbConfig.GetDbConnectionString());
+			this.DbConnectionString = this.DbConfig.GetDbConnectionString();
+			this.GlobalDb = GlobalContext.Create(this.DbConnectionString);
+			this.ServerDb = ServerContext.Create(this.DbConnectionString);
 		}
 
 		public void Dispose()
@@ -381,8 +383,11 @@ namespace Botwinder.core
 
 		private Task Log(LogEntry logEntry)
 		{
-			lock(this.DbLock)
-				this.GlobalDb.Log.Add(logEntry);
+			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+			dbContext.Log.Add(logEntry);
+			dbContext.SaveChanges();
+			dbContext.Dispose();
+
 			return Task.CompletedTask;
 		}
 
@@ -756,13 +761,13 @@ namespace Botwinder.core
 				if( this.Servers.ContainsKey(guild.Id) )
 				{
 					server = this.Servers[guild.Id];
-					server.ReloadConfig(this.DbConfig.GetDbConnectionString());
+					server.ReloadConfig(this.DbConnectionString);
 				}
 				else
 				{
 					server = new Server(guild, this.Commands);
-					server.LoadConfig(this.DbConfig.GetDbConnectionString());
-					server.Localisation = GlobalContext.Create(this.DbConfig.GetDbConnectionString()).Localisations.FirstOrDefault(l => l.Id == server.Config.LocalisationId);
+					server.LoadConfig(this.DbConnectionString);
+					server.Localisation = GlobalContext.Create(this.DbConnectionString).Localisations.FirstOrDefault(l => l.Id == server.Config.LocalisationId);
 					this.Servers.Add(server.Id, server);
 				}
 			}
@@ -839,53 +844,52 @@ namespace Botwinder.core
 
 		private Task OnGuildMembersDownloaded(SocketGuild guild)
 		{
-			List<Username> usernames;
-			List<Nickname> nicknames;
-
-			lock(this.DbLock)
-			{
-				usernames = this.ServerDb.Usernames.Where(u => u.ServerId == guild.Id).ToList();
-				nicknames = this.ServerDb.Nicknames.Where(u => u.ServerId == guild.Id).ToList();
-			}
+			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+			List<Username> usernames = dbContext.Usernames.Where(u => u.ServerId == guild.Id).ToList();
+			List<Nickname> nicknames = dbContext.Nicknames.Where(u => u.ServerId == guild.Id).ToList();
 
 			foreach( SocketGuildUser user in guild.Users )
 			{
 				if( !usernames.Any(u => u.UserId == user.Id && u.Name == user.Username) )
 				{
-					usernames.Add(new Username(){
+					Username username = new Username(){
 						ServerId = user.Guild.Id,
 						UserId = user.Id,
 						Name = user.Username
-					});
+					};
+					usernames.Add(username);
+					dbContext.Usernames.Add(username);
 				}
 
 				if( !string.IsNullOrEmpty(user.Nickname) &&
 				    !nicknames.Any(u => u.UserId == user.Id && u.Name == user.Nickname) )
 				{
-					nicknames.Add(new Nickname(){
+					Nickname nickname = new Nickname(){
 						ServerId = user.Guild.Id,
 						UserId = user.Id,
 						Name = user.Nickname
-					});
+					};
+					nicknames.Add(nickname);
+					dbContext.Nicknames.Add(nickname);
 				}
 			}
 
+			dbContext.SaveChanges();
+			dbContext.Dispose();
 			return Task.CompletedTask;
 		}
 
 // User events
 		private Task OnGuildMemberUpdated(SocketGuildUser originalUser, SocketGuildUser updatedUser)
 		{
-			lock(this.DbLock)
-				UpdateUsernames(this.ServerDb, updatedUser);
+			UpdateUsernames(updatedUser);
 
 			return Task.CompletedTask;
 		}
 
 		private Task OnUserJoined(SocketGuildUser user)
 		{
-			lock(this.DbLock)
-				UpdateUsernames(this.ServerDb, user);
+			UpdateUsernames(user);
 
 			return Task.CompletedTask;
 		}
@@ -894,15 +898,16 @@ namespace Botwinder.core
 		{
 			if( updatedUser is SocketGuildUser )
 			{
-				lock(this.DbLock)
-					UpdateUsernames(this.ServerDb, updatedUser as SocketGuildUser);
+				UpdateUsernames(updatedUser as SocketGuildUser);
 			}
 
 			return Task.CompletedTask;
 		}
 
-		private void UpdateUsernames(ServerContext dbContext, SocketGuildUser user)
+		private void UpdateUsernames(SocketGuildUser user)
 		{
+			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+
 			if( !dbContext.Usernames.Any(u => u.ServerId == user.Guild.Id && u.UserId == user.Id && u.Name == user.Username) )
 			{
 				dbContext.Usernames.Add(new Username(){
@@ -921,6 +926,9 @@ namespace Botwinder.core
 					Name = user.Nickname
 				});
 			}
+
+			dbContext.SaveChanges();
+			dbContext.Dispose();
 		}
 	}
 }
