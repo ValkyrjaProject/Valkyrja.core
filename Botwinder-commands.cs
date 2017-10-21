@@ -353,6 +353,7 @@ namespace Botwinder.core
 						if( e.MessageArgs.Length < 3 )
 						{
 							dbContext.Subscribers.Remove(subscriber);
+							dbContext.SaveChanges();
 							break;
 						}
 
@@ -419,6 +420,7 @@ namespace Botwinder.core
 						if( e.MessageArgs.Length < 3 )
 						{
 							dbContext.PartneredServers.Remove(partner);
+							dbContext.SaveChanges();
 							break;
 						}
 
