@@ -811,7 +811,7 @@ namespace Botwinder.core
 					try
 					{
 						//Partnered servers
-						if( (!IsPartner(pair.Value.Id) && !IsSubscriber(pair.Value.Id) && !serversToLeave.Contains(pair.Value) &&
+						if( (!IsPartner(pair.Value.Id) && !IsSubscriber(pair.Value.Guild.OwnerId) && !serversToLeave.Contains(pair.Value) &&
 						     pair.Value.Guild.CurrentUser.JoinedAt.HasValue &&
 						     DateTime.UtcNow - pair.Value.Guild.CurrentUser.JoinedAt.Value.ToUniversalTime() > TimeSpan.FromHours(this.GlobalConfig.VipTrialHours)) ||
 						    (this.GlobalConfig.VipMembersMax > 0 && pair.Value.Guild.MemberCount > this.GlobalConfig.VipMembersMax) )
