@@ -68,7 +68,7 @@ namespace Botwinder.entities
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public string GetStatsString()
 		{
-			TimeSpan uptime = DateTimeOffset.UtcNow - this.TimeStarted;
+			TimeSpan uptime = this.TimeStarted == DateTime.MinValue ? TimeSpan.Zero : DateTime.UtcNow - this.TimeStarted;
 			int days = uptime.Days;
 			int hours = uptime.Hours;
 			int minutes = uptime.Minutes;

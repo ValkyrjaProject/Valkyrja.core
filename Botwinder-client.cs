@@ -56,6 +56,7 @@ namespace Botwinder.core
 		public Object DbLock{ get; set; } = new Object();
 
 		private readonly List<guid> LeaveNotifiedOwners = new List<guid>();
+		private DateTime LastShardCleanupTime = DateTime.UtcNow;
 		private DateTime LastMessageAverageTime = DateTime.UtcNow;
 		private int MessagesThisMinute = 0;
 
@@ -496,6 +497,16 @@ namespace Botwinder.core
 
 		private void UpdateShardStats()
 		{
+			if( DateTime.UtcNow - this.LastShardCleanupTime > TimeSpan.FromMinutes(10) )
+			{
+				this.LastShardCleanupTime = DateTime.UtcNow;
+				lock(this.DbLock)
+				{
+					foreach( Shard shard in this.GlobalDb.Shards )
+						shard.TimeStarted = DateTime.MinValue;
+				}
+			}
+
 			if( DateTime.UtcNow - this.LastMessageAverageTime > TimeSpan.FromMinutes(1) )
 			{
 				this.CurrentShard.MessagesPerMinute = this.MessagesThisMinute;
@@ -503,6 +514,7 @@ namespace Botwinder.core
 				this.LastMessageAverageTime = DateTime.UtcNow;
 			}
 
+			this.CurrentShard.TimeStarted = this.TimeStarted;
 			this.CurrentShard.OperationsActive = this.CurrentOperations.Count;
 			this.CurrentShard.ThreadsActive = Process.GetCurrentProcess().Threads.Count;
 			this.CurrentShard.MemoryUsed = GC.GetTotalMemory(false) / 1000000;
