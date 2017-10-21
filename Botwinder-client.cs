@@ -524,13 +524,14 @@ namespace Botwinder.core
 				}
 
 				DateTime joinedAt = DateTime.UtcNow;
-				if( pair.Value.Guild.CurrentUser.JoinedAt.HasValue )
+				if( pair.Value.Guild.CurrentUser?.JoinedAt != null )
 					joinedAt = pair.Value.Guild.CurrentUser.JoinedAt.Value.UtcDateTime;
 					//Although D.NET lists this as nullable, D.API always provides the value. It is safe to assume that it's always there.
 
 				if( stats.JoinedTimeFirst == DateTime.MaxValue ) //This is the first time that we joined the server.
 				{
 					stats.JoinedTimeFirst = joinedAt;
+					stats.JoinedCount = 1;
 				}
 
 				if( stats.JoinedTime != joinedAt )
