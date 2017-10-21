@@ -26,34 +26,44 @@ namespace Botwinder.core
 		}
 
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsSubscriber(guid id)
 		{
-			return GlobalContext.Create(this.DbConnectionString).PartneredServers.Any(u => u.ServerId == id);
+			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+			bool val = IsGlobalAdmin(id) || dbContext.PartneredServers.Any(u => u.ServerId == id);
+			dbContext.Dispose();
+			return val;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsPartner(guid id)
 		{
-			return GlobalContext.Create(this.DbConnectionString).PartneredServers.Any(s => s.ServerId == id);
+			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+			bool val = dbContext.PartneredServers.Any(s => s.ServerId == id);
+			dbContext.Dispose();
+			return val;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsPremiumSubscriber(guid id)
 		{
-			return GlobalContext.Create(this.DbConnectionString).Subscribers.Any(u => u.UserId == id && u.IsPremium);
+			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+			bool val = IsGlobalAdmin(id) || dbContext.Subscribers.Any(u => u.UserId == id && u.IsPremium);
+			dbContext.Dispose();
+			return val;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsBonusSubscriber(guid id)
 		{
-			return GlobalContext.Create(this.DbConnectionString).Subscribers.Any(u => u.UserId == id && u.HasBonus);
+			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+			bool val = IsGlobalAdmin(id) || dbContext.Subscribers.Any(u => u.UserId == id && u.HasBonus);
+			dbContext.Dispose();
+			return val;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsPremiumPartner(guid id)
 		{
-			return GlobalContext.Create(this.DbConnectionString).PartneredServers.Any(s => s.ServerId == id && s.IsPremium);
+			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+			bool val = dbContext.PartneredServers.Any(s => s.ServerId == id && s.IsPremium);
+			dbContext.Dispose();
+			return val;
 		}
 
 

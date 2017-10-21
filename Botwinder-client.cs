@@ -814,11 +814,13 @@ namespace Botwinder.core
 					try
 					{
 						//Partnered servers
-						if( (!IsPartner(pair.Value.Id) && !IsSubscriber(pair.Value.Guild.OwnerId) && !serversToLeave.Contains(pair.Value) &&
-						     pair.Value.Guild.CurrentUser.JoinedAt.HasValue &&
-						     DateTime.UtcNow - pair.Value.Guild.CurrentUser.JoinedAt.Value.ToUniversalTime() > TimeSpan.FromHours(this.GlobalConfig.VipTrialHours)) ||
-						    (this.GlobalConfig.VipMembersMax > 0 && pair.Value.Guild.MemberCount > this.GlobalConfig.VipMembersMax) )
+						if( !(IsPartner(pair.Value.Id) || IsSubscriber(pair.Value.Guild.OwnerId) ||
+						     pair.Value.Guild.CurrentUser?.JoinedAt == null ||
+						      DateTime.UtcNow - pair.Value.Guild.CurrentUser.JoinedAt.Value.ToUniversalTime() < TimeSpan.FromHours(this.GlobalConfig.VipTrialHours)) )
 						{
+							if( serversToLeave.Contains(pair.Value) )
+								continue;
+
 							serversToLeave.Add(pair.Value);
 							if( !this.LeaveNotifiedOwners.Contains(pair.Value.Guild.OwnerId) )
 							{
@@ -834,8 +836,8 @@ namespace Botwinder.core
 
 						//Blacklisted servers
 						lock(this.DbLock)
-						if( this.GlobalDb.Blacklist.Any(b => b.Id == pair.Value.Id || b.Id == pair.Value.Guild.OwnerId) &&
-						    !serversToLeave.Contains(pair.Value) )
+						if( !serversToLeave.Contains(pair.Value) &&
+						    this.GlobalDb.Blacklist.Any(b => b.Id == pair.Value.Id || b.Id == pair.Value.Guild.OwnerId) )
 						{
 							serversToLeave.Add(pair.Value);
 							continue;
