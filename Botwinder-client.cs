@@ -304,6 +304,9 @@ namespace Botwinder.core
 			{
 				await LogException(e, "--Events.Disconnected");
 			}
+
+			Dispose();
+			Environment.Exit(0); //HACK - The library often reconnects in really shitty way and no longer works
 		}
 
 // Message events
