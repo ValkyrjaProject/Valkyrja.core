@@ -138,12 +138,12 @@ namespace Botwinder.core
 				lock(this.DbLock)
 					this.GlobalDb.SaveChanges();
 			}
-			Console.WriteLine("BotwinderClient: Shard taken.");
+			Console.WriteLine($"BotwinderClient: Shard {this.CurrentShard.Id - 1} taken.");
 
 			this.CurrentShard.ResetStats(this.TimeStarted);
 
 			DiscordSocketConfig config = new DiscordSocketConfig();
-			config.ShardId = (int) this.CurrentShard.Id;
+			config.ShardId = (int) this.CurrentShard.Id - 1; //Shard's start at one in the database.
 			config.TotalShards = (int) this.GlobalConfig.TotalShards;
 			config.LogLevel = this.GlobalConfig.LogDebug ? LogSeverity.Debug : LogSeverity.Warning;
 			config.DefaultRetryMode = RetryMode.Retry502 & RetryMode.RetryRatelimit & RetryMode.RetryTimeouts;
@@ -376,8 +376,11 @@ namespace Botwinder.core
 
 		private Task Log(ExceptionEntry exceptionEntry)
 		{
-			lock(this.DbLock)
-				this.GlobalDb.Exceptions.Add(exceptionEntry);
+			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+			dbContext.Exceptions.Add(exceptionEntry);
+			dbContext.SaveChanges();
+			dbContext.Dispose();
+
 			return Task.CompletedTask;
 		}
 
@@ -536,7 +539,7 @@ namespace Botwinder.core
 					stats.JoinedCount++;
 				}
 
-				stats.ShardId = this.CurrentShard.Id;
+				stats.ShardId = this.CurrentShard.Id - 1;
 				stats.ServerName = pair.Value.Guild.Name;
 				stats.OwnerId = pair.Value.Guild.OwnerId;
 				stats.OwnerName = pair.Value.Guild.Owner.GetUsername();
