@@ -560,7 +560,8 @@ namespace Botwinder.core
 				stats.ShardId = this.CurrentShard.Id - 1;
 				stats.ServerName = pair.Value.Guild.Name;
 				stats.OwnerId = pair.Value.Guild.OwnerId;
-				stats.OwnerName = pair.Value.Guild.Owner.GetUsername();
+				if( pair.Value.Guild.Owner != null )
+					stats.OwnerName = pair.Value.Guild.Owner.GetUsername();
 				stats.IsDiscordPartner = pair.Value.Guild.VoiceRegionId.StartsWith("vip");
 				stats.UserCount = pair.Value.Guild.MemberCount;
 
