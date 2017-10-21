@@ -533,7 +533,8 @@ namespace Botwinder.core
 			{
 				ServerStats stats = null;
 				lock(this.DbLock)
-				if( (stats = this.ServerDb.ServerStats.FirstOrDefault(s => s.ServerId == pair.Key)) == null )
+				if( (stats = this.ServerDb.ServerStats.FirstOrDefault(s => s.ServerId == pair.Key)) == null &&
+				    (stats = this.ServerDb.ServerStats.Local.FirstOrDefault(s => s.ServerId == pair.Key)) == null)
 				{
 					stats = new ServerStats();
 					stats.ServerId = pair.Value.Id;
