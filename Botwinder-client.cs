@@ -61,12 +61,14 @@ namespace Botwinder.core
 		private int MessagesThisMinute = 0;
 
 
-		public BotwinderClient()
+		public BotwinderClient(int shardIdOverride = -1)
 		{
 			this.DbConfig = DbConfig.Load();
 			this.DbConnectionString = this.DbConfig.GetDbConnectionString();
 			this.GlobalDb = GlobalContext.Create(this.DbConnectionString);
 			this.ServerDb = ServerContext.Create(this.DbConnectionString);
+			if( ++shardIdOverride > 0 )
+				this.DbConfig.ForceShardId = shardIdOverride; //db shards count from one
 		}
 
 		public void Dispose()
@@ -148,7 +150,7 @@ namespace Botwinder.core
 			config.TotalShards = (int) this.GlobalConfig.TotalShards;
 			config.LogLevel = this.GlobalConfig.LogDebug ? LogSeverity.Debug : LogSeverity.Warning;
 			config.DefaultRetryMode = RetryMode.Retry502 & RetryMode.RetryRatelimit & RetryMode.RetryTimeouts;
-			config.AlwaysDownloadUsers = true;
+			config.AlwaysDownloadUsers = this.DbConfig.DownloadUsers;
 			config.LargeThreshold = 100;
 			config.HandlerTimeout = null;
 			config.MessageCacheSize = 100;
@@ -503,7 +505,10 @@ namespace Botwinder.core
 				lock(this.DbLock)
 				{
 					foreach( Shard shard in this.GlobalDb.Shards )
+					{
 						shard.TimeStarted = DateTime.MinValue;
+						shard.IsConnecting = false;
+					}
 				}
 			}
 

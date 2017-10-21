@@ -18,6 +18,7 @@ namespace Botwinder.entities
 		public string ConfigName = "default";
 		public int ForceShardId = 0;
 		public bool UseShardLock = false;
+		public bool DownloadUsers = true;
 
 		public string GetDbConnectionString()
 		{
