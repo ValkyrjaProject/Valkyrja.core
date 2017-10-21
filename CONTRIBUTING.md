@@ -3,7 +3,8 @@
 As a contributor you can directly commit to the project. Please create a new branch for everything, and then submit pull-request. This is done easily right here on the page if you're not awesome enough in the CLI.
 
 Clone the Botwinder.discord repository recursively to include the Core project:
-* Fork this repository, and then clone it recursively to get the Core library as well: `git clone --recursive git@github
+* Fork Botwinder.discord repository, and then clone it recursively to get the Core library as well: `git clone --recursive git@github
+* If you want to modify the Core code, fork that as well and manually clone it into the `Core` folder.
 * Nuke your nuget cache `rm -rf ~/.nuget/packages/discord.net*` (google the location for windows...)
 
 Fix the project to exclude the private code:
