@@ -813,10 +813,17 @@ namespace Botwinder.core
 				{
 					try
 					{
+						//Trial count exceeded
+						ServerStats stats;
+						lock(this.DbLock)
+							stats = this.ServerDb.ServerStats.FirstOrDefault(s => s.ServerId == pair.Value.Id);
+						bool joinedCountExceeded = stats != null && stats.JoinedCount > this.GlobalConfig.VipTrialJoins;
+						bool trialTimeExceeded = pair.Value.Guild.CurrentUser?.JoinedAt != null &&
+						                         DateTime.UtcNow - pair.Value.Guild.CurrentUser.JoinedAt.Value.ToUniversalTime() > TimeSpan.FromHours(this.GlobalConfig.VipTrialHours);
+
 						//Partnered servers
-						if( !(IsPartner(pair.Value.Id) || IsSubscriber(pair.Value.Guild.OwnerId) ||
-						     pair.Value.Guild.CurrentUser?.JoinedAt == null ||
-						      DateTime.UtcNow - pair.Value.Guild.CurrentUser.JoinedAt.Value.ToUniversalTime() < TimeSpan.FromHours(this.GlobalConfig.VipTrialHours)) )
+						if( !(IsPartner(pair.Value.Id) || IsSubscriber(pair.Value.Guild.OwnerId)) &&
+						    (joinedCountExceeded || trialTimeExceeded) )
 						{
 							if( serversToLeave.Contains(pair.Value) )
 								continue;
@@ -838,16 +845,6 @@ namespace Botwinder.core
 						lock(this.DbLock)
 						if( !serversToLeave.Contains(pair.Value) &&
 						    this.GlobalDb.Blacklist.Any(b => b.Id == pair.Value.Id || b.Id == pair.Value.Guild.OwnerId) )
-						{
-							serversToLeave.Add(pair.Value);
-							continue;
-						}
-
-						//Trial count exceeded
-						ServerStats stats = this.ServerDb.ServerStats.FirstOrDefault(s => s.ServerId == pair.Value.Id);
-						lock(this.DbLock)
-						if( stats != null && stats.JoinedCount > this.GlobalConfig.VipTrialJoins &&
-						    !serversToLeave.Contains(pair.Value) )
 						{
 							serversToLeave.Add(pair.Value);
 							continue;
