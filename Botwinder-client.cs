@@ -355,10 +355,11 @@ namespace Botwinder.core
 
 			try
 			{
-				if( !(iChannel is SocketTextChannel channel) || !this.Servers.ContainsKey(channel.Guild.Id) )
+				Server server;
+				if( !(iChannel is SocketTextChannel channel) || updatedMessage.Author == null ||
+				    !this.Servers.ContainsKey(channel.Guild.Id) || (server = this.Servers[channel.Guild.Id]) == null || server.Config == null)
 					return;
 
-				Server server = this.Servers[channel.Guild.Id];
 				if( server.Config.IgnoreBots && updatedMessage.Author.IsBot ||
 				    server.Config.IgnoreEveryone && updatedMessage.MentionedRoles.Any(r => r.IsEveryone) )
 					return;
