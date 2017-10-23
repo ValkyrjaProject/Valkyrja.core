@@ -356,7 +356,7 @@ namespace Botwinder.core
 			try
 			{
 				Server server;
-				if( !(iChannel is SocketTextChannel channel) || updatedMessage.Author == null ||
+				if( !(iChannel is SocketTextChannel channel) || updatedMessage?.Author == null ||
 				    !this.Servers.ContainsKey(channel.Guild.Id) || (server = this.Servers[channel.Guild.Id]) == null || server.Config == null)
 					return;
 
