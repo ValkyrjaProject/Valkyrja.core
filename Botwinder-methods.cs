@@ -29,7 +29,7 @@ namespace Botwinder.core
 		public bool IsSubscriber(guid id)
 		{
 			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-			bool val = IsGlobalAdmin(id) || dbContext.PartneredServers.Any(u => u.ServerId == id);
+			bool val = IsGlobalAdmin(id) || dbContext.Subscribers.Any(u => u.UserId == id);
 			dbContext.Dispose();
 			return val;
 		}
