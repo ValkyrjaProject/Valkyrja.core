@@ -105,7 +105,7 @@ namespace Botwinder.entities
 			if( this.WarningCount > 0 || !string.IsNullOrEmpty(this.Notes) )
 				whoisString.AppendLine($"They have {this.WarningCount} warnings, with these notes: {this.Notes}");
 
-			return whoisString.ToString().Replace("@everyone", "@-everyone").Replace("@here", "@-here").Replace("`", "'");
+			return whoisString.ToString().Replace("@everyone", "@-everyone").Replace("@here", "@-here");
 		}
 
 		public void AddWarning(string warning)
