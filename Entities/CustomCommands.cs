@@ -17,7 +17,7 @@ namespace Botwinder.entities
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public guid ServerId{ get; set; } = 0;
 
-		[Column("commandid", TypeName = "varchar(255)")]
+		[Column("commandid", TypeName = "varchar(127)")]
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public string CommandId{ get; set; } = "";
 
