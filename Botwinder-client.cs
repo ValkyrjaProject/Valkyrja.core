@@ -490,6 +490,10 @@ namespace Botwinder.core
 				Console.WriteLine("BotwinderClient: UpdateServerStats loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 			await UpdateServerStats();
 
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine("BotwinderClient: UpdateServerConfigs loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+			await UpdateServerConfigs();
+
 			lock(this.DbLock)
 			{
 				if( this.GlobalConfig.LogDebug )
@@ -582,6 +586,15 @@ namespace Botwinder.core
 					catch(Exception) { }
 				}
 			}
+		}
+
+		private Task UpdateServerConfigs()
+		{
+			foreach( KeyValuePair<guid, Server> pair in this.Servers )
+			{
+				pair.Value.ReloadConfig(this.DbConnectionString);
+			}
+			return Task.CompletedTask;
 		}
 
 //Modules

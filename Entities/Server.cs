@@ -65,6 +65,11 @@ namespace Botwinder.entities
 			this.CustomAliases = dbContext.CustomAliases.Where(c => c.ServerId == this.Id).ToDictionary(c => c.Alias);
 			this.Roles = dbContext.Roles.Where(c => c.ServerId == this.Id).ToDictionary(c => c.RoleId);
 
+			List<ChannelConfig> channels = dbContext.Channels.Where(c => c.ServerId == this.Id).ToList();
+			this.IgnoredChannels = channels.Where(c => c.Ignored).Select(c => c.ChannelId).ToList();
+			this.TemporaryChannels = channels.Where(c => c.Temporary).Select(c => c.ChannelId).ToList();
+			this.MutedChannels = channels.Where(c => c.MutedUntil > DateTime.MinValue).Select(c => c.ChannelId).ToList();
+
 			dbContext.Dispose();
 
 			SocketRole role;
@@ -84,12 +89,6 @@ namespace Botwinder.entities
 
 		public void LoadConfig(string dbConnectionString)
 		{
-			ServerContext dbContext = ServerContext.Create(dbConnectionString);
-			this.IgnoredChannels = dbContext.Channels.Where(c => c.ServerId == this.Id && c.Ignored).Select(c => c.ChannelId).ToList();
-			this.TemporaryChannels = dbContext.Channels.Where(c => c.ServerId == this.Id && c.Temporary).Select(c => c.ChannelId).ToList();
-			this.MutedChannels = dbContext.Channels.Where(c => c.ServerId == this.Id && c.MutedUntil > DateTime.MinValue).Select(c => c.ChannelId).ToList();
-
-			dbContext.Dispose();
 			ReloadConfig(dbConnectionString);
 		}
 
