@@ -185,25 +185,25 @@ namespace Botwinder.entities
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsAdmin(SocketGuildUser user)
 		{
-			return user.Roles.Any(r => this.Roles.Any(p => p.Value.PermissionLevel >= RolePermissionLevel.Admin && p.Value.RoleId == r.Id));
+			return IsOwner(user) || user.Roles.Any(r => this.Roles.Any(p => p.Value.PermissionLevel >= RolePermissionLevel.Admin && p.Value.RoleId == r.Id));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsModerator(SocketGuildUser user)
 		{
-			return user.Roles.Any(r => this.Roles.Any(p => p.Value.PermissionLevel >= RolePermissionLevel.Moderator && p.Value.RoleId == r.Id));
+			return IsOwner(user) || user.Roles.Any(r => this.Roles.Any(p => p.Value.PermissionLevel >= RolePermissionLevel.Moderator && p.Value.RoleId == r.Id));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsSubModerator(SocketGuildUser user)
 		{
-			return user.Roles.Any(r => this.Roles.Any(p => p.Value.PermissionLevel >= RolePermissionLevel.SubModerator && p.Value.RoleId == r.Id));
+			return IsOwner(user) || user.Roles.Any(r => this.Roles.Any(p => p.Value.PermissionLevel >= RolePermissionLevel.SubModerator && p.Value.RoleId == r.Id));
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool IsMember(SocketGuildUser user)
 		{
-			return user.Roles.Any(r => this.Roles.Any(p => p.Value.PermissionLevel >= RolePermissionLevel.Member && p.Value.RoleId == r.Id));
+			return IsOwner(user) || user.Roles.Any(r => this.Roles.Any(p => p.Value.PermissionLevel >= RolePermissionLevel.Member && p.Value.RoleId == r.Id));
 		}
 	}
 }
