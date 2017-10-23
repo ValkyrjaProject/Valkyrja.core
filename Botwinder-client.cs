@@ -503,6 +503,7 @@ namespace Botwinder.core
 
 		private void UpdateShardStats()
 		{
+			DateTime timeStarted = this.TimeStarted; // EF Core hack because... magic.
 			if( DateTime.UtcNow - this.LastShardCleanupTime > TimeSpan.FromMinutes(10) )
 			{
 				this.LastShardCleanupTime = DateTime.UtcNow;
@@ -510,7 +511,7 @@ namespace Botwinder.core
 				{
 					foreach( Shard shard in this.GlobalDb.Shards )
 					{
-						shard.TimeStarted = DateTime.MinValue;
+						timeStarted = DateTime.MinValue;
 						shard.IsConnecting = false;
 					}
 				}
@@ -523,7 +524,9 @@ namespace Botwinder.core
 				this.LastMessageAverageTime = DateTime.UtcNow;
 			}
 
-			this.CurrentShard.TimeStarted = this.TimeStarted;
+			if( timeStarted != this.CurrentShard.TimeStarted )
+				this.CurrentShard.TimeStarted = timeStarted;
+
 			this.CurrentShard.OperationsActive = this.CurrentOperations.Count;
 			this.CurrentShard.ThreadsActive = Process.GetCurrentProcess().Threads.Count;
 			this.CurrentShard.MemoryUsed = GC.GetTotalMemory(false) / 1000000;
