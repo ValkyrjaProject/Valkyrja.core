@@ -579,11 +579,17 @@ namespace Botwinder.core
 
 				if( string.IsNullOrEmpty(pair.Value.Config.InviteUrl) )
 				{
+					ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+
 					try
 					{
-						pair.Value.Config.InviteUrl = (await pair.Value.Guild.DefaultChannel.CreateInviteAsync()).Url;
+						dbContext.ServerConfigurations.First(s => s.ServerId == pair.Value.Id).InviteUrl =
+							(await pair.Value.Guild.DefaultChannel.CreateInviteAsync(0)).Url;
 					}
 					catch(Exception) { }
+
+					dbContext.SaveChanges();
+					dbContext.Dispose();
 				}
 			}
 		}
