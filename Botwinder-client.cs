@@ -77,19 +77,16 @@ namespace Botwinder.core
 
 			if( this.CurrentShard != null )
 			{
-				this.CurrentShard.IsTaken = false;
-				this.CurrentShard.IsConnecting = false;
+				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+				Shard shard = dbContext.Shards.FirstOrDefault(s => s.Id == this.CurrentShard.Id);
+				if( shard != null )
+				{
+					shard.IsTaken = false;
+					shard.IsConnecting = false;
+					dbContext.SaveChanges();
+				}
+				dbContext.Dispose();
 			}
-
-			lock(this.DbLock)
-			{
-				if( this.GlobalDb != null )
-					this.GlobalDb.SaveChanges();
-				if( this.ServerDb != null )
-					this.ServerDb.SaveChanges();
-			}
-
-			Task.Delay(500).Wait();
 
 			if( this.DiscordClient != null )
 				this.DiscordClient.Dispose();
