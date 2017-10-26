@@ -321,11 +321,16 @@ namespace Botwinder.core
 				this.CurrentShard.MessagesTotal++;
 				this.MessagesThisMinute++;
 
-				if( !(message.Channel is SocketTextChannel channel) || !this.Servers.ContainsKey(channel.Guild.Id) )
+				if( !(message.Channel is SocketTextChannel channel) )
+				{
+					await LogMessage(LogType.Pm, null, message);
 					return;
+				}
 
-				Server server = this.Servers[channel.Guild.Id];
-				if( server.Config.IgnoreBots && message.Author.IsBot ||
+				Server server;
+				if( !this.Servers.ContainsKey(channel.Guild.Id) ||
+					(server = this.Servers[channel.Guild.Id]) == null ||
+					server.Config.IgnoreBots && message.Author.IsBot ||
 				    server.Config.IgnoreEveryone && message.MentionedRoles.Any(r => r.IsEveryone) )
 					return;
 

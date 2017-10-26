@@ -678,6 +678,7 @@ namespace Botwinder.core
 			this.Commands.Add(newCommand.Id, newCommand);
 
 */
+
 			return Task.CompletedTask;
 		}
 	}

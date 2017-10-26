@@ -86,8 +86,8 @@ namespace Botwinder.core
 				Type = logType,
 				UserId = message.Author.Id,
 				MessageId = message.Id,
-				ChannelId = channel.Id,
-				ServerId = channel.Guild.Id,
+				ChannelId = channel?.Id ?? 0,
+				ServerId = channel?.Guild.Id ?? 0,
 				DateTime = DateTime.UtcNow,
 				Message = message.Content
 			};

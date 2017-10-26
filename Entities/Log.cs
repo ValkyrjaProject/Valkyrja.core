@@ -43,7 +43,8 @@ namespace Botwinder.entities
 		None = 0,
 		Debug,
 		Command,
-		Response
+		Response,
+		Pm
 	}
 
 	[Table("exceptions")]
