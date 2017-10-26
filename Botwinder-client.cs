@@ -50,7 +50,7 @@ namespace Botwinder.core
 		private readonly Regex RegexCommandParams = new Regex("\"[^\"]+\"|\\S+", RegexOptions.Compiled);
 
 		public readonly ConcurrentDictionary<guid, Server> Servers = new ConcurrentDictionary<guid, Server>();
-		private readonly Dictionary<string, Command> Commands = new Dictionary<string, Command>();
+		public readonly Dictionary<string, Command> Commands = new Dictionary<string, Command>();
 		public List<Operation> CurrentOperations{ get; set; } = new List<Operation>();
 		public Object OperationsLock{ get; set; } = new Object();
 		public Object DbLock{ get; set; } = new Object();

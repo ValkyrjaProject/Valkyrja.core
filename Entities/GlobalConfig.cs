@@ -12,6 +12,7 @@ namespace Botwinder.entities
 	{
 		public const int MessageCharacterLimit = 2000;
 		public const int CommandExecutionTimeout = 10000;
+		public const string DataFolder = "data";
 
 
 		[Key]
