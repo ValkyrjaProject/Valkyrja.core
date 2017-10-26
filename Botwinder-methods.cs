@@ -112,7 +112,7 @@ namespace Botwinder.core
 			};
 			await this.Events.Exception(exceptionEntry);
 
-			if( exception.InnerException != null )
+			if( exception.InnerException != null && exception.Message != exception.InnerException.Message )
 				await LogException(exception.InnerException, "InnerException | " + data, serverId);
 		}
 
