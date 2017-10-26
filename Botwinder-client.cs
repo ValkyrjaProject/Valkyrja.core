@@ -88,10 +88,6 @@ namespace Botwinder.core
 				dbContext.Dispose();
 			}
 
-			if( this.DiscordClient != null )
-				this.DiscordClient.Dispose();
-			this.DiscordClient = null;
-
 			if( this.GlobalDb != null )
 				this.GlobalDb.Dispose();
 			this.GlobalDb = null;
