@@ -169,7 +169,7 @@ namespace Botwinder.core
 			Environment.Exit(0);
 		}
 
-		public List<UserData> GetMentionedUsersData(ServerContext dbContext, CommandArguments e)
+		public List<UserData> GetMentionedUsersData(ServerContext dbContext, CommandArguments e) //todo - Move this elsewhere...
 		{
 			List<guid> mentionedUserIds = new List<guid>();
 
@@ -210,6 +210,41 @@ namespace Botwinder.core
 				}
 			}
 			return found;
+		}
+
+		public List<SocketGuildUser> GetMentionedGuildUsers(CommandArguments e) //todo - Move this elsewhere...
+		{
+			List<SocketGuildUser> mentionedUsers = new List<SocketGuildUser>();
+			foreach( SocketUser user in GetMentionedUsers(e) )
+			{
+				if(user is SocketGuildUser guildUser)
+					mentionedUsers.Add(guildUser);
+			}
+
+			return mentionedUsers;
+		}
+		public List<SocketUser> GetMentionedUsers(CommandArguments e) //todo - Move this elsewhere...
+		{
+			List<SocketUser> mentionedUsers = new List<SocketUser>();
+
+			if( e.Message.MentionedUsers != null && e.Message.MentionedUsers.Any() )
+			{
+				mentionedUsers.AddRange(e.Message.MentionedUsers);
+			}
+			else if( e.MessageArgs != null && e.MessageArgs.Length > 0 )
+			{
+				foreach( string param in e.MessageArgs )
+				{
+					guid id;
+					SocketUser user;
+					if( guid.TryParse(param, out id) && (user = e.Server.Guild.GetUser(id)) != null )
+						mentionedUsers.Add(user);
+					else
+						break;
+				}
+			}
+
+			return mentionedUsers;
 		}
 	}
 }
