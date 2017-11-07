@@ -246,5 +246,28 @@ namespace Botwinder.core
 
 			return mentionedUsers;
 		}
+
+		public List<guid> GetMentionedUserIds(CommandArguments e) //todo - Move this elsewhere...
+		{
+			List<guid> mentionedIds = new List<guid>();
+
+			if( e.Message.MentionedUsers != null && e.Message.MentionedUsers.Any() )
+			{
+				mentionedIds.AddRange(e.Message.MentionedUsers.Select(u => u.Id));
+			}
+			else if( e.MessageArgs != null && e.MessageArgs.Length > 0 )
+			{
+				foreach( string param in e.MessageArgs )
+				{
+					guid id;
+					if( guid.TryParse(param, out id) && id > int.MaxValue )
+						mentionedIds.Add(id);
+					else
+						break;
+				}
+			}
+
+			return mentionedIds;
+		}
 	}
 }

@@ -61,8 +61,9 @@ namespace Botwinder.entities
 		}
 
 		/// <summary> Execute the main loop for this Operation.
-		/// Returns true if it was canceled, false otherwise. </summary>
-		public async Task<bool> While(Func<bool> condition, Func<Task> body)
+		/// Returns true if it was canceled, false otherwise.</summary>
+		/// <param name="body">Returning true in the body will break the loop.</param>
+		public async Task<bool> While(Func<bool> condition, Func<Task<bool>> body)
 		{
 			if( condition == null || body == null )
 				throw new ArgumentNullException();
@@ -78,7 +79,8 @@ namespace Botwinder.entities
 					return true;
 				}
 
-				await body();
+				if( await body() )
+					break;
 
 				if( i++ >= iterationsToYield )
 					await Task.Yield();

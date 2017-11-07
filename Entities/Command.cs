@@ -139,7 +139,8 @@ namespace Botwinder.entities
 			{
 				try
 				{
-					await e.Message.DeleteAsync();
+					if( !e.Message.Deleted )
+						await e.Message.DeleteAsync();
 				}
 				catch(Exception) { }
 			}

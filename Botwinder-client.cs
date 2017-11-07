@@ -60,6 +60,8 @@ namespace Botwinder.core
 		private DateTime LastMessageAverageTime = DateTime.UtcNow;
 		private int MessagesThisMinute = 0;
 
+		public ConcurrentDictionary<guid, List<guid>> ClearedMessageIDs = new ConcurrentDictionary<guid, List<guid>>();
+
 
 		public BotwinderClient(int shardIdOverride = -1)
 		{
