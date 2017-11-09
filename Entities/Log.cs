@@ -85,7 +85,9 @@ namespace Botwinder.entities
 			       $"Message: `{this.Message}`\n" +
 			       $"ServerId: `{this.ServerId}`\n" +
 			       $"Data: `{this.Data}`\n" +
-			       $"Stack: ```{this.Stack}```";
+			       $"Stack: " +
+			       (this.Stack.Length > 1500 ? $"\n{this.Stack.Replace("`", "'")}" :
+			       $"```{this.Stack.Replace("`", "'")}```");
 		}
 	}
 }
