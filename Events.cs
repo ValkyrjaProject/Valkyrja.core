@@ -102,6 +102,66 @@ namespace Botwinder.entities
 		/// <see cref="T:IRole" />: MutedRole. </summary>
 		public Func<Server, List<UserData>, IRole, Task> UnMuteUsers = null;
 
+		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
+		/// <see cref="T:Server" />: Server on which to log. <br />
+		/// <see cref="T:SocketGuildUser" />: Banned user. <br />
+		/// <see cref="T:string" />: Ban reason. <br />
+		/// <see cref="T:string" />: Ban duration. <br />
+		/// <see cref="T:SocketGuildUser" />: User who issued the ban. </summary>
+		public Func<Server, SocketGuildUser, string, string, SocketGuildUser, Task> LogBan = null;
+
+		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
+		/// <see cref="T:Server" />: Server on which to log. <br />
+		/// <see cref="T:SocketGuildUser" />: Banned user. <br />
+		/// <see cref="T:SocketGuildUser" />: User who issued the unban. </summary>
+		public Func<Server, SocketGuildUser, SocketGuildUser, Task> LogUnban = null;
+
+		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
+		/// <see cref="T:Server" />: Server on which to log. <br />
+		/// <see cref="T:SocketGuildUser" />: Kicked user. <br />
+		/// <see cref="T:string" />: Kick reason. <br />
+		/// <see cref="T:SocketGuildUser" />: User who issued the kick. </summary>
+		public Func<Server, SocketGuildUser, string, SocketGuildUser, Task> LogKick = null;
+
+		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
+		/// <see cref="T:Server" />: Server on which to log. <br />
+		/// <see cref="T:SocketGuildUser" />: Muted user. <br />
+		/// <see cref="T:string" />: Mute duration. <br />
+		/// <see cref="T:SocketGuildUser" />: User who issued the mute. </summary>
+		public Func<Server, SocketGuildUser, string, SocketGuildUser, Task> LogMute = null;
+
+		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
+		/// <see cref="T:Server" />: Server on which to log. <br />
+		/// <see cref="T:SocketGuildUser" />: Muted user. <br />
+		/// <see cref="T:SocketGuildUser" />: User who issued the unmute. </summary>
+		public Func<Server, SocketGuildUser, SocketGuildUser, Task> LogUnmute = null;
+
+		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
+		/// <see cref="T:Server" />: Server on which to log. <br />
+		/// <see cref="T:SocketGuildUser" />: User who was promoted. <br />
+		/// <see cref="T:string" />: Name of the role. <br />
+		/// <see cref="T:SocketGuildUser" />: User who issued the promote. </summary>
+		public Func<Server, SocketGuildUser, string, SocketGuildUser, Task> LogPromote = null;
+
+		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
+		/// <see cref="T:Server" />: Server on which to log. <br />
+		/// <see cref="T:SocketGuildUser" />: User who was demoted. <br />
+		/// <see cref="T:string" />: Name of the role. <br />
+		/// <see cref="T:SocketGuildUser" />: User who issued the demote. </summary>
+		public Func<Server, SocketGuildUser, string, SocketGuildUser, Task> LogDemote = null;
+
+		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
+		/// <see cref="T:Server" />: Server on which to log. <br />
+		/// <see cref="T:SocketGuildUser" />: User who joined a role. <br />
+		/// <see cref="T:string" />: Name of the role. </summary>
+		public Func<Server, SocketGuildUser, string, Task> LogPublicRoleJoin = null;
+
+		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
+		/// <see cref="T:Server" />: Server on which to log. <br />
+		/// <see cref="T:SocketGuildUser" />: User who left a role. <br />
+		/// <see cref="T:string" />: Name of the role. </summary>
+		public Func<Server, SocketGuildUser, string, Task> LogPublicRoleLeave = null;
+
 		public Events(DiscordSocketClient discordClient)
 		{
 			discordClient.Log += OnLogEntryAdded;
