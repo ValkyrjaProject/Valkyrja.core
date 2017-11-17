@@ -79,8 +79,9 @@ namespace Botwinder.entities
 
 		/// <summary> An event used to pass an unban instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to unban. <br />
-		/// <see cref="T:List{UserData}" />: Users to be unbanned. </summary>
-		public Func<Server, List<UserData>, Task> UnBanUsers = null;
+		/// <see cref="T:List{UserData}" />: Users to be unbanned. <br />
+		/// <see cref="T:SocketGuildUser" />: Who issued the unban. </summary>
+		public Func<Server, List<UserData>, SocketGuildUser, Task> UnBanUsers = null;
 
 		/// <summary> An event used to pass a mute instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to mute. <br />
@@ -101,8 +102,9 @@ namespace Botwinder.entities
 		/// <summary> An event used to pass a mute instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to mute. <br />
 		/// <see cref="T:List{UserData}" />: Users to be muted. <br />
-		/// <see cref="T:IRole" />: MutedRole. </summary>
-		public Func<Server, List<UserData>, IRole, Task> UnMuteUsers = null;
+		/// <see cref="T:IRole" />: MutedRole. <br />
+		/// <see cref="T:SocketGuildUser" />: Who issued the unmute. </summary>
+		public Func<Server, List<UserData>, IRole, SocketGuildUser, Task> UnMuteUsers = null;
 
 
 		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
