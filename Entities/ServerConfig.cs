@@ -173,10 +173,10 @@ namespace Botwinder.entities
 		public bool LogPromotions{ get; set; } = false;
 
 		[Column("log_deletedmessages")]
-		public bool LogDeletedmessages{ get; set; } = false;
+		public bool LogDeletedMessages{ get; set; } = false;
 
 		[Column("log_editedmessages")]
-		public bool LogEditedmessages{ get; set; } = false;
+		public bool LogEditedMessages{ get; set; } = false;
 
 		[Column("activity_channelid")]
 		public guid ActivityChannelId{ get; set; } = 0;
