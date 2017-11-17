@@ -55,53 +55,52 @@ namespace Botwinder.entities
 		public Func<SocketUser, SocketGuild, Task> UserBanned = null;
 		public Func<SocketUser, SocketGuild, Task> UserUnbanned = null;
 
-		/// <summary> An event used to pass a ban instruction to the responsible module. </summary>
-		/// <param name="Server"> Server on which to ban. </param>
-		/// <param name="List<UserData>"> Users to be banned. </param>
-		/// <param name="TimeSpan"> Duration of the ban. </param>
-		/// <param name="string"> Reason for the ban. </param>
-		/// <param name="SocketGuildUser"> Who issued the ban. </param>
-		/// <param name="bool"> Silent? True to not PM the users. </param>
-		/// <param name="bool"> True to prune recent messages. </param>
+		/// <summary> An event used to pass a ban instruction to the responsible module. <br />
+		/// <see cref="T:Server" />: Server on which to ban. <br />
+		/// <see cref="T:List{UserData}" />: Users to be banned. <br />
+		/// <see cref="T:TimeSpan" />: Duration of the ban. <br />
+		/// <see cref="T:string" />: Reason for the ban. <br />
+		/// <see cref="T:SocketGuildUser" />: Who issued the ban. <br />
+		/// <see cref="T:bool" />: Silent? True to not PM the users. <br />
+		/// <see cref="T:bool" />: True to prune recent messages. </summary>
 		public Func<Server, UserData, TimeSpan, string, SocketGuildUser, bool, bool, Task> BanUser = null;
 
-		/// <summary> An event used to pass a ban instruction to the responsible module. </summary>
-		/// <param name="Server"> Server on which to ban. </param>
-		/// <param name="List<UserData>"> Users to be banned. </param>
-		/// <param name="TimeSpan"> Duration of the ban. </param>
-		/// <param name="string"> Reason for the ban. </param>
-		/// <param name="SocketGuildUser"> Who issued the ban. </param>
-		/// <param name="bool"> Silent? True to not PM the users. </param>
-		/// <param name="bool"> True to prune recent messages. </param>
+		/// <summary> An event used to pass a ban instruction to the responsible module. <br />
+		/// <see cref="T:Server" />: Server on which to ban. <br />
+		/// <see cref="T:List{UserData}" />: Users to be banned. <br />
+		/// <see cref="T:TimeSpan" />: Duration of the ban. <br />
+		/// <see cref="T:string" />: Reason for the ban. <br />
+		/// <see cref="T:SocketGuildUser" />: Who issued the ban. <br />
+		/// <see cref="T:bool" />: Silent? True to not PM the users. <br />
+		/// <see cref="T:bool" />: True to prune recent messages. </summary>
 		public Func<Server, List<UserData>, TimeSpan, string, SocketGuildUser, bool, bool, Task> BanUsers = null;
 
-		/// <summary> An event used to pass an unban instruction to the responsible module. </summary>
-		/// <param name="Server"> Server on which to unban. </param>
-		/// <param name="List<UserData>"> Users to be unbanned. </param>
+		/// <summary> An event used to pass an unban instruction to the responsible module. <br />
+		/// <see cref="T:Server" />: Server on which to unban. <br />
+		/// <see cref="T:List{UserData}" />: Users to be unbanned. </summary>
 		public Func<Server, List<UserData>, Task> UnBanUsers = null;
 
-		/// <summary> An event used to pass a mute instruction to the responsible module. </summary>
-		/// <param name="Server"> Server on which to mute. </param>
-		/// <param name="List<UserData>"> User to be muted. </param>
-		/// <param name="TimeSpan"> Duration of the mute. </param>
-		/// <param name="IRole"> MutedRole. </param>
-		/// <param name="SocketGuildUser"> Who issued the mute. </param>
+		/// <summary> An event used to pass a mute instruction to the responsible module. <br />
+		/// <see cref="T:Server" />: Server on which to mute. <br />
+		/// <see cref="T:List{UserData}" />: User to be muted. <br />
+		/// <see cref="T:TimeSpan" />: Duration of the mute. <br />
+		/// <see cref="T:IRole" />: MutedRole. <br />
+		/// <see cref="T:SocketGuildUser" />: Who issued the mute. </summary>
 		public Func<Server, UserData, TimeSpan, IRole, SocketGuildUser, Task> MuteUser = null;
 
-		/// <summary> An event used to pass a mute instruction to the responsible module. </summary>
-		/// <param name="Server"> Server on which to mute. </param>
-		/// <param name="List<UserData>"> Users to be muted. </param>
-		/// <param name="TimeSpan"> Duration of the mute. </param>
-		/// <param name="IRole"> MutedRole. </param>
-		/// <param name="SocketGuildUser"> Who issued the mute. </param>
+		/// <summary> An event used to pass a mute instruction to the responsible module. <br />
+		/// <see cref="T:Server" />: Server on which to mute. <br />
+		/// <see cref="T:List{UserData}" />: Users to be muted. <br />
+		/// <see cref="T:TimeSpan" />: Duration of the mute. <br />
+		/// <see cref="T:IRole" />: MutedRole. <br />
+		/// <see cref="T:SocketGuildUser" />: Who issued the mute. </summary>
 		public Func<Server, List<UserData>, TimeSpan, IRole, SocketGuildUser, Task> MuteUsers = null;
 
-		/// <summary> An event used to pass a mute instruction to the responsible module. </summary>
-		/// <param name="Server"> Server on which to mute. </param>
-		/// <param name="List<UserData>"> Users to be muted. </param>
-		/// <param name="IRole"> MutedRole. </param>
+		/// <summary> An event used to pass a mute instruction to the responsible module. <br />
+		/// <see cref="T:Server" />: Server on which to mute. <br />
+		/// <see cref="T:List{UserData}" />: Users to be muted. <br />
+		/// <see cref="T:IRole" />: MutedRole. </summary>
 		public Func<Server, List<UserData>, IRole, Task> UnMuteUsers = null;
-
 
 		public Events(DiscordSocketClient discordClient)
 		{
