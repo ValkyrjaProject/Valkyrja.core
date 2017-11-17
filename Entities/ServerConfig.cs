@@ -199,6 +199,12 @@ namespace Botwinder.entities
 		[Column("log_mention_leave")]
 		public bool LogMentionLeave{ get; set; } = false;
 
+		[Column("log_timestamp_join")]
+		public bool LogTimestampJoin{ get; set; } = false;
+
+		[Column("log_timestamp_leave")]
+		public bool LogTimestampLeave{ get; set; } = false;
+
 		[Column("welcome_pm")]
 		public bool WelcomeMessageEnabled{ get; set; } = false;
 

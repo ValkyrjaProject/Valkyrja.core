@@ -165,6 +165,12 @@ namespace Botwinder.entities
 	public static class DiscordEx
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static string GetNickname(this IGuildUser self)
+		{
+			return !string.IsNullOrWhiteSpace(self.Nickname) ? self.Nickname : self.Username;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static string GetName(this IGuildUser self)
 		{
 			return !string.IsNullOrWhiteSpace(self.Nickname) ? self.Nickname : self.Username +"#"+ self.Discriminator;
