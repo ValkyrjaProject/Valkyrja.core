@@ -116,16 +116,18 @@ namespace Botwinder.entities
 
 		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to log. <br />
-		/// <see cref="T:SocketGuildUser" />: Banned user. <br />
+		/// <see cref="T:string" />: Banned user name. <br />
+		/// <see cref="T:guid" />: Banned user id. <br />
 		/// <see cref="T:SocketGuildUser" />: User who issued the unban. </summary>
-		public Func<Server, SocketGuildUser, SocketGuildUser, Task> LogUnban = null;
+		public Func<Server, string, guid, SocketGuildUser, Task> LogUnban = null;
 
 		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to log. <br />
-		/// <see cref="T:SocketGuildUser" />: Kicked user. <br />
+		/// <see cref="T:string" />: Kicked user name. <br />
+		/// <see cref="T:guid" />: Kicked user id. <br />
 		/// <see cref="T:string" />: Kick reason. <br />
 		/// <see cref="T:SocketGuildUser" />: User who issued the kick. </summary>
-		public Func<Server, SocketGuildUser, string, SocketGuildUser, Task> LogKick = null;
+		public Func<Server, string, guid, string, SocketGuildUser, Task> LogKick = null;
 
 		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to log. <br />
