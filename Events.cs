@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 
+using guid = System.UInt64;
+
 namespace Botwinder.entities
 {
 	public class Events
@@ -102,13 +104,15 @@ namespace Botwinder.entities
 		/// <see cref="T:IRole" />: MutedRole. </summary>
 		public Func<Server, List<UserData>, IRole, Task> UnMuteUsers = null;
 
+
 		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to log. <br />
-		/// <see cref="T:SocketGuildUser" />: Banned user. <br />
+		/// <see cref="T:string" />: Banned user name. <br />
+		/// <see cref="T:guid" />: Banned user id. <br />
 		/// <see cref="T:string" />: Ban reason. <br />
 		/// <see cref="T:string" />: Ban duration. <br />
 		/// <see cref="T:SocketGuildUser" />: User who issued the ban. </summary>
-		public Func<Server, SocketGuildUser, string, string, SocketGuildUser, Task> LogBan = null;
+		public Func<Server, string, guid, string, string, SocketGuildUser, Task> LogBan = null;
 
 		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to log. <br />
