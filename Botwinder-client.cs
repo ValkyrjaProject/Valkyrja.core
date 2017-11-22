@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Botwinder.entities;
 using Discord;
+using Discord.Net;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using guid = System.UInt64;
@@ -292,7 +293,8 @@ namespace Botwinder.core
 			this.IsConnected = false;
 			this.CurrentShard.Disconnects++;
 
-			await LogException(exception, "--D.NET Client Disconnected");
+			if( !(exception is WebSocketClosedException) )
+				await LogException(exception, "--D.NET Client Disconnected");
 
 			try
 			{
