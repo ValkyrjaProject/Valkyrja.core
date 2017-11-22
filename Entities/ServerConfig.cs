@@ -118,6 +118,9 @@ namespace Botwinder.entities
 		[Column("antispam_tolerance")]
 		public Int64 AntispamTolerance{ get; set; } = 7;
 
+		[Column("antispam_voice_switching")]
+		public bool AntispamVoiceChannelSwitching{ get; set; } = false;
+
 		[Column("antispam_ignore_members")]
 		public bool AntispamIgnoreMembers{ get; set; } = false;
 
