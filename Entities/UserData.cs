@@ -67,10 +67,10 @@ namespace Botwinder.entities
 
 			if( user != null )
 				whoisString.AppendLine($"<@{this.UserId}>: `{this.UserId}` | `{user.GetUsername()}`\n" +
-									   $"    Account created at: {Utils.GetTimeFromId(this.UserId)}");
+									   $"    Account created at: {Utils.GetTimestamp(Utils.GetTimeFromId(this.UserId))}");
 			else
 				whoisString.AppendLine($"<@{this.UserId}>: `{this.UserId}`\n" +
-									   $"    Account created at: {Utils.GetTimeFromId(this.UserId)}");
+									   $"    Account created at: {Utils.GetTimestamp(Utils.GetTimeFromId(this.UserId))}");
 
 			if( user?.JoinedAt != null )
 				whoisString.AppendLine("    Joined the server: " + Utils.GetTimestamp(user.JoinedAt.Value));
