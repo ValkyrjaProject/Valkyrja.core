@@ -187,6 +187,21 @@ namespace Botwinder.entities
 		[Column("embed_modchannel")]
 		public bool ModChannelEmbeds{ get; set; } = false;
 
+		[Column("color_voicechannel")]
+		public uint VoiceChannelColor{ get; set; } = 65280;
+
+		[Column("color_activitychannel")]
+		public uint ActivityChannelColor{ get; set; } = 65535;
+
+		[Column("color_logchannel")]
+		public uint LogChannelColor{ get; set; } = 255;
+
+		[Column("color_modchannel")]
+		public uint ModChannelColor{ get; set; } = 16711680;
+
+		[Column("color_logmessages")]
+		public uint LogMessagesColor{ get; set; } = 16776960;
+
 		[Column("log_bans")]
 		public bool LogBans{ get; set; } = false;
 
