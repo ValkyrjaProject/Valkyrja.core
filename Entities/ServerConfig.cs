@@ -166,11 +166,26 @@ namespace Botwinder.entities
 		[Column("voice_channelid")]
 		public guid VoiceChannelId{ get; set; } = 0;
 
+		[Column("activity_channelid")]
+		public guid ActivityChannelId{ get; set; } = 0;
+
 		[Column("log_channelid")]
 		public guid LogChannelId{ get; set; } = 0;
 
 		[Column("mod_channelid")]
 		public guid ModChannelId{ get; set; } = 0;
+
+		[Column("embed_voicechannel")]
+		public bool VoiceChannelEmbeds{ get; set; } = false;
+
+		[Column("embed_activitychannel")]
+		public bool ActivityChannelEmbeds{ get; set; } = false;
+
+		[Column("embed_logchannel")]
+		public bool LogChannelEmbeds{ get; set; } = false;
+
+		[Column("embed_modchannel")]
+		public bool ModChannelEmbeds{ get; set; } = false;
 
 		[Column("log_bans")]
 		public bool LogBans{ get; set; } = false;
@@ -183,9 +198,6 @@ namespace Botwinder.entities
 
 		[Column("log_editedmessages")]
 		public bool LogEditedMessages{ get; set; } = false;
-
-		[Column("activity_channelid")]
-		public guid ActivityChannelId{ get; set; } = 0;
 
 		[Column("log_join")]
 		public bool LogJoin{ get; set; } = false;
