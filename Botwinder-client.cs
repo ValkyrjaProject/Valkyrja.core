@@ -62,6 +62,7 @@ namespace Botwinder.core
 		private int MessagesThisMinute = 0;
 
 		public ConcurrentDictionary<guid, List<guid>> ClearedMessageIDs = new ConcurrentDictionary<guid, List<guid>>();
+		public List<guid> AntispamMessageIDs = new List<guid>();
 
 
 		public BotwinderClient(int shardIdOverride = -1)
@@ -619,7 +620,7 @@ namespace Botwinder.core
 				try
 				{
 					module.HandleException += async (e, d, id) =>
-						await LogException(e, "--ModuleInit." + module.ToString() + " | " + d, id);
+						await LogException(e, "--Module." + module.ToString() + " | " + d, id);
 					newCommands = module.Init(this);
 
 					foreach( Command cmd in newCommands )
