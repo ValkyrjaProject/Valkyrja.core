@@ -209,7 +209,7 @@ namespace Botwinder.entities
 
 		private Task OnLogEntryAdded(LogMessage logMessage)
 		{
-			if( logMessage.Exception != null )
+			if( logMessage.Exception != null && logMessage.Exception.Message != "WebSocket connection was closed" ) //hack to not spam my logs
 			{
 				ExceptionEntry exceptionEntry = new ExceptionEntry();
 				exceptionEntry.Message = logMessage.Exception.Message;

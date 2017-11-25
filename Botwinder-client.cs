@@ -293,7 +293,7 @@ namespace Botwinder.core
 			this.IsConnected = false;
 			this.CurrentShard.Disconnects++;
 
-			if( !(exception is WebSocketClosedException) )
+			if( exception.Message != "WebSocket connection was closed" ) //hack to not spam my logs
 				await LogException(exception, "--D.NET Client Disconnected");
 
 			try
