@@ -209,15 +209,17 @@ namespace Botwinder.entities
 
 		private Task OnLogEntryAdded(LogMessage logMessage)
 		{
-			if( logMessage.Exception != null && logMessage.Exception.Message != "WebSocket connection was closed" ) //hack to not spam my logs
+			if( logMessage.Exception != null )
 			{
-				ExceptionEntry exceptionEntry = new ExceptionEntry();
-				exceptionEntry.Message = logMessage.Exception.Message;
-				exceptionEntry.Stack = logMessage.Exception.StackTrace;
-				exceptionEntry.Data = "D.NET Message: " + logMessage.Message + "\n--Source: " + logMessage.Source;
-
-				if( this.Exception != null )
+				if( this.Exception != null &&
+				    logMessage.Exception.Message != "WebSocket connection was closed" &&
+				    logMessage.Exception.Message != "Server missed last heartbeat" ) //hack to not spam my logs with your d.net magicalshit please!
 				{
+					ExceptionEntry exceptionEntry = new ExceptionEntry();
+					exceptionEntry.Message = logMessage.Exception.Message;
+					exceptionEntry.Stack = logMessage.Exception.StackTrace;
+					exceptionEntry.Data = "D.NET Message: " + logMessage.Message + "\n--Source: " + logMessage.Source;
+
 					Task.Run(async () => await this.Exception(exceptionEntry));
 				}
 
