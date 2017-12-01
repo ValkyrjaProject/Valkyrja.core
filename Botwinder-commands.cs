@@ -821,33 +821,12 @@ namespace Botwinder.core
 					return;
 				}
 
-				if( e.Server.CustomAliases.ContainsKey(commandId) )
-					commandId = e.Server.CustomAliases[commandId].CommandId;
-
-				if( e.Server.Commands.ContainsKey(commandId) )
-				{
-					Command command;
-					if( (command = e.Server.Commands[commandId]).IsCoreCommand ||
-					    command.RequiredPermissions == PermissionType.OwnerOnly )
-					{
-						await SendMessageToChannel(e.Channel, "I'm sorry but you can not restrict this command.");
-						return;
-					}
-
-					if( command.IsAlias && !string.IsNullOrEmpty(command.ParentId) )
-						commandId = command.ParentId;
-				}
-
 				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
-
-				CommandOptions options = dbContext.CommandOptions.FirstOrDefault(c => c.ServerId == e.Server.Id && c.CommandId == commandId);
+				CommandOptions options = dbContext.GetOrAddCommandOptions(e.Server, commandId);
 				if( options == null )
 				{
-					options = new CommandOptions(){
-						ServerId = e.Server.Id,
-						CommandId = commandId
-					};
-					dbContext.CommandOptions.Add(options);
+					await SendMessageToChannel(e.Channel, "I'm sorry but you can not restrict this command.");
+					return;
 				}
 
 				options.PermissionOverrides = permissionOverrides;
@@ -858,6 +837,41 @@ namespace Botwinder.core
 				await SendMessageToChannel(e.Channel, "All set!");
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
+
+// !deleteRequest
+			newCommand = new Command("deleteRequest");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Set a command to have the issuing request message deleted automatically. Use with `CommandID` and `true` or `false` parameters.";
+			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
+			newCommand.OnExecute += async e => {
+				string commandId = e.MessageArgs[0];
+				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
+				    !bool.TryParse(e.MessageArgs[1], out bool deleteRequest) ||
+				    (!e.Server.CustomAliases.ContainsKey(commandId) &&
+				     !e.Server.Commands.ContainsKey(commandId) &&
+				     !e.Server.CustomCommands.ContainsKey(commandId)) )
+				{
+					await SendMessageToChannel(e.Channel, "Invalid parameters, or the command does not exist...\n" + e.Command.Description);
+					return;
+				}
+
+				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				CommandOptions options = dbContext.GetOrAddCommandOptions(e.Server, commandId);
+				if( options == null )
+				{
+					await SendMessageToChannel(e.Channel, "I'm sorry but you can not restrict this command.");
+					return;
+				}
+
+				options.DeleteRequest = deleteRequest;
+
+				dbContext.SaveChanges();
+				dbContext.Dispose();
+
+				await SendMessageToChannel(e.Channel, "Okay...");
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add("removeRequest", newCommand.CreateAlias("removeRequest"));
 
 /*
 // !command

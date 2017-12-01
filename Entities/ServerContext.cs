@@ -99,5 +99,36 @@ namespace Botwinder.entities
 
 			return userData;
 		}
+
+		public CommandOptions GetOrAddCommandOptions(Server server, string commandId)
+		{
+			if( server.CustomAliases.ContainsKey(commandId) )
+				commandId = server.CustomAliases[commandId].CommandId;
+
+			if( server.Commands.ContainsKey(commandId) )
+			{
+				Command command;
+				if( (command = server.Commands[commandId]).IsCoreCommand ||
+				    command.RequiredPermissions == PermissionType.OwnerOnly )
+				{
+					return null;
+				}
+
+				if( command.IsAlias && !string.IsNullOrEmpty(command.ParentId) )
+					commandId = command.ParentId;
+			}
+
+			CommandOptions options = this.CommandOptions.FirstOrDefault(c => c.ServerId == server.Id && c.CommandId == commandId);
+			if( options == null )
+			{
+				options = new CommandOptions(){
+					ServerId = server.Id,
+					CommandId = commandId
+				};
+				this.CommandOptions.Add(options);
+			}
+
+			return options;
+		}
 	}
 }
