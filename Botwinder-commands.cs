@@ -665,6 +665,121 @@ namespace Botwinder.core
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
+// !alias
+			newCommand = new Command("alias");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Manage command aliases, use without parameters for more details.";
+			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
+			newCommand.OnExecute += async e => {
+				if(e.MessageArgs == null || e.MessageArgs.Length == 0 || !(
+					   (e.MessageArgs.Length == 1 && e.MessageArgs[0] == "list") ||
+					   (e.MessageArgs.Length == 2 && (e.MessageArgs[0] == "remove" || e.MessageArgs[0] == "delete")) ||
+					   (e.MessageArgs.Length == 3 && (e.MessageArgs[0] == "add" || e.MessageArgs[0] == "create")) ))
+				{
+					await e.Message.Channel.SendMessageSafe(string.Format(
+						"Use this command with the following parameters:\n" +
+						"  `{0}{1} list` - Display the list of your custom aliases.\n" +
+						"  `{0}{1} create alias command` - Create a new `alias` to the old `command`.\n" +
+						"  `{0}{1} delete alias` - Delete the `alias`.\n",
+						e.Server.Config.CommandPrefix,
+						e.Command.Id
+					));
+					return;
+				}
+				string responseString = "";
+
+				switch(e.MessageArgs[0])
+				{
+					case "list":
+					{
+						if( e.Server.CustomAliases == null || !e.Server.CustomAliases.Any() )
+						{
+							responseString = "There aren't any! O_O";
+							break;
+						}
+
+						StringBuilder response = new StringBuilder();
+						response.AppendLine("Command-Aliases on this server:\n```http\nexampleAlias: command\n---------------------");
+						foreach( CustomAlias alias in e.Server.CustomAliases.Values )
+						{
+							string line = alias.Alias + ": " + alias.CommandId;
+							if( line.Length + response.Length + 5 > GlobalConfig.MessageCharacterLimit )
+							{
+								await SendMessageToChannel(e.Channel, response.ToString() + "\n```");
+								response.Clear().AppendLine("```http\nexampleAlias: command\n---------------------");
+							}
+							response.AppendLine(line);
+						}
+
+						response.Append("```");
+						responseString = response.ToString();
+					}
+						break;
+					case "create":
+					case "add":
+					{
+						CustomAlias alias = new CustomAlias(){
+							Alias = e.MessageArgs[1],
+							CommandId = e.MessageArgs[1],
+							ServerId = e.Server.Id
+						};
+						if( e.Server.Commands.ContainsKey(alias.Alias) ||
+						    e.Server.CustomCommands.ContainsKey(alias.Alias) ||
+						    e.Server.CustomAliases.ContainsKey(alias.Alias) )
+						{
+							responseString = $"I already have a command with this name (`{alias.Alias}`)";
+							break;
+						}
+						if( !e.Server.Commands.ContainsKey(alias.CommandId) &&
+						    !e.Server.CustomCommands.ContainsKey(alias.CommandId) )
+						{
+							responseString = $"Target command not found (`{alias.CommandId}`)";
+							break;
+						}
+
+						if( e.Server.Commands.ContainsKey(alias.CommandId) )
+						{
+							Command cmd = e.Server.Commands[alias.CommandId];
+							if( cmd.IsAlias && !string.IsNullOrEmpty(cmd.ParentId) )
+								alias.CommandId = cmd.ParentId;
+						}
+
+						ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+						dbContext.CustomAliases.Add(alias);
+						dbContext.SaveChanges();
+						dbContext.Dispose();
+
+						responseString = $"Alias `{e.Server.Config.CommandPrefix}{alias.Alias}` created.";
+					}
+						break;
+					case "delete":
+					case "remove":
+					{
+						if( e.Server.CustomAliases == null || !e.Server.CustomAliases.ContainsKey(e.MessageArgs[1]) )
+						{
+							responseString = $"Alias not found. (`{e.MessageArgs[1]}`)";
+							break;
+						}
+
+						ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+						CustomAlias alias = new CustomAlias{ServerId = e.Server.Id, Alias = e.MessageArgs[1]};
+						dbContext.CustomAliases.Attach(alias);
+						dbContext.CustomAliases.Remove(alias);
+						dbContext.SaveChanges();
+						dbContext.Dispose();
+
+						responseString = $"RIP `{e.Server.Config.CommandPrefix}{alias.Alias}`.";
+					}
+						break;
+					default:
+						responseString = "Unknown property.";
+						return;
+				}
+
+				await SendMessageToChannel(e.Channel, responseString);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
 /*
 // !command
 			newCommand = new Command("command");
