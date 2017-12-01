@@ -733,7 +733,7 @@ namespace Botwinder.core
 					{
 						CustomAlias alias = new CustomAlias(){
 							Alias = e.MessageArgs[1],
-							CommandId = e.MessageArgs[1],
+							CommandId = e.MessageArgs[2],
 							ServerId = e.Server.Id
 						};
 						if( e.Server.Commands.ContainsKey(alias.Alias) ||
