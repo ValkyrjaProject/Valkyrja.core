@@ -76,7 +76,7 @@ namespace Botwinder.entities
 				whoisString.AppendLine("    Joined the server: " + Utils.GetTimestamp(user.JoinedAt.Value));
 
 			if( user != null )
-				whoisString.AppendLine("    Roles: " + user.Roles.Select(r => r.Name).ToNames().Replace('`', '\''));
+				whoisString.AppendLine("    Roles: " + user.Roles.Select(r => r.Name.Replace('`', '\'')).ToNames());
 
 			if( this.Verified )
 				whoisString.AppendLine("    Verified: `true`");
@@ -92,15 +92,15 @@ namespace Botwinder.entities
 
 			List<string> foundUsernames = dbContext.Usernames
 				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
-				.Select(u => u.Name).ToList();
+				.Select(u => u.Name.Replace('`', '\'')).ToList();
 			whoisString.Append("    Known usernames: ");
-			whoisString.AppendLine(foundUsernames.ToNames().Replace('`', '\''));
+			whoisString.AppendLine(foundUsernames.ToNames());
 
 			List<string> foundNicknames = dbContext.Nicknames
 				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
-				.Select(u => u.Name).ToList();
+				.Select(u => u.Name.Replace('`', '\'')).ToList();
 			whoisString.Append("    Known nicknames: ");
-			whoisString.AppendLine(foundNicknames.ToNames().Replace('`', '\''));
+			whoisString.AppendLine(foundNicknames.ToNames());
 
 			if( this.WarningCount > 0 || !string.IsNullOrEmpty(this.Notes) )
 				whoisString.AppendLine($"They have {this.WarningCount} warnings, with these notes: {this.Notes}");
