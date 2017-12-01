@@ -694,7 +694,7 @@ namespace Botwinder.core
 			     server.Commands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId)) )
 			{
 				Command command = server.Commands[commandString];
-				if( !string.IsNullOrEmpty(command.ParentId) ) //Internal, not-custom alias.
+				if( command.IsAlias && !string.IsNullOrEmpty(command.ParentId) ) //Internal, not-custom alias.
 					command = server.Commands[command.ParentId];
 
 				CommandOptions commandOptions = server.GetCommandOptions(commandString);

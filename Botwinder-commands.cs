@@ -44,6 +44,7 @@ namespace Botwinder.core
 // !global
 			newCommand = new Command("global");
 			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Display all teh numbers.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
@@ -86,6 +87,7 @@ namespace Botwinder.core
 // !getServer
 			newCommand = new Command("getServer");
 			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Display some info about specific server with id/name, or owners id/username.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
@@ -127,6 +129,7 @@ namespace Botwinder.core
 // !getInvite
 			newCommand = new Command("getInvite");
 			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Get an invite url with serverid.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
@@ -153,6 +156,7 @@ namespace Botwinder.core
 // !clearInvite
 			newCommand = new Command("clearInvite");
 			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Clear the Invite url to be re-created, with serverid.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
@@ -182,6 +186,7 @@ namespace Botwinder.core
 // !maintenance
 			newCommand = new Command("maintenance");
 			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Performe maintenance";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e =>{
@@ -193,6 +198,7 @@ namespace Botwinder.core
 // !restart
 			newCommand = new Command("restart");
 			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Shut down the bot.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
@@ -206,6 +212,7 @@ namespace Botwinder.core
 // !getExceptions
 			newCommand = new Command("getExceptions");
 			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Get a list of exceptions.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
@@ -230,6 +237,7 @@ namespace Botwinder.core
 // !getException
 			newCommand = new Command("getException");
 			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Get an exception stack for specific ID.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
@@ -247,6 +255,7 @@ namespace Botwinder.core
 // !blacklist
 			newCommand = new Command("blacklist");
 			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Add or remove an ID to or from the blacklist.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
@@ -308,6 +317,7 @@ namespace Botwinder.core
 // !subscriber
 			newCommand = new Command("subscriber");
 			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Add or remove an ID to or from the subscribers, use with optional bonus or premium parameter.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e =>{
@@ -378,6 +388,7 @@ namespace Botwinder.core
 // !partner
 			newCommand = new Command("partner");
 			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Add or remove an ID to or from the partners, use with optional premium parameter.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e =>{
@@ -442,6 +453,7 @@ namespace Botwinder.core
 // !operations
 			newCommand = new Command("operations");
 			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Display info about all queued or running operations on your server.";
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
 			newCommand.OnExecute += async e => {
@@ -479,6 +491,7 @@ namespace Botwinder.core
 // !cancel
 			newCommand = new Command("cancel");
 			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Cancel queued or running operation - use in the same channel, and with the name of the command as parameter. (nuke, archive, etc...)";
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
 			newCommand.OnExecute += async e => {
@@ -777,6 +790,72 @@ namespace Botwinder.core
 				}
 
 				await SendMessageToChannel(e.Channel, responseString);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
+// !permissions
+			newCommand = new Command("permissions");
+			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
+			newCommand.Description = "Configure permission groups for every built-in command. Use without parameters for help.";
+			newCommand.RequiredPermissions = PermissionType.ServerOwner;
+			newCommand.OnExecute += async e => {
+				string response = string.Format(
+					"Use this command with the following parameters:\n" +
+					"  `{0}{1} CommandID PermissionGroup` - where `CommandID` is name of the command, and `PermissionGroups` can be:\n" +
+					"    `ServerOwner`, `Admins`, `Moderators`, `SubModerators`, `Members`, `Everyone` - Look at the docs for reference: <http://botwinder.info/docs>\n" +
+					"    `Nobody` - Block this command from execusion even by Server Owner.\n" +
+					"    `Default` - will set default permissions as seen in the docs."+
+					"  For example `{0}{1} nuke ServerOwner`",
+					e.Server.Config.CommandPrefix,
+					e.Command.Id);
+
+				string commandId = e.MessageArgs[0];
+				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
+				    (!e.Server.CustomAliases.ContainsKey(commandId) &&
+				     !e.Server.Commands.ContainsKey(commandId) &&
+				     !e.Server.CustomCommands.ContainsKey(commandId)) ||
+				    !Enum.TryParse(e.MessageArgs[1], true, out PermissionOverrides permissionOverrides) )
+				{
+					await SendMessageToChannel(e.Channel, response);
+					return;
+				}
+
+				if( e.Server.CustomAliases.ContainsKey(commandId) )
+					commandId = e.Server.CustomAliases[commandId].CommandId;
+
+				if( e.Server.Commands.ContainsKey(commandId) )
+				{
+					Command command;
+					if( (command = e.Server.Commands[commandId]).IsCoreCommand ||
+					    command.RequiredPermissions == PermissionType.OwnerOnly )
+					{
+						await SendMessageToChannel(e.Channel, "I'm sorry but you can not restrict this command.");
+						return;
+					}
+
+					if( command.IsAlias && !string.IsNullOrEmpty(command.ParentId) )
+						commandId = command.ParentId;
+				}
+
+				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+
+				CommandOptions options = dbContext.CommandOptions.FirstOrDefault(c => c.ServerId == e.Server.Id && c.CommandId == commandId);
+				if( options == null )
+				{
+					options = new CommandOptions(){
+						ServerId = e.Server.Id,
+						CommandId = commandId
+					};
+					dbContext.CommandOptions.Add(options);
+				}
+
+				options.PermissionOverrides = permissionOverrides;
+
+				dbContext.SaveChanges();
+				dbContext.Dispose();
+
+				await SendMessageToChannel(e.Channel, "All set!");
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 

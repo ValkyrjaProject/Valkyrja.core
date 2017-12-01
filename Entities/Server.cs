@@ -98,7 +98,10 @@ namespace Botwinder.entities
 			if( this.CachedCommandOptions != null && this.CachedCommandOptions.CommandId == commandString )
 				return this.CachedCommandOptions;
 
-			return this.CachedCommandOptions = ServerContext.Create(this.DbConnectionString).CommandOptions.FirstOrDefault(c => c.ServerId == this.Id && c.CommandId == commandString);
+			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+			this.CachedCommandOptions = dbContext.CommandOptions.FirstOrDefault(c => c.ServerId == this.Id && c.CommandId == commandString);
+			dbContext.Dispose();
+			return this.CachedCommandOptions;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
