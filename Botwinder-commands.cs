@@ -810,7 +810,7 @@ namespace Botwinder.core
 					e.Server.Config.CommandPrefix,
 					e.Command.Id);
 
-				string commandId = e.MessageArgs[0];
+				string commandId = e.MessageArgs == null ? "" : e.MessageArgs[0];
 				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
 				    (!e.Server.CustomAliases.ContainsKey(commandId) &&
 				     !e.Server.Commands.ContainsKey(commandId) &&
