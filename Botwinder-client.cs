@@ -391,10 +391,14 @@ namespace Botwinder.core
 
 		private Task Log(ExceptionEntry exceptionEntry)
 		{
-			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-			dbContext.Exceptions.Add(exceptionEntry);
-			dbContext.SaveChanges();
-			dbContext.Dispose();
+			try
+			{
+				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+				dbContext.Exceptions.Add(exceptionEntry);
+				dbContext.SaveChanges();
+				dbContext.Dispose();
+			}
+			catch(Exception) { }
 
 			return Task.CompletedTask;
 		}
