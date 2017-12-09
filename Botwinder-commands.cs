@@ -980,6 +980,36 @@ namespace Botwinder.core
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
+// !cmdResetRestrictions
+			newCommand = new Command("cmdResetRestrictions");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Reset restrictions placed on a command by the _cmdChannelWhitelist_ and _cmdChannelBlacklist_ commands. Use with the `CommandID` as parameter.";
+			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
+			newCommand.OnExecute += async e => {
+				if( e.MessageArgs == null || e.MessageArgs.Length < 1 )
+				{
+					await SendMessageToChannel(e.Channel, "Invalid parameters...\n" + e.Command.Description);
+					return;
+				}
+
+				string commandId = e.Server.GetCommandOptionsId(e.MessageArgs[0]);
+				if( string.IsNullOrEmpty(commandId) )
+				{
+					await SendMessageToChannel(e.Channel, $"Command `{e.MessageArgs[0]}` not found.");
+					return;
+				}
+
+				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				await dbContext.CommandChannelOptions.Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId)
+					.ForEachAsync(c => c.Blacklisted = c.Whitelisted = false);
+
+				dbContext.SaveChanges();
+				dbContext.Dispose();
+
+				await SendMessageToChannel(e.Channel, "As you wish my thane.");
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
 /*
 // !command
 			newCommand = new Command("command");
