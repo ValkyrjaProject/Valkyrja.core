@@ -112,7 +112,10 @@ namespace Botwinder.entities
 			   (tmp = this.CachedCommandChannelOptions.FirstOrDefault()) != null && tmp.CommandId == commandString )
 				return this.CachedCommandChannelOptions;
 
-			return this.CachedCommandChannelOptions = ServerContext.Create(this.DbConnectionString).CommandChannelOptions.Where(c => c.ServerId == this.Id && c.CommandId == commandString)?.ToList();
+			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+			this.CachedCommandChannelOptions = dbContext.CommandChannelOptions.Where(c => c.ServerId == this.Id && c.CommandId == commandString)?.ToList();
+			dbContext.Dispose();
+			return this.CachedCommandChannelOptions;
 		}
 
 		///<summary> Returns the correct commandId if it exists, empty otherwise. Returns null if it is restricted command. </summary>
