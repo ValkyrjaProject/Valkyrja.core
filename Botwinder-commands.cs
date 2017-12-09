@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 using Botwinder.entities;
 using Discord.Net.Queue;
 using Discord.WebSocket;
-
+using Microsoft.EntityFrameworkCore;
 using guid = System.UInt64;
 
 namespace Botwinder.core
@@ -810,24 +811,27 @@ namespace Botwinder.core
 					e.Server.Config.CommandPrefix,
 					e.Command.Id);
 
-				string commandId = e.MessageArgs == null ? "" : e.MessageArgs[0];
 				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
-				    (!e.Server.CustomAliases.ContainsKey(commandId) &&
-				     !e.Server.Commands.ContainsKey(commandId) &&
-				     !e.Server.CustomCommands.ContainsKey(commandId)) ||
 				    !Enum.TryParse(e.MessageArgs[1], true, out PermissionOverrides permissionOverrides) )
 				{
 					await SendMessageToChannel(e.Channel, response);
 					return;
 				}
 
-				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
-				CommandOptions options = dbContext.GetOrAddCommandOptions(e.Server, commandId);
-				if( options == null )
+				string commandId = e.Server.GetCommandOptionsId(e.MessageArgs[0]);
+				if( commandId == null )
 				{
 					await SendMessageToChannel(e.Channel, "I'm sorry but you can not restrict this command.");
 					return;
 				}
+				if( commandId == "" )
+				{
+					await SendMessageToChannel(e.Channel, $"Command `{e.MessageArgs[0]}` not found.");
+					return;
+				}
+
+				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				CommandOptions options = dbContext.GetOrAddCommandOptions(e.Server, commandId);
 
 				options.PermissionOverrides = permissionOverrides;
 
@@ -844,24 +848,27 @@ namespace Botwinder.core
 			newCommand.Description = "Set a command to have the issuing request message deleted automatically. Use with `CommandID` and `true` or `false` parameters.";
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
 			newCommand.OnExecute += async e => {
-				string commandId = e.MessageArgs[0];
 				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
-				    !bool.TryParse(e.MessageArgs[1], out bool deleteRequest) ||
-				    (!e.Server.CustomAliases.ContainsKey(commandId) &&
-				     !e.Server.Commands.ContainsKey(commandId) &&
-				     !e.Server.CustomCommands.ContainsKey(commandId)) )
+				    !bool.TryParse(e.MessageArgs[1], out bool deleteRequest) )
 				{
-					await SendMessageToChannel(e.Channel, "Invalid parameters, or the command does not exist...\n" + e.Command.Description);
+					await SendMessageToChannel(e.Channel, "Invalid parameters...\n" + e.Command.Description);
+					return;
+				}
+
+				string commandId = e.Server.GetCommandOptionsId(e.MessageArgs[0]);
+				if( commandId == null )
+				{
+					await SendMessageToChannel(e.Channel, "I'm sorry but you can not restrict this command.");
+					return;
+				}
+				if( commandId == "" )
+				{
+					await SendMessageToChannel(e.Channel, $"Command `{e.MessageArgs[0]}` not found.");
 					return;
 				}
 
 				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
 				CommandOptions options = dbContext.GetOrAddCommandOptions(e.Server, commandId);
-				if( options == null )
-				{
-					await SendMessageToChannel(e.Channel, "I'm sorry but you can not restrict this command.");
-					return;
-				}
 
 				options.DeleteRequest = deleteRequest;
 

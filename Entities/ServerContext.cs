@@ -102,22 +102,6 @@ namespace Botwinder.entities
 
 		public CommandOptions GetOrAddCommandOptions(Server server, string commandId)
 		{
-			if( server.CustomAliases.ContainsKey(commandId) )
-				commandId = server.CustomAliases[commandId].CommandId;
-
-			if( server.Commands.ContainsKey(commandId) )
-			{
-				Command command;
-				if( (command = server.Commands[commandId]).IsCoreCommand ||
-				    command.RequiredPermissions == PermissionType.OwnerOnly )
-				{
-					return null;
-				}
-
-				if( command.IsAlias && !string.IsNullOrEmpty(command.ParentId) )
-					commandId = command.ParentId;
-			}
-
 			CommandOptions options = this.CommandOptions.FirstOrDefault(c => c.ServerId == server.Id && c.CommandId == commandId);
 			if( options == null )
 			{
@@ -128,6 +112,22 @@ namespace Botwinder.entities
 				this.CommandOptions.Add(options);
 			}
 
+			return options;
+		}
+
+		public CommandChannelOptions GetOrAddCommandChannelOptions(guid serverId, guid channelId, string commandId)
+		{
+			CommandChannelOptions options = this.CommandChannelOptions.FirstOrDefault(c => c.ServerId == serverId && c.CommandId == commandId && c.ChannelId == channelId);
+			if( options == null )
+			{
+				options = new CommandChannelOptions{
+					ServerId = serverId,
+					ChannelId = channelId,
+					CommandId = commandId
+				};
+
+				this.CommandChannelOptions.Add(options);
+			}
 			return options;
 		}
 	}

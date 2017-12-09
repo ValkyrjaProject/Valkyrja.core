@@ -115,6 +115,35 @@ namespace Botwinder.entities
 			return this.CachedCommandChannelOptions = ServerContext.Create(this.DbConnectionString).CommandChannelOptions.Where(c => c.ServerId == this.Id && c.CommandId == commandString)?.ToList();
 		}
 
+		///<summary> Returns the correct commandId if it exists, empty otherwise. Returns null if it is restricted command. </summary>
+		public string GetCommandOptionsId(string commandId)
+		{
+			if( (!this.CustomAliases.ContainsKey(commandId) &&
+			     !this.Commands.ContainsKey(commandId) &&
+			     !this.CustomCommands.ContainsKey(commandId)) )
+			{
+				return "";
+			}
+
+			if( this.CustomAliases.ContainsKey(commandId) )
+				commandId = this.CustomAliases[commandId].CommandId;
+
+			if( this.Commands.ContainsKey(commandId) )
+			{
+				Command command;
+				if( (command = this.Commands[commandId]).IsCoreCommand ||
+				    command.RequiredPermissions == PermissionType.OwnerOnly )
+				{
+					return null;
+				}
+
+				if( command.IsAlias && !string.IsNullOrEmpty(command.ParentId) )
+					commandId = command.ParentId;
+			}
+
+			return commandId;
+		}
+
 		public bool CanExecuteCommand(string commandId, int commandPermissions, SocketGuildChannel channel, SocketGuildUser user)
 		{
 			CommandOptions commandOptions = GetCommandOptions(commandId);
