@@ -23,7 +23,7 @@ namespace Botwinder.core
 		public GlobalConfig GlobalConfig{ get; set; }
 		public Shard CurrentShard{ get; set; }
 
-		private DiscordSocketClient DiscordClient;
+		public DiscordSocketClient DiscordClient;
 		public Events Events;
 		public string DbConnectionString;
 

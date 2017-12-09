@@ -146,6 +146,19 @@ namespace Botwinder.entities
 
 		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to log. <br />
+		/// <see cref="T:SocketGuildChannel" />: Muted channel. <br />
+		/// <see cref="T:string" />: Mute duration. <br />
+		/// <see cref="T:SocketGuildUser" />: User who issued the mute. </summary>
+		public Func<Server, SocketGuildChannel, string, SocketGuildUser, Task> LogMutedChannel = null;
+
+		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
+		/// <see cref="T:Server" />: Server on which to log. <br />
+		/// <see cref="T:SocketGuildChannel" />: Muted channel. <br />
+		/// <see cref="T:SocketGuildUser" />: User who issued the unmute. </summary>
+		public Func<Server, SocketGuildChannel, SocketUser, Task> LogUnmutedChannel = null;
+
+		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
+		/// <see cref="T:Server" />: Server on which to log. <br />
 		/// <see cref="T:SocketGuildUser" />: User who was promoted. <br />
 		/// <see cref="T:string" />: Name of the role. <br />
 		/// <see cref="T:SocketGuildUser" />: User who issued the promote. </summary>
