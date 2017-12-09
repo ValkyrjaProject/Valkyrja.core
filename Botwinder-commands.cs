@@ -888,7 +888,7 @@ namespace Botwinder.core
 			newCommand.OnExecute += async e => {
 				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
 				    (e.MessageArgs[1].ToLower() != "add" && e.MessageArgs[1].ToLower() != "remove") ||
-				    !guid.TryParse(e.MessageArgs[2], out guid channelId) || e.Server.Guild.GetChannel(channelId) == null )
+				    !guid.TryParse(e.MessageArgs[2].Trim('<', '#', '>'), out guid channelId) || e.Server.Guild.GetChannel(channelId) == null )
 				{
 					await SendMessageToChannel(e.Channel, "Invalid parameters...\n" + e.Command.Description);
 					return;
@@ -938,7 +938,7 @@ namespace Botwinder.core
 			newCommand.OnExecute += async e => {
 				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
 				    (e.MessageArgs[1].ToLower() != "add" && e.MessageArgs[1].ToLower() != "remove") ||
-				    !guid.TryParse(e.MessageArgs[2], out guid channelId) || e.Server.Guild.GetChannel(channelId) == null )
+				    !guid.TryParse(e.MessageArgs[2].Trim('<', '#', '>'), out guid channelId) || e.Server.Guild.GetChannel(channelId) == null )
 				{
 					await SendMessageToChannel(e.Channel, "Invalid parameters...\n" + e.Command.Description);
 					return;
