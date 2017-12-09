@@ -31,8 +31,6 @@ namespace Botwinder.entities
 		public Dictionary<guid, SocketMessage[]> AntispamRecentMessages = new Dictionary<guid, SocketMessage[]>();
 
 		public List<guid> IgnoredChannels;
-		public List<guid> MutedChannels = new List<guid>();
-		public List<guid> TemporaryChannels = new List<guid>();
 
 		public Dictionary<guid, RoleConfig> Roles;
 
@@ -67,8 +65,6 @@ namespace Botwinder.entities
 
 			List<ChannelConfig> channels = dbContext.Channels.Where(c => c.ServerId == this.Id).ToList();
 			this.IgnoredChannels = channels.Where(c => c.Ignored).Select(c => c.ChannelId).ToList();
-			this.TemporaryChannels = channels.Where(c => c.Temporary).Select(c => c.ChannelId).ToList();
-			this.MutedChannels = channels.Where(c => c.MutedUntil > DateTime.MinValue).Select(c => c.ChannelId).ToList();
 
 			dbContext.Dispose();
 
