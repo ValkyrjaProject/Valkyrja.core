@@ -880,6 +880,56 @@ namespace Botwinder.core
 			this.Commands.Add(newCommand.Id, newCommand);
 			this.Commands.Add("removeRequest", newCommand.CreateAlias("removeRequest"));
 
+// !cmdChannelWhitelist
+			newCommand = new Command("cmdChannelWhitelist");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Allow a command to be ran only in certain channels. Use with `CommandID`, `add` or `remove`, and `ChannelID` parameters.";
+			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
+			newCommand.OnExecute += async e => {
+				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
+				    (e.MessageArgs[1].ToLower() != "add" && e.MessageArgs[1].ToLower() != "remove") ||
+				    !guid.TryParse(e.MessageArgs[2], out guid channelId) || e.Server.Guild.GetChannel(channelId) == null )
+				{
+					await SendMessageToChannel(e.Channel, "Invalid parameters...\n" + e.Command.Description);
+					return;
+				}
+
+				string commandId = e.Server.GetCommandOptionsId(e.MessageArgs[0]);
+				if( commandId == null )
+				{
+					await SendMessageToChannel(e.Channel, "I'm sorry but you can not restrict this command.");
+					return;
+				}
+				if( commandId == "" )
+				{
+					await SendMessageToChannel(e.Channel, $"Command `{e.MessageArgs[0]}` not found.");
+					return;
+				}
+
+				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				CommandChannelOptions commandOptions = dbContext.GetOrAddCommandChannelOptions(e.Server.Id, channelId, commandId);
+
+				string responseString = "Success! \\o/";
+				switch(e.MessageArgs[1].ToLower())
+				{
+					case "add":
+						commandOptions.Whitelisted = true;
+						dbContext.SaveChanges();
+						break;
+					case "remove":
+						commandOptions.Whitelisted = false;
+						dbContext.SaveChanges();
+						break;
+					default:
+						responseString = "Invalid parameters...\n" + e.Command.Description;
+						break;
+				}
+
+				dbContext.Dispose();
+				await SendMessageToChannel(e.Channel, responseString);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
 /*
 // !command
 			newCommand = new Command("command");
