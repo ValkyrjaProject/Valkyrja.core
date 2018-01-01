@@ -798,7 +798,7 @@ namespace Botwinder.core
 			newCommand = new Command("permissions");
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
-			newCommand.Description = "Configure permission groups for every built-in command. Use without parameters for help.";
+			newCommand.Description = "Configure permission groups for every command. Use without parameters for help.";
 			newCommand.RequiredPermissions = PermissionType.ServerOwner;
 			newCommand.OnExecute += async e => {
 				string response = string.Format(
