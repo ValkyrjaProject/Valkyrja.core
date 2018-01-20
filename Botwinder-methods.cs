@@ -101,7 +101,7 @@ namespace Botwinder.core
 		{
 			Console.WriteLine(exception.Message);
 			Console.WriteLine(exception.StackTrace);
-			Console.WriteLine(data);
+			Console.WriteLine($"{data} | ServerId:{serverId}");
 
 			ExceptionEntry exceptionEntry = new ExceptionEntry(){
 				Message = exception.Message,

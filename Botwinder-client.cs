@@ -398,7 +398,20 @@ namespace Botwinder.core
 				dbContext.SaveChanges();
 				dbContext.Dispose();
 			}
-			catch(Exception) { }
+			catch(Exception exception)
+			{
+				Console.WriteLine(exception.Message);
+				Console.WriteLine(exception.StackTrace);
+				Console.WriteLine($"--Failed to log exceptionEntry: {exceptionEntry.Message}");
+				Console.WriteLine($"--Failed to log exceptionEntry: {exceptionEntry.Data} | ServerId:{exceptionEntry.ServerId}");
+				if( exception.InnerException != null && exception.Message != exception.InnerException.Message )
+				{
+					Console.WriteLine(exception.InnerException.Message);
+					Console.WriteLine(exception.InnerException.StackTrace);
+					Console.WriteLine($"--Failed to log exceptionEntry: {exceptionEntry.Message}");
+					Console.WriteLine($"--Failed to log exceptionEntry: {exceptionEntry.Data} | ServerId:{exceptionEntry.ServerId}");
+				}
+			}
 
 			return Task.CompletedTask;
 		}
