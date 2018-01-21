@@ -107,8 +107,9 @@ namespace Botwinder.core
 				Message = exception.Message,
 				Stack = exception.StackTrace,
 				Data = data,
+				DateTime = DateTime.UtcNow,
 				ServerId = serverId,
-				DateTime = DateTime.UtcNow
+				ShardId = this.CurrentShard?.Id ?? 0
 			};
 			await this.Events.Exception(exceptionEntry);
 

@@ -55,6 +55,9 @@ namespace Botwinder.entities
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public Int64 Id{ get; set; } = 0;
 
+		[Column("shardid")]
+		public Int64 ShardId{ get; set; } = 0;
+
 		[Column("serverid")]
 		public guid ServerId{ get; set; } = 0;
 
@@ -83,6 +86,7 @@ namespace Botwinder.entities
 		{
 			return $"\n**ID: `{this.Id}`** | `{Utils.GetTimestamp(this.DateTime)}`\n" +
 			       $"Message: `{this.Message}`\n" +
+			       $"ShardId: `{this.ShardId - 1}`\n" +
 			       $"ServerId: `{this.ServerId}`\n" +
 			       $"Data: `{this.Data}`\n" +
 			       $"Stack: " +
