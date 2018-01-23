@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using Botwinder.entities;
+using Discord.Net;
 using Discord.WebSocket;
 using guid = System.UInt64;
 
@@ -99,6 +100,9 @@ namespace Botwinder.core
 
 		public async Task LogException(Exception exception, string data, guid serverId = 0)
 		{
+			if( exception is RateLimitedException )
+				return;
+
 			Console.WriteLine(exception.Message);
 			Console.WriteLine(exception.StackTrace);
 			Console.WriteLine($"{data} | ServerId:{serverId}");
