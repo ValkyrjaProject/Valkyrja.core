@@ -210,7 +210,7 @@ namespace Botwinder.entities
 		public string TrimmedMessage{ get; private set; }
 
 		/// <summary> Command parameters (individual words) from the original message. MessageArgs[0] == Command.ID; </summary>
-		public string[] MessageArgs{ get; private set; }
+		public string[] MessageArgs{ get; internal set; }
 
 		/// <summary> Null if this is standard command. </summary>
 		public Operation Operation{ get; set; } //Necessary evul.

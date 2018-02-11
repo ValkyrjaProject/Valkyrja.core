@@ -176,23 +176,7 @@ namespace Botwinder.core
 
 		public List<UserData> GetMentionedUsersData(ServerContext dbContext, CommandArguments e) //todo - Move this elsewhere...
 		{
-			List<guid> mentionedUserIds = new List<guid>();
-
-			if( e.Message.MentionedUsers != null && e.Message.MentionedUsers.Any() )
-			{
-				mentionedUserIds.AddRange(e.Message.MentionedUsers.Select(u => u.Id));
-			}
-			else if( e.MessageArgs != null && e.MessageArgs.Length > 0 )
-			{
-				foreach( string param in e.MessageArgs )
-				{
-					guid id;
-					if( guid.TryParse(param, out id) && id != 0 )
-						mentionedUserIds.Add(id);
-					else
-						break;
-				}
-			}
+			List<guid> mentionedUserIds = GetMentionedUserIds(e);
 
 			if( !mentionedUserIds.Any() )
 				return new List<UserData>();
@@ -238,14 +222,21 @@ namespace Botwinder.core
 			}
 			else if( e.MessageArgs != null && e.MessageArgs.Length > 0 )
 			{
-				foreach( string param in e.MessageArgs )
+				for( int i = 0; i < e.MessageArgs.Length; i++)
 				{
 					guid id;
 					SocketUser user;
-					if( guid.TryParse(param, out id) && (user = e.Server.Guild.GetUser(id)) != null )
-						mentionedUsers.Add(user);
-					else
+					if( !guid.TryParse(e.MessageArgs[i], out id) || id == 0 || (user = e.Server.Guild.GetUser(id)) == null )
 						break;
+					if( mentionedUsers.Contains(user) )
+					{
+						List<string> newArgs = new List<string>(e.MessageArgs);
+						newArgs.RemoveAt(i);
+						e.MessageArgs = newArgs.ToArray();
+						continue;
+					}
+
+					mentionedUsers.Add(user);
 				}
 			}
 
@@ -262,13 +253,20 @@ namespace Botwinder.core
 			}
 			else if( e.MessageArgs != null && e.MessageArgs.Length > 0 )
 			{
-				foreach( string param in e.MessageArgs )
+				for( int i = 0; i < e.MessageArgs.Length; i++)
 				{
 					guid id;
-					if( guid.TryParse(param, out id) && id > int.MaxValue )
-						mentionedIds.Add(id);
-					else
+					if( !guid.TryParse(e.MessageArgs[i], out id) || id < int.MaxValue )
 						break;
+					if( mentionedIds.Contains(id) )
+					{
+						List<string> newArgs = new List<string>(e.MessageArgs);
+						newArgs.RemoveAt(i--);
+						e.MessageArgs = newArgs.ToArray();
+						continue;
+					}
+
+					mentionedIds.Add(id);
 				}
 			}
 
