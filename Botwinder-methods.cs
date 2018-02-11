@@ -187,7 +187,7 @@ namespace Botwinder.core
 				foreach( string param in e.MessageArgs )
 				{
 					guid id;
-					if( guid.TryParse(param, out id) )
+					if( guid.TryParse(param, out id) && id != 0 )
 						mentionedUserIds.Add(id);
 					else
 						break;
