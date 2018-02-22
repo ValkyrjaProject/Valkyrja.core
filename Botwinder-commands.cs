@@ -127,10 +127,51 @@ namespace Botwinder.core
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
+// !getProperty
+			newCommand = new Command("getProperty");
+			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
+			newCommand.IsSupportCommand = true;
+			newCommand.Description = "Get a server config property by its exact name. Defaults to the current server - use with serverid as the first parameter to explicitly specify different one.";
+			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.OnExecute += async e => {
+				if( e.MessageArgs.Length < 1 )
+				{
+					await SendMessageToChannel(e.Channel, $"{e.Command.Description}");
+					return;
+				}
+
+				guid serverId = e.Server.Id;
+				ServerConfig config = e.Server.Config;
+				if( e.MessageArgs.Length > 1 && (!guid.TryParse(e.MessageArgs[0], out serverId) ||
+				    (config = this.ServerDb.ServerConfigurations.FirstOrDefault(s => s.ServerId == serverId)) == null) )
+				{
+					await SendMessageToChannel(e.Channel, "Used with two parameters to specify serverId, but I couldn't find a server.");
+					return;
+				}
+
+				string propertyName = e.MessageArgs.Length == 1 ? e.MessageArgs[0] : e.MessageArgs[1];
+				string propertyValue;
+
+				if( this.Servers.ContainsKey(serverId) )
+					propertyValue = this.Servers[serverId].GetPropertyValue(propertyName);
+				else
+					propertyValue = config.GetPropertyValue(propertyName);
+
+				if( string.IsNullOrEmpty(propertyValue) )
+					propertyValue = "Unknown property.";
+				else
+					propertyValue = $"`{serverId}`.`{propertyName}`: `{propertyValue}`";
+
+				await SendMessageToChannel(e.Channel, propertyValue);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
 // !getInvite
 			newCommand = new Command("getInvite");
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
+			newCommand.IsSupportCommand = true;
 			newCommand.Description = "Get an invite url with serverid.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
@@ -158,6 +199,7 @@ namespace Botwinder.core
 			newCommand = new Command("clearInvite");
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
+			newCommand.IsSupportCommand = true;
 			newCommand.Description = "Clear the Invite url to be re-created, with serverid.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
@@ -516,6 +558,7 @@ namespace Botwinder.core
 			newCommand.RequiredPermissions = PermissionType.SubModerator;
 			newCommand.DeleteRequest = true;
 			newCommand.IsBonusCommand = true;
+			newCommand.IsSupportCommand = true;
 			newCommand.OnExecute += async e => {
 				if( string.IsNullOrWhiteSpace(e.TrimmedMessage) )
 					return;

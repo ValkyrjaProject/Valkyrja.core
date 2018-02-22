@@ -288,5 +288,19 @@ namespace Botwinder.entities
 
 		[Column("exp_cumulative_roles")]
 		public bool ExpCumulativeRoles{ get; set; } = false;
+
+
+		public string GetPropertyValue(string propertyName)
+		{
+			if( propertyName == "CustomCommands" || propertyName == "Aliases" )
+				return null;
+
+			System.Reflection.PropertyInfo info = GetType().GetProperty(propertyName);
+			object value;
+			if( info == null || (value = info.GetValue(this)) == null )
+				return null;
+
+			return value.ToString();
+		}
 	}
 }

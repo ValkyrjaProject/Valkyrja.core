@@ -235,5 +235,23 @@ namespace Botwinder.entities
 		{
 			return IsOwner(user) || user.Roles.Any(r => this.Roles.Any(p => p.Value.PermissionLevel >= RolePermissionLevel.Member && p.Value.RoleId == r.Id));
 		}
+
+
+		public string GetPropertyValue(string propertyName)
+		{
+			string propertyValue = this.Config.GetPropertyValue(propertyName);
+			if( string.IsNullOrEmpty(propertyValue) )
+				return null;
+
+			guid id;
+			if( guid.TryParse(propertyValue, out id) && id > int.MaxValue )
+			{
+				string propertyValueDereferenced = (this.Guild.GetChannel(id)?.Name ?? this.Guild.GetRole(id)?.Name);
+				if( propertyValueDereferenced != null )
+					propertyValue = propertyValueDereferenced + "` | `" + propertyValue;
+			}
+
+			return propertyValue;
+		}
 	}
 }
