@@ -39,6 +39,9 @@ namespace Botwinder.entities
 		/// <summary> True if this command can not be changed by PermissionOverrides </summary>
 		public bool IsCoreCommand{ get; set; }
 
+		/// <summary> True if this command can be executed by SupportTeamMembers </summary>
+		public bool IsSupportCommand{ get; set; }
+
 		/// <summary> True if this is a custom command. </summary>
 		public bool IsCustomCommand{ get; set; }
 
@@ -117,6 +120,9 @@ namespace Botwinder.entities
 		public bool CanExecute(IBotwinderClient client, Server server, SocketGuildChannel channel, SocketGuildUser user)
 		{
 			if( client.IsGlobalAdmin(user.Id) )
+				return true;
+
+			if( this.IsSupportCommand && client.IsSupportTeam(user.Id) )
 				return true;
 
 			//Premium-only commands

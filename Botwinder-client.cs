@@ -21,6 +21,7 @@ namespace Botwinder.core
 		private GlobalContext GlobalDb;
 		private ServerContext ServerDb;
 		public GlobalConfig GlobalConfig{ get; set; }
+		public List<guid> SupportTeam{ get; set; }
 		public Shard CurrentShard{ get; set; }
 
 		public DiscordSocketClient DiscordClient;
@@ -214,6 +215,8 @@ namespace Botwinder.core
 					Console.WriteLine("BotwinderClient: Configuration created.");
 					Environment.Exit(0);
 				}
+
+				this.SupportTeam = this.GlobalDb.SupportTeam.Select(u => u.UserId).ToList();
 			}
 
 			Console.WriteLine("BotwinderClient: Configuration loaded.");

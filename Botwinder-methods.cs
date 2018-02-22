@@ -26,6 +26,12 @@ namespace Botwinder.core
 			return this.GlobalConfig.AdminUserId == id;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool IsSupportTeam(guid id)
+		{
+			return this.SupportTeam.Contains(id);
+		}
+
 
 		public bool IsSubscriber(guid id)
 		{

@@ -10,6 +10,7 @@ namespace Botwinder.entities
 	public class GlobalContext: DbContext
 	{
 		public DbSet<GlobalConfig> GlobalConfigs;
+		public DbSet<SupportTeamMember> SupportTeam;
 		public DbSet<Subscriber> Subscribers;
 		public DbSet<PartneredServer> PartneredServers;
 		public DbSet<BlacklistEntry> Blacklist;
@@ -21,6 +22,7 @@ namespace Botwinder.entities
 		public GlobalContext(DbContextOptions<GlobalContext> options) : base(options)
 		{
 			this.GlobalConfigs = new InternalDbSet<GlobalConfig>(this);
+			this.SupportTeam = new InternalDbSet<SupportTeamMember>(this);
 			this.Subscribers = new InternalDbSet<Subscriber>(this);
 			this.PartneredServers = new InternalDbSet<PartneredServer>(this);
 			this.Blacklist = new InternalDbSet<BlacklistEntry>(this);
@@ -34,6 +36,9 @@ namespace Botwinder.entities
 		{
 			modelBuilder.Entity<GlobalConfig>()
 				.HasKey(p => p.ConfigName);
+
+			modelBuilder.Entity<SupportTeamMember>()
+				.HasKey(p => p.UserId);
 
 			modelBuilder.Entity<Subscriber>()
 				.HasKey(p => p.UserId);

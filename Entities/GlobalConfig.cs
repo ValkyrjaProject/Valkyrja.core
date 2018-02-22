@@ -7,6 +7,12 @@ using guid = System.UInt64;
 
 namespace Botwinder.entities
 {
+	[Table("support_team")]
+	public class SupportTeamMember
+	{
+		public guid UserId{ get; set; } = 0;
+	}
+
 	[Table("global_config")]
 	public class GlobalConfig
 	{

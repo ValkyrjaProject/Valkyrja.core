@@ -17,6 +17,7 @@ namespace Botwinder.entities
 
 		Task SendMessageToChannel(SocketTextChannel channel, string message);
 		bool IsGlobalAdmin(guid id);
+		bool IsSupportTeam(guid id);
 		bool IsSubscriber(guid id);
 		bool IsPartner(guid id);
 		bool IsPremiumSubscriber(guid id);
