@@ -709,6 +709,8 @@ namespace Botwinder.core
 			if( this.GlobalConfig.LogDebug )
 				Console.WriteLine($"Command: {commandString} | {trimmedMessage}");
 
+			CommandOptions commandOptions = server.GetCommandOptions(commandString);
+
 			if( server.Commands.ContainsKey(commandString) ||
 			    (server.CustomAliases.ContainsKey(commandString) &&
 			     server.Commands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId)) )
@@ -717,7 +719,6 @@ namespace Botwinder.core
 				if( command.IsAlias && !string.IsNullOrEmpty(command.ParentId) ) //Internal, not-custom alias.
 					command = server.Commands[command.ParentId];
 
-				CommandOptions commandOptions = server.GetCommandOptions(commandString);
 				CommandArguments args = new CommandArguments(this, command, server, channel, message, trimmedMessage, parameters, commandOptions);
 
 				if( command.CanExecute(this, server, channel, message.Author as SocketGuildUser) )
@@ -728,14 +729,21 @@ namespace Botwinder.core
 			          server.CustomCommands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId)) )
 			{
 				if( server.CustomCommands[commandString].CanExecute(this, server, channel, message.Author as SocketGuildUser) )
-					return await HandleCustomCommand(server.CustomCommands[commandString], channel, message);
+					return await HandleCustomCommand(server.CustomCommands[commandString], commandOptions, channel, message);
 			}
 
 			return false;
 		}
 
-		private async Task<bool> HandleCustomCommand(CustomCommand cmd, SocketTextChannel channel, SocketMessage message)
+		private async Task<bool> HandleCustomCommand(CustomCommand cmd, CommandOptions commandOptions, SocketTextChannel channel, SocketMessage message)
 		{
+			try
+			{
+				if( commandOptions != null && commandOptions.DeleteRequest &&
+				    channel.Guild.CurrentUser.GuildPermissions.ManageMessages && !message.Deleted )
+					await message.DeleteAsync();
+			}catch( Exception ) { }
+
 			//todo - rewrite using string builder...
 			string msg = cmd.Response;
 
