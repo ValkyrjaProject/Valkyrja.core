@@ -3,11 +3,9 @@ using System.Collections;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Botwinder.entities;
-using Discord.Net.Queue;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using guid = System.UInt64;
@@ -608,6 +606,10 @@ namespace Botwinder.core
 
 				void AddCommand(Command cmd)
 				{
+					if( includedCommandIds.Contains(cmd.Id) )
+						return;
+					includedCommandIds.Add(cmd.Id);
+
 					commandStrings.AppendLine($"\n```diff\n{(cmd.CanExecute(this, e.Server, e.Channel, e.Message.Author as SocketGuildUser) ? "+" : "-")}" +
 					                          $"  {prefix}{cmd.Id}```" +
 					                          $" **-** {cmd.Description}");
@@ -626,6 +628,10 @@ namespace Botwinder.core
 
 				void AddCustomCommand(CustomCommand cmd)
 				{
+					if( includedCommandIds.Contains(cmd.CommandId) )
+						return;
+					includedCommandIds.Add(cmd.CommandId);
+
 					commandStrings.AppendLine($"\n```diff\n{(cmd.CanExecute(this, e.Server, e.Channel, e.Message.Author as SocketGuildUser) ? "+" : "-")}" +
 					                          $"  {prefix}{cmd.CommandId}```" +
 					                          $" **-** {cmd.Description}");
@@ -664,9 +670,6 @@ namespace Botwinder.core
 					{
 						if( regex.Match(cmd.CommandId).Success ) //Chances are that it's gonna fail more often.
 						{
-							if( includedCommandIds.Contains(cmd.CommandId) )
-								continue;
-
 							if( ++count > 5 )
 								break;
 
@@ -678,16 +681,15 @@ namespace Botwinder.core
 					{
 						if( regex.Match(alias.Alias).Success ) //Chances are that it's gonna fail more often.
 						{
-							if( includedCommandIds.Contains(alias.CommandId) )
-								continue;
-
 							if( ++count > 5 )
 								break;
 
 							if( e.Server.Commands.ContainsKey(alias.CommandId) )
 								AddCommand(e.Server.Commands[alias.CommandId]);
 							else if( e.Server.CustomCommands.ContainsKey(alias.CommandId) )
+							{
 								AddCustomCommand(e.Server.CustomCommands[alias.CommandId]);
+							}
 						}
 					}
 
@@ -701,16 +703,10 @@ namespace Botwinder.core
 						response.Append(commandStrings.ToString());
 					}
 				}
-				else //Not specific - PM CustomCommands.
+				else if( e.Server.CustomCommands.Any() ) //Not specific - PM CustomCommands.
 				{
 					foreach( CustomCommand cmd in e.Server.CustomCommands.Values )
 					{
-						if( includedCommandIds.Contains(cmd.CommandId) )
-							continue;
-
-						if( ++count > 5 )
-							break;
-
 						AddCustomCommand(cmd);
 					}
 
