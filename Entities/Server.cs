@@ -251,7 +251,7 @@ namespace Botwinder.entities
 					propertyValue = propertyValueDereferenced + "` | `" + propertyValue;
 			}
 
-			return propertyValue;
+			return propertyValue.Replace("@everyone", "@-everyone");
 		}
 	}
 }
