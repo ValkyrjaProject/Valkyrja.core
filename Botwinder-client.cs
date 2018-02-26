@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using Botwinder.entities;
 using Discord;
 using Discord.Net;
@@ -28,7 +29,7 @@ namespace Botwinder.core
 		public Events Events;
 		public string DbConnectionString;
 
-		public readonly DateTime TimeStarted = DateTime.Now;
+		public DateTime TimeStarted{ get; private set; }
 		private DateTime TimeConnected = DateTime.MaxValue;
 
 		private bool IsInitialized = false;
@@ -68,6 +69,7 @@ namespace Botwinder.core
 
 		public BotwinderClient(int shardIdOverride = -1)
 		{
+			this.TimeStarted = DateTime.UtcNow;
 			this.DbConfig = DbConfig.Load();
 			this.DbConnectionString = this.DbConfig.GetDbConnectionString();
 			this.GlobalDb = GlobalContext.Create(this.DbConnectionString);
