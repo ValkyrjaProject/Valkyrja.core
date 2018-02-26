@@ -845,7 +845,7 @@ namespace Botwinder.core
 					"  `{0}{1} CommandID PermissionGroup` - where `CommandID` is name of the command, and `PermissionGroups` can be:\n" +
 					"    `ServerOwner`, `Admins`, `Moderators`, `SubModerators`, `Members`, `Everyone` - Look at the docs for reference: <http://botwinder.info/docs>\n" +
 					"    `Nobody` - Block this command from execusion even by Server Owner.\n" +
-					"    `Default` - will set default permissions as seen in the docs."+
+					"    `Default` - will set default permissions as seen in the docs.\n"+
 					"  For example `{0}{1} nuke ServerOwner`",
 					e.Server.Config.CommandPrefix,
 					e.Command.Id);
