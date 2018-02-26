@@ -148,6 +148,59 @@ namespace Botwinder.entities
 
 			return builder.ToString();
 		}
+
+		public static string ToNamesList(this string[] self)
+		{
+			if( self == null || !self.Any() )
+				return "None.";
+
+			StringBuilder builder = new StringBuilder();
+			for(int i = 0; i < self.Length; i++)
+			{
+				builder.Append((i == 0 ? "`" : "`\n`") + self[i].Replace("`", "'"));
+			}
+
+			if( self.Length > 0 )
+				builder.Append("`");
+
+			return builder.ToString();
+		}
+
+		public static string ToNamesList(this List<string> self)
+		{
+			if( self == null || !self.Any() )
+				return "None.";
+
+			StringBuilder builder = new StringBuilder();
+			for(int i = 0; i < self.Count; i++)
+			{
+				builder.Append((i == 0 ? "`" : "`\n`") + self[i].Replace("`", "'"));
+			}
+
+			if( self.Count > 0 )
+				builder.Append("`");
+
+			return builder.ToString();
+		}
+
+		public static string ToNamesList(this IEnumerable<string> self)
+		{
+			if( self == null || !self.Any() )
+				return "None.";
+
+			StringBuilder builder = new StringBuilder();
+			int count = self.Count();
+			int i = -1;
+			foreach(string element in self)
+			{
+				builder.Append((++i == 0 ? "`" : "`\n`") + element.Replace("`", "'"));
+			}
+
+			if( count > 0 )
+				builder.Append("`");
+
+			return builder.ToString();
+		}
 	}
 
 	public static class ConcurrentDictionaryEx
