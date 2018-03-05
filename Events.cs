@@ -386,8 +386,12 @@ namespace Botwinder.entities
 			if( this.MessageDeleted == null )
 				return Task.CompletedTask;
 
-			IMessage msg = originalMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
-			Task.Run(async () => await this.MessageDeleted(msg as SocketMessage, channel));
+			try
+			{
+				IMessage msg = originalMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
+				Task.Run(async () => await this.MessageDeleted(msg as SocketMessage, channel));
+			}
+			catch(Exception) { }
 			return Task.CompletedTask;
 		}
 
