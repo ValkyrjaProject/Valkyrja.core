@@ -73,7 +73,8 @@ namespace Botwinder.entities
 			{
 				foreach( SocketTextChannel channel in this.Guild.TextChannels )
 				{
-					if( this.Config.MuteIgnoreChannelId == channel.Id )
+					if( this.Config.MuteIgnoreChannelId == channel.Id ||
+					    channel.PermissionOverwrites.Any(p => p.TargetId == role.Id))
 						continue;
 
 					try{
