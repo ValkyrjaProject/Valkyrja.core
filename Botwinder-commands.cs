@@ -205,7 +205,7 @@ namespace Botwinder.core
 				else
 				{
 					dbContext.SaveChanges();
-					propertyValueOld = $"Property `{serverId}`.`{propertyName}`: `{propertyValueOld}` was set to `{propertyValueString}`";
+					propertyValueOld = $"Property `{serverId}`.`{propertyName}`: `{propertyValueOld}` was changed to `{propertyValueString}`";
 				}
 
 				dbContext.Dispose();
