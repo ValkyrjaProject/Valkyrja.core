@@ -169,38 +169,46 @@ namespace Botwinder.core
 			newCommand.Description = "Set a server config property referenced by its exact name. Use with serverid, the exact property name, and the new value.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
-				if( e.MessageArgs.Length < 1 )
+				if( e.MessageArgs.Length < 3 )
 				{
 					await SendMessageToChannel(e.Channel, $"{e.Command.Description}");
 					return;
 				}
 
-				guid serverId = e.Server.Id;
-				ServerConfig config = e.Server.Config;
-				if( e.MessageArgs.Length > 1 && (!guid.TryParse(e.MessageArgs[0], out serverId) ||
-				    (config = this.ServerDb.ServerConfigurations.FirstOrDefault(s => s.ServerId == serverId)) == null) )
+				guid serverId = 0;
+				ServerConfig config = null;
+				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				if( !guid.TryParse(e.MessageArgs[0], out serverId) ||
+				    (config = dbContext.ServerConfigurations.FirstOrDefault(s => s.ServerId == serverId)) == null )
 				{
 					await SendMessageToChannel(e.Channel, "Server not found in the database. Use with three parameters: serverid, the exact property name, and the new value.");
 					return;
 				}
 
 				string propertyName = e.MessageArgs[1];
-				string propertyValue = e.MessageArgs[2];
+				string propertyValueString = e.MessageArgs[2];
 				string propertyValueOld = "";
-				object propertyObject = null;
-				if( int.TryParse(propertyValue, out int number) )
-					propertyObject = number;
-				else if( guid.TryParse(propertyValue, out guid id) )
-					propertyObject = id;
-				else propertyObject = propertyValue;
 
-				config.SetPropertyValue(propertyName, propertyObject);
+				object propertyValue = null;
+				if( bool.TryParse(propertyValueString, out bool boolie) )
+					propertyValue = boolie;
+				else if( int.TryParse(propertyValueString, out int number) )
+					propertyValue = number;
+				else if( guid.TryParse(propertyValueString, out guid id) )
+					propertyValue = id;
+				else propertyValue = propertyValueString;
+
+				propertyValueOld = config.SetPropertyValue(propertyName, propertyValue);
 
 				if( string.IsNullOrEmpty(propertyValueOld) )
 					propertyValueOld = "Unknown property.";
 				else
-					propertyValueOld = $"Property `{serverId}`.`{propertyName}`: `{propertyValueOld}` was set to `{propertyValue}`";
+				{
+					dbContext.SaveChanges();
+					propertyValueOld = $"Property `{serverId}`.`{propertyName}`: `{propertyValueOld}` was set to `{propertyValueString}`";
+				}
 
+				dbContext.Dispose();
 				await SendMessageToChannel(e.Channel, propertyValueOld);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
