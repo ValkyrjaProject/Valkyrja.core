@@ -87,6 +87,7 @@ namespace Botwinder.core
 			newCommand = new Command("getServer");
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
+			newCommand.IsSupportCommand = true;
 			newCommand.Description = "Display some info about specific server with id/name, or owners id/username.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
@@ -149,12 +150,7 @@ namespace Botwinder.core
 				}
 
 				string propertyName = e.MessageArgs.Length == 1 ? e.MessageArgs[0] : e.MessageArgs[1];
-				string propertyValue;
-
-				if( this.Servers.ContainsKey(serverId) )
-					propertyValue = this.Servers[serverId].GetPropertyValue(propertyName);
-				else
-					propertyValue = config.GetPropertyValue(propertyName);
+				string propertyValue = config.GetPropertyValue(propertyName);
 
 				if( string.IsNullOrEmpty(propertyValue) )
 					propertyValue = "Unknown property.";
@@ -162,6 +158,50 @@ namespace Botwinder.core
 					propertyValue = $"`{serverId}`.`{propertyName}`: `{propertyValue}`";
 
 				await SendMessageToChannel(e.Channel, propertyValue);
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
+// !setProperty
+			newCommand = new Command("setProperty");
+			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
+			newCommand.IsSupportCommand = true;
+			newCommand.Description = "Set a server config property referenced by its exact name. Use with serverid, the exact property name, and the new value.";
+			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.OnExecute += async e => {
+				if( e.MessageArgs.Length < 1 )
+				{
+					await SendMessageToChannel(e.Channel, $"{e.Command.Description}");
+					return;
+				}
+
+				guid serverId = e.Server.Id;
+				ServerConfig config = e.Server.Config;
+				if( e.MessageArgs.Length > 1 && (!guid.TryParse(e.MessageArgs[0], out serverId) ||
+				    (config = this.ServerDb.ServerConfigurations.FirstOrDefault(s => s.ServerId == serverId)) == null) )
+				{
+					await SendMessageToChannel(e.Channel, "Server not found in the database. Use with three parameters: serverid, the exact property name, and the new value.");
+					return;
+				}
+
+				string propertyName = e.MessageArgs[1];
+				string propertyValue = e.MessageArgs[2];
+				string propertyValueOld = "";
+				object propertyObject = null;
+				if( int.TryParse(propertyValue, out int number) )
+					propertyObject = number;
+				else if( guid.TryParse(propertyValue, out guid id) )
+					propertyObject = id;
+				else propertyObject = propertyValue;
+
+				config.SetPropertyValue(propertyName, propertyObject);
+
+				if( string.IsNullOrEmpty(propertyValueOld) )
+					propertyValueOld = "Unknown property.";
+				else
+					propertyValueOld = $"Property `{serverId}`.`{propertyName}`: `{propertyValueOld}` was set to `{propertyValue}`";
+
+				await SendMessageToChannel(e.Channel, propertyValueOld);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 

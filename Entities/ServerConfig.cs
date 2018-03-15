@@ -302,5 +302,20 @@ namespace Botwinder.entities
 
 			return value.ToString();
 		}
+
+		public string SetPropertyValue(string propertyName, object value)
+		{
+			if( propertyName == "CustomCommands" || propertyName == "Aliases" )
+				return null;
+
+			System.Reflection.PropertyInfo info = GetType().GetProperty(propertyName);
+			if( info == null )
+				return null;
+
+			string oldValue = info.GetValue(this).ToString();
+			info.SetValue(this, value);
+
+			return oldValue;
+		}
 	}
 }
