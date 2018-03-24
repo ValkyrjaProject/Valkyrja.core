@@ -92,6 +92,9 @@ namespace Botwinder.entities
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public CommandOptions GetCommandOptions(string commandString)
 		{
+			if( this.CustomAliases.ContainsKey(commandString) )
+				commandString = this.CustomAliases[commandString].CommandId;
+
 			if( this.CachedCommandOptions != null && this.CachedCommandOptions.CommandId == commandString )
 				return this.CachedCommandOptions;
 
