@@ -239,7 +239,7 @@ namespace Botwinder.entities
 		public async Task SendReplyUnsafe(string message)
 		{
 			await this.Client.LogMessage(LogType.Response, this.Channel, this.Client.GlobalConfig.UserId, message);
-			RestUserMessage msg = await this.Channel.SendMessageAsync("string");
+			RestUserMessage msg = await this.Channel.SendMessageAsync(message);
 
 			if( this.CommandOptions.DeleteReply )
 			{
