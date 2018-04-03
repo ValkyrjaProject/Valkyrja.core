@@ -3,7 +3,9 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Discord;
 using Discord.Net;
+using Discord.Rest;
 using Discord.WebSocket;
 
 using guid = System.UInt64;
@@ -232,6 +234,18 @@ namespace Botwinder.entities
 			this.Message = message;
 			this.TrimmedMessage = trimmedMessage;
 			this.MessageArgs = messageArgs;
+		}
+
+		public async Task SendReplyUnsafe(string message)
+		{
+			await this.Client.LogMessage(LogType.Response, this.Channel, this.Client.GlobalConfig.UserId, message);
+			RestUserMessage msg = await this.Channel.SendMessageAsync("string");
+
+			if( this.CommandOptions.DeleteReply )
+			{
+				await Task.Delay(3000);
+				await msg.DeleteAsync();
+			}
 		}
 	}
 

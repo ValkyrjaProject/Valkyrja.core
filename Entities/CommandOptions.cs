@@ -24,6 +24,9 @@ namespace Botwinder.entities
 
 		[Column("delete_request")]
 		public bool DeleteRequest{ get; set; } = false;
+
+		[Column("delete_reply")]
+		public bool DeleteReply{ get; set; } = false;
 	}
 
 	[Table("command_channel_options")]

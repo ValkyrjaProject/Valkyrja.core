@@ -967,6 +967,44 @@ namespace Botwinder.core
 			this.Commands.Add(newCommand.Id, newCommand);
 			this.Commands.Add("removeRequest", newCommand.CreateAlias("removeRequest"));
 
+// !deleteReply
+			newCommand = new Command("deleteReply");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Set a command to delete bot's replies in a few seconds. _(Only some commands support this!)_ Use with `CommandID` and `true` or `false` parameters.";
+			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
+			newCommand.OnExecute += async e => {
+				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
+				    !bool.TryParse(e.MessageArgs[1], out bool deleteReply) )
+				{
+					await SendMessageToChannel(e.Channel, "Invalid parameters...\n" + e.Command.Description);
+					return;
+				}
+
+				string commandId = e.Server.GetCommandOptionsId(e.MessageArgs[0]);
+				if( commandId == null )
+				{
+					await SendMessageToChannel(e.Channel, "I'm sorry but you can not restrict this command.");
+					return;
+				}
+				if( commandId == "" )
+				{
+					await SendMessageToChannel(e.Channel, $"Command `{e.MessageArgs[0]}` not found.");
+					return;
+				}
+
+				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				CommandOptions options = dbContext.GetOrAddCommandOptions(e.Server, commandId);
+
+				options.DeleteReply = deleteReply;
+
+				dbContext.SaveChanges();
+				dbContext.Dispose();
+
+				await SendMessageToChannel(e.Channel, "Okay...");
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add("removeReply", newCommand.CreateAlias("removeReply"));
+
 // !cmdChannelWhitelist
 			newCommand = new Command("cmdChannelWhitelist");
 			newCommand.Type = CommandType.Standard;
