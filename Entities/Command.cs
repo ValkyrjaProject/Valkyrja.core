@@ -241,7 +241,7 @@ namespace Botwinder.entities
 			await this.Client.LogMessage(LogType.Response, this.Channel, this.Client.GlobalConfig.UserId, message);
 			RestUserMessage msg = await this.Channel.SendMessageAsync(message);
 
-			if( this.CommandOptions.DeleteReply )
+			if( this.CommandOptions != null && this.CommandOptions.DeleteReply )
 			{
 				await Task.Delay(3000);
 				await msg.DeleteAsync();
