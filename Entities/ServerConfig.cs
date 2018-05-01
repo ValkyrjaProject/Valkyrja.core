@@ -275,16 +275,19 @@ namespace Botwinder.entities
 		public bool ExpEnabled{ get; set; } = false;
 
 		[Column("base_exp_to_levelup")]
-		public Int64 BaseExpToLevelup{ get; set; } = 0;
-
-		[Column("exp_announce_levelup")]
-		public bool ExpAnnounceLevelup{ get; set; } = false;
+		public Int64 BaseExpToLevelup{ get; set; } = 10;
 
 		[Column("exp_per_message")]
-		public Int64 ExpPerMessage{ get; set; } = 0;
+		public Int64 ExpPerMessage{ get; set; } = 1;
 
 		[Column("exp_per_attachment")]
-		public Int64 ExpPerAttachment{ get; set; } = 0;
+		public Int64 ExpPerAttachment{ get; set; } = 3;
+
+		[Column("karma_per_level")]
+		public Int64 KarmaPerLevel{ get; set; } = 3;
+
+		[Column("exp_announce_levelup")]
+		public bool ExpAnnounceLevelup{ get; set; } = true;
 
 		[Column("exp_cumulative_roles")]
 		public bool ExpCumulativeRoles{ get; set; } = false;

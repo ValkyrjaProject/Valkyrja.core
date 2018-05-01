@@ -56,7 +56,7 @@ namespace Botwinder.entities
 		public Int64 CountAttachments{ get; set; } = 0;
 
 		[Column("level_relative")]
-		public Int64 LevelRelative{ get; set; } = 0;
+		public Int64 Level{ get; set; } = 0;
 
 		[Column("exp_relative")]
 		public Int64 ExpRelative{ get; set; } = 0;
