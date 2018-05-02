@@ -224,6 +224,12 @@ namespace Botwinder.entities
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static string GetNickname(this IUser self)
+		{
+			return (self as IGuildUser).GetNickname();
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static string GetName(this IGuildUser self)
 		{
 			return !string.IsNullOrWhiteSpace(self.Nickname) ? self.Nickname : self.Username +"#"+ self.Discriminator;
