@@ -295,6 +295,9 @@ namespace Botwinder.entities
 		[Column("exp_cumulative_roles")]
 		public bool ExpCumulativeRoles{ get; set; } = false;
 
+		[Column("exp_advance_users")]
+		public bool ExpAdvanceUsers{ get; set; } = false;
+
 
 		public string GetPropertyValue(string propertyName)
 		{

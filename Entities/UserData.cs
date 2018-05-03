@@ -59,7 +59,7 @@ namespace Botwinder.entities
 		public Int64 Level{ get; set; } = 0;
 
 		[Column("exp_relative")]
-		public Int64 ExpRelative{ get; set; } = 0;
+		public Int64 Exp{ get; set; } = 0;
 
 		[Column("memo", TypeName = "text")]
 		public string Memo{ get; set; } = "";
