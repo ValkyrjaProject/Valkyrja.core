@@ -707,6 +707,7 @@ namespace Botwinder.core
 		private async Task<bool> HandleCommand(Server server, SocketTextChannel channel, SocketMessage message, string prefix)
 		{
 			GetCommandAndParams(message.Content.Substring(prefix.Length), out string commandString, out string trimmedMessage, out string[] parameters);
+			string originalCommandString = commandString;
 
 			if( this.GlobalConfig.LogDebug )
 				Console.WriteLine($"Command: {commandString} | {trimmedMessage}");
@@ -721,7 +722,7 @@ namespace Botwinder.core
 				if( command.IsAlias && !string.IsNullOrEmpty(command.ParentId) ) //Internal, not-custom alias.
 					command = server.Commands[command.ParentId];
 
-				CommandArguments args = new CommandArguments(this, command, server, channel, message, commandString, trimmedMessage, parameters, commandOptions);
+				CommandArguments args = new CommandArguments(this, command, server, channel, message, originalCommandString, trimmedMessage, parameters, commandOptions);
 
 				if( command.CanExecute(this, server, channel, message.Author as SocketGuildUser) )
 					return await command.Execute(args);
