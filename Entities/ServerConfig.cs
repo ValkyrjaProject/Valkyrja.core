@@ -283,6 +283,9 @@ namespace Botwinder.entities
 		[Column("exp_per_attachment")]
 		public Int64 ExpPerAttachment{ get; set; } = 3;
 
+		[Column("exp_max_level")]
+		public Int64 ExpMaxLevel{ get; set; } = 0;
+
 		[Column("karma_per_level")]
 		public Int64 KarmaPerLevel{ get; set; } = 3;
 
