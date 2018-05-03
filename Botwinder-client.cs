@@ -721,7 +721,7 @@ namespace Botwinder.core
 				if( command.IsAlias && !string.IsNullOrEmpty(command.ParentId) ) //Internal, not-custom alias.
 					command = server.Commands[command.ParentId];
 
-				CommandArguments args = new CommandArguments(this, command, server, channel, message, trimmedMessage, parameters, commandOptions);
+				CommandArguments args = new CommandArguments(this, command, server, channel, message, commandString, trimmedMessage, parameters, commandOptions);
 
 				if( command.CanExecute(this, server, channel, message.Author as SocketGuildUser) )
 					return await command.Execute(args);

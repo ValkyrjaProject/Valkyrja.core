@@ -215,6 +215,9 @@ namespace Botwinder.entities
 		public SocketTextChannel Channel{ get; private set; }
 
 		/// <summary> Text of the Message, where the command was invoked. The command itself is excluded. </summary>
+		public string CommandId{ get; private set; }
+
+		/// <summary> Text of the Message, where the command was invoked. The command itself is excluded. </summary>
 		public string TrimmedMessage{ get; private set; }
 
 		/// <summary> Command parameters (individual words) from the original message. MessageArgs[0] == Command.ID; </summary>
@@ -224,7 +227,7 @@ namespace Botwinder.entities
 		public Operation Operation{ get; set; } //Necessary evul.
 
 
-		public CommandArguments(IBotwinderClient client, Command command, Server server, SocketTextChannel channel, SocketMessage message, string trimmedMessage, string[] messageArgs, CommandOptions options = null)
+		public CommandArguments(IBotwinderClient client, Command command, Server server, SocketTextChannel channel, SocketMessage message, string commandId, string trimmedMessage, string[] messageArgs, CommandOptions options = null)
 		{
 			this.Client = client;
 			this.Command = command;
@@ -232,6 +235,7 @@ namespace Botwinder.entities
 			this.Server = server;
 			this.Channel = channel;
 			this.Message = message;
+			this.CommandId = commandId;
 			this.TrimmedMessage = trimmedMessage;
 			this.MessageArgs = messageArgs;
 		}
