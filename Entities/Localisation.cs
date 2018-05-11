@@ -31,7 +31,7 @@ namespace Botwinder.entities
 			public const string GuildJoined = "Hai! I have some info for you =]\n" +
 			                                  "You can find full list of features and commands in the docs, and most importantly the configuration, on our website: http://botwinder.info\n" +
 			                                  "If you have any questions or experience any problems, feel free to poke our Support team for help at: <http://support.botwinder.info>\n" +
-			                                  "You can also `!subscribe` to patchnotes and maintenance notifications!!\n\n";
+			                                  "Please make sure to be in the support server and follow the `#news` channel to be notified of possible maintenance.\n\n";
 
 			public const string GuildJoinedTrial = "Botwinder is now available only to contributors. You can use it as a trial demo version for one day from now, then it will leave your server.\n"+
 			                                       "Should you wish to continue using it, do take a look at conditions and instructions at <http://botwinder.info/invite>";

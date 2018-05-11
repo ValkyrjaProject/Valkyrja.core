@@ -64,6 +64,9 @@ namespace Botwinder.entities
 		[Column("datetime")]
 		public DateTime DateTime{ get; set; } = DateTime.UtcNow;
 
+		[Column("type", TypeName = "varchar(255)")]
+		public string Type{ get; set; } = "";
+
 		[Column("message", TypeName = "varchar(255)")]
 		public string Message{ get; set; } = "";
 
@@ -86,12 +89,13 @@ namespace Botwinder.entities
 		{
 			return $"\n**ID: `{this.Id}`** | `{Utils.GetTimestamp(this.DateTime)}`\n" +
 			       $"Message: `{this.Message}`\n" +
+			       (string.IsNullOrEmpty(this.Type) ? "" : $"ExceptionType: `{this.Type}`\n") +
 			       $"ShardId: `{this.ShardId - 1}`\n" +
 			       $"ServerId: `{this.ServerId}`\n" +
 			       $"Data: `{this.Data}`\n" +
 			       $"Stack: " +
-			       (this.Stack.Length > 1500 ? $"\n{this.Stack.Replace("`", "'")}" :
-			       $"```{this.Stack.Replace("`", "'")}```");
+			       (string.IsNullOrEmpty(this.Stack) ? "Empty." : (this.Stack.Length > 1500 ? $"\n{this.Stack.Replace("`", "'")}" :
+			       $"```{this.Stack.Replace("`", "'")}```"));
 		}
 	}
 }
