@@ -537,7 +537,9 @@ namespace Botwinder.core
 
 		private void UpdateShardStats()
 		{
-			DateTime timeStarted = this.TimeStarted; // EF Core hack because... magic.
+			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+			this.CurrentShard = dbContext.Shards.FirstOrDefault(s => s.Id == this.CurrentShard.Id);
+
 			if( DateTime.UtcNow - this.LastMessageAverageTime > TimeSpan.FromMinutes(1) )
 			{
 				this.CurrentShard.MessagesPerMinute = this.MessagesThisMinute;
@@ -545,14 +547,15 @@ namespace Botwinder.core
 				this.LastMessageAverageTime = DateTime.UtcNow;
 			}
 
-			if( timeStarted != this.CurrentShard.TimeStarted ) // EF Core hack because... magic.
-				this.CurrentShard.TimeStarted = timeStarted;
-
+			this.CurrentShard.TimeStarted = this.TimeStarted;
 			this.CurrentShard.OperationsActive = this.CurrentOperations.Count;
 			this.CurrentShard.ThreadsActive = Process.GetCurrentProcess().Threads.Count;
 			this.CurrentShard.MemoryUsed = GC.GetTotalMemory(false) / 1000000;
 			this.CurrentShard.ServerCount = this.Servers.Count;
 			this.CurrentShard.UserCount = this.DiscordClient.Guilds.Sum(s => s.MemberCount);
+
+			dbContext.SaveChanges();
+			dbContext.Dispose();
 		}
 
 		private async Task UpdateServerStats()
