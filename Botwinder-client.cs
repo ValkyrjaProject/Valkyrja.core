@@ -545,8 +545,9 @@ namespace Botwinder.core
 				this.LastMessageAverageTime = DateTime.UtcNow;
 			}
 
-			this.CurrentShard.IsConnecting = false;
-			this.CurrentShard.TimeStarted = timeStarted;
+			if( timeStarted != this.CurrentShard.TimeStarted ) // EF Core hack because... magic.
+				this.CurrentShard.TimeStarted = timeStarted;
+
 			this.CurrentShard.OperationsActive = this.CurrentOperations.Count;
 			this.CurrentShard.ThreadsActive = Process.GetCurrentProcess().Threads.Count;
 			this.CurrentShard.MemoryUsed = GC.GetTotalMemory(false) / 1000000;
