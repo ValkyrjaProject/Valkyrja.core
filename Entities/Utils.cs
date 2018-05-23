@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,6 +39,28 @@ namespace Botwinder.entities
 		public static string GetTimestamp(DateTimeOffset time)
 		{
 			return time.ToUniversalTime().ToString("yyyy-MM-dd_HH:mm:ss") + " UTC";
+		}
+	}
+
+	public static class Bash
+	{
+		public static string Run(string cmd)
+		{
+			var escapedArgs = cmd.Replace("\"", "\\\"");
+
+			var process = new Process() {
+				StartInfo = new ProcessStartInfo {
+					FileName = "/bin/bash",
+					Arguments = $"-c \"{escapedArgs}\"",
+					RedirectStandardOutput = true,
+					UseShellExecute = false,
+					CreateNoWindow = true,
+				}
+			};
+			process.Start();
+			string result = process.StandardOutput.ReadToEnd();
+			process.WaitForExit();
+			return result;
 		}
 	}
 
