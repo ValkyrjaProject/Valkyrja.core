@@ -42,6 +42,78 @@ namespace Botwinder.core
 		{
 			Command newCommand = null;
 
+// !stats
+			newCommand = new Command("stats");
+			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
+			newCommand.Description = "Display all teh command numbers.";
+			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.OnExecute += async e => {
+				await SendMessageToChannel(e.Channel, "I'm counting! Do not disturb!! >_<");
+				StringBuilder message = new StringBuilder("Lifetime Command stats:\n```md\n");
+
+				try
+				{
+					GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+					ServerContext serverContext = ServerContext.Create(this.DbConnectionString);
+
+					string GetSpaces(string txt)
+					{
+						string spaces = "";
+						for( int i = txt.Length; i <= 20; i++ )
+							spaces += " ";
+						return spaces;
+					}
+
+					Dictionary<string, int> count = new Dictionary<string, int>();
+
+					foreach( Command cmd in this.Commands.Values )
+					{
+						string key, cmdName = key = cmd.Id;
+						if( cmd.IsAlias && !string.IsNullOrEmpty(cmd.ParentId) )
+							key = cmd.ParentId;
+
+						//Please don't read this query :D
+
+						bool IsCommand(LogEntry log)
+						{
+							return log.Type == LogType.Command && (log.Message?.StartsWith(
+								                                       (serverContext.ServerConfigurations.First(c => c.ServerId == log.ServerId)?.CommandPrefix ?? "") + cmdName)
+							                                       ?? false);
+						}
+
+						int cmdCount = dbContext.Log.Count(IsCommand);
+
+						if( !count.ContainsKey(key) )
+							count.Add(key, 0);
+						count[key] += cmdCount;
+					}
+
+					foreach(KeyValuePair<string, int> pair in count.OrderByDescending(p => p.Value))
+					{
+						string newMessage = $"[{GetSpaces(pair.Key)}{pair.Key} ][ {pair.Value}{GetSpaces(pair.Value.ToString())}]\n";
+						if( message.Length + newMessage.Length >= GlobalConfig.MessageCharacterLimit )
+						{
+							message.Append("```");
+							await SendMessageToChannel(e.Channel, message.ToString());
+							message.Clear();
+							message.Append("```md\n");
+						}
+						message.Append(newMessage);
+					}
+
+					message.Append("```");
+					serverContext.Dispose();
+					dbContext.Dispose();
+				}
+				catch(Exception ex)
+				{
+					message.Append(ex.Message);
+				}
+				await SendMessageToChannel(e.Channel, message.ToString());
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
 // !global
 			newCommand = new Command("global");
 			newCommand.Type = CommandType.Standard;
