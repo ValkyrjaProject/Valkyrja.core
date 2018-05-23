@@ -31,6 +31,8 @@ namespace Botwinder.core
 				responseString = Localisation.SystemStrings.MentionHelp;
 			else if( this.RegexPrefixHelp.Match(message.Content).Success )
 				responseString = string.IsNullOrEmpty(server.Config.CommandPrefix) ? Localisation.SystemStrings.MentionPrefixEmpty : string.Format(Localisation.SystemStrings.MentionPrefix, server.Config.CommandPrefix);
+			else
+				responseString = "<:BotwinderNomPing:438688419447570442>";
 
 			if( !string.IsNullOrEmpty(responseString) )
 				await SendMessageToChannel(channel, responseString);
@@ -628,13 +630,14 @@ namespace Botwinder.core
 				string cpuLoad = Bash.Run("grep 'cpu ' /proc/stat | awk '{print ($2+$4)*100/($2+$4+$5)}'");
 				string memoryUsed = Bash.Run("free | grep Mem | awk '{print $3/$2 * 100.0}'");
 				string message = "Server Status: <http://status.botwinder.info>\n" +
+				                 "Server Info: <http://rhea-ayase.eu/persephone>" +
 				                 $"```md\n" +
 				                 $"[ Memory usage ][ {double.Parse(memoryUsed):#00.00} % ]\n" +
 				                 $"[     CPU Load ][ {double.Parse(cpuLoad):#00.00} % ]\n" +
 				                 $"[    CPU0 Temp ][ {cpuTemp[0]}  ]\n" +
 				                 $"[    CPU1 Temp ][ {cpuTemp[1]}  ]\n" +
 				                 $"[      Threads ][ {threads:#000}     ]\n" +
-				                 $"```\n`{time.TotalMilliseconds:#00}`ms";
+				                 $"```\n<:BlobNomBotwinder:436141463299031040> `{time.TotalMilliseconds:#00}`ms <:BotwinderNomBlob:438688429849706497>";
 
 				await SendMessageToChannel(e.Channel, message);
 				dbContext.Dispose();
