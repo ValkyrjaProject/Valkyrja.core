@@ -40,35 +40,6 @@ namespace Botwinder.core
 		{
 			Command newCommand = null;
 
-// !status
-			newCommand = new Command("status");
-			newCommand.Type = CommandType.Standard;
-			newCommand.IsCoreCommand = true;
-			newCommand.Description = "Display basic server status.";
-			newCommand.RequiredPermissions = PermissionType.Everyone;
-			newCommand.OnExecute += async e => {
-				TimeSpan time = DateTime.UtcNow - Utils.GetTimeFromId(e.Message.Id);
-				StringBuilder shards = new StringBuilder();
-				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-
-				Int64 threads = dbContext.Shards.Sum(s => s.ThreadsActive);
-				string[] cpuTemp = Bash.Run("sensors | grep Package | sed 's/Package id [01]:\\s*+//g' | sed 's/\\s*(high = +85.0°C, crit = +95.0°C)//g'").Split('\n');
-				string cpuLoad = Bash.Run("grep 'cpu ' /proc/stat | awk '{print ($2+$4)*100/($2+$4+$5)}'");
-				string memoryUsed = Bash.Run("free | grep Mem | awk '{print $3/$2 * 100.0}'");
-				string message = "Server Status: <http://status.botwinder.info>\n" +
-				                 $"```md\n" +
-				                 $"[ Memory usage ][ {double.Parse(memoryUsed):#00.00} % ]\n" +
-				                 $"[     CPU Load ][ {double.Parse(cpuLoad):#00.00} % ]\n" +
-				                 $"[    CPU0 Temp ][ {cpuTemp[0]}  ]\n" +
-				                 $"[    CPU1 Temp ][ {cpuTemp[1]}  ]\n" +
-				                 $"[      Threads ][ {threads:#000}     ]\n" +
-				                 $"```\n`{time.TotalMilliseconds:#00}`ms";
-
-				await SendMessageToChannel(e.Channel, message);
-				dbContext.Dispose();
-			};
-			this.Commands.Add(newCommand.Id, newCommand);
-
 // !global
 			newCommand = new Command("global");
 			newCommand.Type = CommandType.Standard;
@@ -641,17 +612,35 @@ namespace Botwinder.core
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
-// !ping
-			newCommand = new Command("ping");
+// !status
+			newCommand = new Command("status");
 			newCommand.Type = CommandType.Standard;
-			newCommand.Description = "Measure how long does it take to receive a message and handle it as a command.";
+			newCommand.IsCoreCommand = true;
+			newCommand.Description = "Display basic server status.";
 			newCommand.RequiredPermissions = PermissionType.Everyone;
 			newCommand.OnExecute += async e => {
 				TimeSpan time = DateTime.UtcNow - Utils.GetTimeFromId(e.Message.Id);
-				string responseString = "`"+ time.TotalMilliseconds.ToString("#00") +"`ms";
-				await SendMessageToChannel(e.Channel, responseString);
+				StringBuilder shards = new StringBuilder();
+				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+
+				Int64 threads = dbContext.Shards.Sum(s => s.ThreadsActive);
+				string[] cpuTemp = Bash.Run("sensors | grep Package | sed 's/Package id [01]:\\s*+//g' | sed 's/\\s*(high = +85.0°C, crit = +95.0°C)//g'").Split('\n');
+				string cpuLoad = Bash.Run("grep 'cpu ' /proc/stat | awk '{print ($2+$4)*100/($2+$4+$5)}'");
+				string memoryUsed = Bash.Run("free | grep Mem | awk '{print $3/$2 * 100.0}'");
+				string message = "Server Status: <http://status.botwinder.info>\n" +
+				                 $"```md\n" +
+				                 $"[ Memory usage ][ {double.Parse(memoryUsed):#00.00} % ]\n" +
+				                 $"[     CPU Load ][ {double.Parse(cpuLoad):#00.00} % ]\n" +
+				                 $"[    CPU0 Temp ][ {cpuTemp[0]}  ]\n" +
+				                 $"[    CPU1 Temp ][ {cpuTemp[1]}  ]\n" +
+				                 $"[      Threads ][ {threads:#000}     ]\n" +
+				                 $"```\n`{time.TotalMilliseconds:#00}`ms";
+
+				await SendMessageToChannel(e.Channel, message);
+				dbContext.Dispose();
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add("ping", newCommand.CreateAlias("ping"));
 
 // !help
 			newCommand = new Command("help");
