@@ -14,7 +14,6 @@ namespace Botwinder.core
 {
 	public partial class BotwinderClient : IBotwinderClient, IDisposable
 	{
-		private readonly Regex RegexPingHelp = new Regex(".*(ping).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		private readonly Regex RegexMentionHelp = new Regex(".*(help|commands).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		private readonly Regex RegexPrefixHelp = new Regex(".*(command character|prefix).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
@@ -25,9 +24,7 @@ namespace Botwinder.core
 
 			string responseString = "";
 
-			if( this.RegexPingHelp.Match(message.Content).Success )
-				responseString = $"`{(DateTime.UtcNow - Utils.GetTimeFromId(message.Id)).TotalMilliseconds:#00}`ms";
-			else if( this.RegexMentionHelp.Match(message.Content).Success )
+			if( this.RegexMentionHelp.Match(message.Content).Success )
 				responseString = Localisation.SystemStrings.MentionHelp;
 			else if( this.RegexPrefixHelp.Match(message.Content).Success )
 				responseString = string.IsNullOrEmpty(server.Config.CommandPrefix) ? Localisation.SystemStrings.MentionPrefixEmpty : string.Format(Localisation.SystemStrings.MentionPrefix, server.Config.CommandPrefix);
@@ -78,7 +75,7 @@ namespace Botwinder.core
 						bool IsCommand(LogEntry log)
 						{
 							return log.Type == LogType.Command && (log.Message?.StartsWith(
-								                                       (serverContext.ServerConfigurations.First(c => c.ServerId == log.ServerId)?.CommandPrefix ?? "") + cmdName)
+					FF			                                       (serverContext.ServerConfigurations.First(c => c.ServerId == log.ServerId)?.CommandPrefix ?? "") + cmdName)
 							                                       ?? false);
 						}
 
