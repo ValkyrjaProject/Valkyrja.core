@@ -75,8 +75,8 @@ namespace Botwinder.core
 						bool IsCommand(LogEntry log)
 						{
 							return log.Type == LogType.Command && (log.Message?.StartsWith(
-					FF			                                       (serverContext.ServerConfigurations.First(c => c.ServerId == log.ServerId)?.CommandPrefix ?? "") + cmdName)
-							                                       ?? false);
+							    (serverContext.ServerConfigurations.First(c => c.ServerId == log.ServerId)?.CommandPrefix ?? "") + cmdName)
+							    ?? false);
 						}
 
 						int cmdCount = dbContext.Log.Count(IsCommand);
