@@ -100,6 +100,21 @@ namespace Botwinder.entities
 			return userData;
 		}
 
+		public RoleConfig GetOrAddRole(guid serverId, guid roleId)
+		{
+			RoleConfig roleConfig = this.Roles.FirstOrDefault(u => u.ServerId == serverId && u.RoleId == roleId);
+			if( roleConfig == null )
+			{
+				roleConfig = new RoleConfig(){
+					ServerId = serverId,
+					RoleId = roleId
+				};
+				this.Roles.Add(roleConfig);
+			}
+
+			return roleConfig;
+		}
+
 		public CommandOptions GetOrAddCommandOptions(Server server, string commandId)
 		{
 			CommandOptions options = this.CommandOptions.FirstOrDefault(c => c.ServerId == server.Id && c.CommandId == commandId);

@@ -24,6 +24,8 @@ namespace Botwinder.entities
 
 		public static class SystemStrings
 		{
+			public const string DiscordShitEmoji = "<:DiscordShit:356545886454677506>";
+
 			public const string VipPmLeaving = "Hulloh!\n" +
 			                                   "I'm afraid that you are not eligible to use the Botwinder Mk.III !\n" +
 			                                   "Take a look at <http://botwinder.info/invite> for more details. _(Please do read the whole page!)_";

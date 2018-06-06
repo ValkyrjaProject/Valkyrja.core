@@ -34,5 +34,8 @@ namespace Botwinder.entities
 
 		[Column("level")]
 		public Int64 ExpLevel{ get; set; } = 0;
+
+		[Column("delete_at_time")]
+		public DateTime DeleteAtTime{ get; set; } = DateTime.MinValue;
 	}
 }
