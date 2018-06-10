@@ -59,7 +59,6 @@ namespace Botwinder.core
 		public Object DbLock{ get; set; } = new Object();
 
 		private readonly List<guid> LeaveNotifiedOwners = new List<guid>();
-		private DateTime LastShardCleanupTime = DateTime.UtcNow;
 		private DateTime LastMessageAverageTime = DateTime.UtcNow;
 		private int MessagesThisMinute = 0;
 
@@ -161,6 +160,14 @@ namespace Botwinder.core
 			config.ConnectionTimeout = int.MaxValue; //todo - figure out something reasonable?
 
 			this.DiscordClient = new DiscordSocketClient(config);
+
+			/*if( this.GlobalConfig.LogDebug )
+			{
+				this.DiscordClient.Log += message => {
+					Console.WriteLine($"[${message.Severity}] ${message.Message}\n  Source: ${message.Source}");
+					return Task.CompletedTask;
+				};
+			}*/
 
 			this.DiscordClient.Connecting += OnConnecting;
 			this.DiscordClient.Connected += OnConnected;
