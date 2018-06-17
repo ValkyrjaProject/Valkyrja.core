@@ -348,7 +348,8 @@ namespace Botwinder.core
 				if( !this.Servers.ContainsKey(channel.Guild.Id) ||
 					(server = this.Servers[channel.Guild.Id]) == null ||
 					server.Config.IgnoreBots && message.Author.IsBot ||
-				    server.Config.IgnoreEveryone && message.MentionedRoles.Any(r => r.IsEveryone) )
+				    server.Config.IgnoreEveryone && (message.Content.Contains("@everyone") ||
+				                                     message.Content.Contains("@here")) )
 					return;
 
 				bool commandExecuted = false;
