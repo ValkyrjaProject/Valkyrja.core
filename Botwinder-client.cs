@@ -51,6 +51,7 @@ namespace Botwinder.core
 		private const string GameStatusConnecting = "Connecting...";
 		private const string GameStatusUrl = "at http://botwinder.info";
 		private readonly Regex RegexCommandParams = new Regex("\"[^\"]+\"|\\S+", RegexOptions.Compiled);
+		private readonly Regex RegexEveryone = new Regex("(@everyone)|(@here)", RegexOptions.Compiled);
 
 		public readonly ConcurrentDictionary<guid, Server> Servers = new ConcurrentDictionary<guid, Server>();
 		public readonly Dictionary<string, Command> Commands = new Dictionary<string, Command>();
@@ -348,8 +349,7 @@ namespace Botwinder.core
 				if( !this.Servers.ContainsKey(channel.Guild.Id) ||
 					(server = this.Servers[channel.Guild.Id]) == null ||
 					server.Config.IgnoreBots && message.Author.IsBot ||
-				    server.Config.IgnoreEveryone && (message.Content.Contains("@everyone") ||
-				                                     message.Content.Contains("@here")) )
+				    server.Config.IgnoreEveryone && this.RegexEveryone.IsMatch(message.Content) )
 					return;
 
 				bool commandExecuted = false;
@@ -382,7 +382,7 @@ namespace Botwinder.core
 					return;
 
 				if( server.Config.IgnoreBots && updatedMessage.Author.IsBot ||
-				    server.Config.IgnoreEveryone && updatedMessage.MentionedRoles.Any(r => r.IsEveryone) )
+				    server.Config.IgnoreEveryone && this.RegexEveryone.IsMatch(updatedMessage.Content) )
 					return;
 
 				bool commandExecuted = false;
