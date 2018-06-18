@@ -15,7 +15,7 @@ namespace Botwinder.entities
 		List<Operation> CurrentOperations{ get; set; }
 		Object OperationsLock{ get; set; }
 
-		Task SendMessageToChannel(SocketTextChannel channel, string message);
+		Task SendRawMessageToChannel(SocketTextChannel channel, string message);
 		bool IsGlobalAdmin(guid id);
 		bool IsSupportTeam(guid id);
 		bool IsSubscriber(guid id);

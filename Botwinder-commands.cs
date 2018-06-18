@@ -32,7 +32,7 @@ namespace Botwinder.core
 				responseString = "<:BotwinderNomPing:438688419447570442>";
 
 			if( !string.IsNullOrEmpty(responseString) )
-				await SendMessageToChannel(channel, responseString);
+				await SendRawMessageToChannel(channel, responseString);
 		}
 
 		private Task InitCommands()
@@ -46,7 +46,7 @@ namespace Botwinder.core
 			newCommand.Description = "Display all teh command numbers.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
-				await SendMessageToChannel(e.Channel, "I'm counting! Do not disturb!! >_<");
+				await e.SendReplySafe("I'm counting! Do not disturb!! >_<");
 				StringBuilder message = new StringBuilder("Lifetime Command stats:\n```md\n");
 
 				try
@@ -92,7 +92,7 @@ namespace Botwinder.core
 						if( message.Length + newMessage.Length >= GlobalConfig.MessageCharacterLimit )
 						{
 							message.Append("```");
-							await SendMessageToChannel(e.Channel, message.ToString());
+							await e.SendReplySafe(message.ToString());
 							message.Clear();
 							message.Append("```md\n");
 						}
@@ -107,7 +107,7 @@ namespace Botwinder.core
 				{
 					message.Append(ex.Message);
 				}
-				await SendMessageToChannel(e.Channel, message.ToString());
+				await e.SendReplySafe(message.ToString());
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -150,7 +150,7 @@ namespace Botwinder.core
 				                 $"{shards.ToString()}";
 
 				dbContext.Dispose();
-				await SendMessageToChannel(e.Channel, message);
+				await e.SendReplySafe(message);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -164,7 +164,7 @@ namespace Botwinder.core
 			newCommand.OnExecute += async e => {
 				if( string.IsNullOrEmpty(e.TrimmedMessage) )
 				{
-					await SendMessageToChannel(e.Channel, "Requires parameters.");
+					await e.SendReplySafe("Requires parameters.");
 					return;
 				}
 
@@ -178,7 +178,7 @@ namespace Botwinder.core
 					    s.OwnerName.ToLower().Contains($"{e.TrimmedMessage.ToLower()}")
 				    )).Any() )
 				{
-					await SendMessageToChannel(e.Channel, "Server not found.");
+					await e.SendReplySafe("Server not found.");
 					return;
 				}
 
@@ -193,7 +193,7 @@ namespace Botwinder.core
 					response.AppendLine();
 				}
 
-				await SendMessageToChannel(e.Channel, response.ToString());
+				await e.SendReplySafe(response.ToString());
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -207,7 +207,7 @@ namespace Botwinder.core
 			newCommand.OnExecute += async e => {
 				if( e.MessageArgs.Length < 1 )
 				{
-					await SendMessageToChannel(e.Channel, $"{e.Command.Description}");
+					await e.SendReplySafe($"{e.Command.Description}");
 					return;
 				}
 
@@ -216,7 +216,7 @@ namespace Botwinder.core
 				if( e.MessageArgs.Length > 1 && (!guid.TryParse(e.MessageArgs[0], out serverId) ||
 				    (config = this.ServerDb.ServerConfigurations.FirstOrDefault(s => s.ServerId == serverId)) == null) )
 				{
-					await SendMessageToChannel(e.Channel, "Used with two parameters to specify serverId, but I couldn't find a server.");
+					await e.SendReplySafe("Used with two parameters to specify serverId, but I couldn't find a server.");
 					return;
 				}
 
@@ -228,7 +228,7 @@ namespace Botwinder.core
 				else
 					propertyValue = $"`{serverId}`.`{propertyName}`: `{propertyValue}`";
 
-				await SendMessageToChannel(e.Channel, propertyValue);
+				await e.SendReplySafe(propertyValue);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -242,7 +242,7 @@ namespace Botwinder.core
 			newCommand.OnExecute += async e => {
 				if( e.MessageArgs.Length < 3 )
 				{
-					await SendMessageToChannel(e.Channel, $"{e.Command.Description}");
+					await e.SendReplySafe($"{e.Command.Description}");
 					return;
 				}
 
@@ -252,7 +252,7 @@ namespace Botwinder.core
 				if( !guid.TryParse(e.MessageArgs[0], out serverId) ||
 				    (config = dbContext.ServerConfigurations.FirstOrDefault(s => s.ServerId == serverId)) == null )
 				{
-					await SendMessageToChannel(e.Channel, "Server not found in the database. Use with three parameters: serverid, the exact property name, and the new value.");
+					await e.SendReplySafe("Server not found in the database. Use with three parameters: serverid, the exact property name, and the new value.");
 					return;
 				}
 
@@ -280,7 +280,7 @@ namespace Botwinder.core
 				}
 
 				dbContext.Dispose();
-				await SendMessageToChannel(e.Channel, propertyValueOld);
+				await e.SendReplySafe(propertyValueOld);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -298,17 +298,17 @@ namespace Botwinder.core
 				    !guid.TryParse(e.TrimmedMessage, out id) ||
 				    (foundServer = ServerContext.Create(this.DbConnectionString).ServerConfigurations.FirstOrDefault(s => s.ServerId == id)) == null )
 				{
-					await SendMessageToChannel(e.Channel, "Server not found.");
+					await e.SendReplySafe("Server not found.");
 					return;
 				}
 
 				if( string.IsNullOrEmpty(foundServer.InviteUrl) )
 				{
-					await SendMessageToChannel(e.Channel, "I don't have permissions to create this InviteUrl.");
+					await e.SendReplySafe("I don't have permissions to create this InviteUrl.");
 					return;
 				}
 
-				await SendMessageToChannel(e.Channel, foundServer.InviteUrl);
+				await e.SendReplySafe(foundServer.InviteUrl);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -324,7 +324,7 @@ namespace Botwinder.core
 				if( string.IsNullOrEmpty(e.TrimmedMessage) ||
 				    !guid.TryParse(e.TrimmedMessage, out id) )
 				{
-					await SendMessageToChannel(e.Channel, "Invalid parameters.");
+					await e.SendReplySafe("Invalid parameters.");
 					return;
 				}
 
@@ -338,7 +338,7 @@ namespace Botwinder.core
 					dbContext.SaveChanges();
 				}
 
-				await SendMessageToChannel(e.Channel, response);
+				await e.SendReplySafe(response);
 				dbContext.Dispose();
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
@@ -350,7 +350,7 @@ namespace Botwinder.core
 			newCommand.Description = "Performe maintenance";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e =>{
-				await SendMessageToChannel(e.Channel, "Okay, this may take a while...");
+				await e.SendReplySafe("Okay, this may take a while...");
 				await LogMaintenanceAndExit();
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
@@ -362,7 +362,7 @@ namespace Botwinder.core
 			newCommand.Description = "Shut down the bot.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
-				await SendMessageToChannel(e.Channel, "bai");
+				await e.SendReplySafe("bai");
 				await Task.Delay(1000);
 				Environment.Exit(0);
 			};
@@ -390,7 +390,7 @@ namespace Botwinder.core
 				string responseString = response.ToString();
 				if( string.IsNullOrWhiteSpace(responseString) )
 					responseString = "I did not record any errors :stuck_out_tongue:";
-				await SendMessageToChannel(e.Channel, responseString);
+				await e.SendReplySafe(responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -408,7 +408,7 @@ namespace Botwinder.core
 					responseString = exception.GetStack();
 
 				dbContext.Dispose();
-				await SendMessageToChannel(e.Channel, responseString);
+				await e.SendReplySafe(responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -425,7 +425,7 @@ namespace Botwinder.core
 				{
 					if( !e.Message.MentionedUsers.Any() )
 					{
-						await SendMessageToChannel(e.Channel, responseString);
+						await e.SendReplySafe(responseString);
 						return;
 					}
 
@@ -470,7 +470,7 @@ namespace Botwinder.core
 				}
 
 				dbContext.Dispose();
-				await SendMessageToChannel(e.Channel, responseString);
+				await e.SendReplySafe(responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -488,7 +488,7 @@ namespace Botwinder.core
 				{
 					if( !e.Message.MentionedUsers.Any() )
 					{
-						await SendMessageToChannel(e.Channel, responseString);
+						await e.SendReplySafe(responseString);
 						return;
 					}
 
@@ -541,7 +541,7 @@ namespace Botwinder.core
 				}
 
 				dbContext.Dispose();
-				await SendMessageToChannel(e.Channel, responseString);
+				await e.SendReplySafe(responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -559,7 +559,7 @@ namespace Botwinder.core
 				{
 					if( !e.Message.MentionedUsers.Any() )
 					{
-						await SendMessageToChannel(e.Channel, responseString);
+						await e.SendReplySafe(responseString);
 						return;
 					}
 
@@ -606,7 +606,7 @@ namespace Botwinder.core
 				}
 
 				dbContext.Dispose();
-				await SendMessageToChannel(e.Channel, responseString);
+				await e.SendReplySafe(responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -644,7 +644,7 @@ namespace Botwinder.core
 				if( string.IsNullOrEmpty(responseString) )
 					responseString = "There are no operations running.";
 
-				await SendMessageToChannel(e.Channel, responseString);
+				await e.SendReplySafe(responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -664,7 +664,7 @@ namespace Botwinder.core
 					          op.CommandArgs.Command.Id == e.TrimmedMessage)) != null )
 					responseString = "Operation canceled:\n\n" + operation.ToString();
 
-				await SendMessageToChannel(e.Channel, responseString);
+				await e.SendReplySafe(responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -679,7 +679,7 @@ namespace Botwinder.core
 			newCommand.OnExecute += async e => {
 				if( string.IsNullOrWhiteSpace(e.TrimmedMessage) )
 					return;
-				await SendMessageToChannel(e.Channel, e.TrimmedMessage);
+				await e.SendReplySafe(e.TrimmedMessage);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -708,7 +708,7 @@ namespace Botwinder.core
 				                 $"[      Threads ][ {threads:#000}     ]\n" +
 				                 $"```\n<:BlobNomBotwinder:436141463299031040> `{time.TotalMilliseconds:#00}`ms <:BotwinderNomBlob:438688429849706497>";
 
-				await SendMessageToChannel(e.Channel, message);
+				await e.SendReplySafe(message);
 				dbContext.Dispose();
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
@@ -852,7 +852,7 @@ namespace Botwinder.core
 					await e.Message.Author.SendMessageSafe(commandStrings.ToString());
 				}
 
-				await SendMessageToChannel(e.Channel, response.ToString());
+				await e.SendReplySafe(response.ToString());
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -896,7 +896,7 @@ namespace Botwinder.core
 							string line = alias.Alias + ": " + alias.CommandId;
 							if( line.Length + response.Length + 5 > GlobalConfig.MessageCharacterLimit )
 							{
-								await SendMessageToChannel(e.Channel, response.ToString() + "\n```");
+								await e.SendReplySafe(response.ToString() + "\n```");
 								response.Clear().AppendLine("```http\nexampleAlias: command\n---------------------");
 							}
 							response.AppendLine(line);
@@ -967,7 +967,7 @@ namespace Botwinder.core
 						return;
 				}
 
-				await SendMessageToChannel(e.Channel, responseString);
+				await e.SendReplySafe(responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -991,19 +991,19 @@ namespace Botwinder.core
 				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
 				    !Enum.TryParse(e.MessageArgs[1], true, out PermissionOverrides permissionOverrides) )
 				{
-					await SendMessageToChannel(e.Channel, response);
+					await e.SendReplySafe(response);
 					return;
 				}
 
 				string commandId = e.Server.GetCommandOptionsId(e.MessageArgs[0]);
 				if( commandId == null )
 				{
-					await SendMessageToChannel(e.Channel, "I'm sorry but you can not restrict this command.");
+					await e.SendReplySafe("I'm sorry but you can not restrict this command.");
 					return;
 				}
 				if( commandId == "" )
 				{
-					await SendMessageToChannel(e.Channel, $"Command `{e.MessageArgs[0]}` not found.");
+					await e.SendReplySafe($"Command `{e.MessageArgs[0]}` not found.");
 					return;
 				}
 
@@ -1015,7 +1015,7 @@ namespace Botwinder.core
 				dbContext.SaveChanges();
 				dbContext.Dispose();
 
-				await SendMessageToChannel(e.Channel, "All set!");
+				await e.SendReplySafe("All set!");
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -1028,19 +1028,19 @@ namespace Botwinder.core
 				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
 				    !bool.TryParse(e.MessageArgs[1], out bool deleteRequest) )
 				{
-					await SendMessageToChannel(e.Channel, "Invalid parameters...\n" + e.Command.Description);
+					await e.SendReplySafe("Invalid parameters...\n" + e.Command.Description);
 					return;
 				}
 
 				string commandId = e.Server.GetCommandOptionsId(e.MessageArgs[0]);
 				if( commandId == null )
 				{
-					await SendMessageToChannel(e.Channel, "I'm sorry but you can not restrict this command.");
+					await e.SendReplySafe("I'm sorry but you can not restrict this command.");
 					return;
 				}
 				if( commandId == "" )
 				{
-					await SendMessageToChannel(e.Channel, $"Command `{e.MessageArgs[0]}` not found.");
+					await e.SendReplySafe($"Command `{e.MessageArgs[0]}` not found.");
 					return;
 				}
 
@@ -1052,7 +1052,7 @@ namespace Botwinder.core
 				dbContext.SaveChanges();
 				dbContext.Dispose();
 
-				await SendMessageToChannel(e.Channel, "Okay...");
+				await e.SendReplySafe("Okay...");
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 			this.Commands.Add("removeRequest", newCommand.CreateAlias("removeRequest"));
@@ -1066,19 +1066,19 @@ namespace Botwinder.core
 				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
 				    !bool.TryParse(e.MessageArgs[1], out bool deleteReply) )
 				{
-					await SendMessageToChannel(e.Channel, "Invalid parameters...\n" + e.Command.Description);
+					await e.SendReplySafe("Invalid parameters...\n" + e.Command.Description);
 					return;
 				}
 
 				string commandId = e.Server.GetCommandOptionsId(e.MessageArgs[0]);
 				if( commandId == null )
 				{
-					await SendMessageToChannel(e.Channel, "I'm sorry but you can not restrict this command.");
+					await e.SendReplySafe("I'm sorry but you can not restrict this command.");
 					return;
 				}
 				if( commandId == "" )
 				{
-					await SendMessageToChannel(e.Channel, $"Command `{e.MessageArgs[0]}` not found.");
+					await e.SendReplySafe($"Command `{e.MessageArgs[0]}` not found.");
 					return;
 				}
 
@@ -1090,7 +1090,7 @@ namespace Botwinder.core
 				dbContext.SaveChanges();
 				dbContext.Dispose();
 
-				await SendMessageToChannel(e.Channel, "Okay...");
+				await e.SendReplySafe("Okay...");
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 			this.Commands.Add("removeReply", newCommand.CreateAlias("removeReply"));
@@ -1105,19 +1105,19 @@ namespace Botwinder.core
 				    (e.MessageArgs[1].ToLower() != "add" && e.MessageArgs[1].ToLower() != "remove") ||
 				    !guid.TryParse(e.MessageArgs[2].Trim('<', '#', '>'), out guid channelId) || e.Server.Guild.GetChannel(channelId) == null )
 				{
-					await SendMessageToChannel(e.Channel, "Invalid parameters...\n" + e.Command.Description);
+					await e.SendReplySafe("Invalid parameters...\n" + e.Command.Description);
 					return;
 				}
 
 				string commandId = e.Server.GetCommandOptionsId(e.MessageArgs[0]);
 				if( commandId == null )
 				{
-					await SendMessageToChannel(e.Channel, "I'm sorry but you can not restrict this command.");
+					await e.SendReplySafe("I'm sorry but you can not restrict this command.");
 					return;
 				}
 				if( commandId == "" )
 				{
-					await SendMessageToChannel(e.Channel, $"Command `{e.MessageArgs[0]}` not found.");
+					await e.SendReplySafe($"Command `{e.MessageArgs[0]}` not found.");
 					return;
 				}
 
@@ -1141,7 +1141,7 @@ namespace Botwinder.core
 				}
 
 				dbContext.Dispose();
-				await SendMessageToChannel(e.Channel, responseString);
+				await e.SendReplySafe(responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -1155,19 +1155,19 @@ namespace Botwinder.core
 				    (e.MessageArgs[1].ToLower() != "add" && e.MessageArgs[1].ToLower() != "remove") ||
 				    !guid.TryParse(e.MessageArgs[2].Trim('<', '#', '>'), out guid channelId) || e.Server.Guild.GetChannel(channelId) == null )
 				{
-					await SendMessageToChannel(e.Channel, "Invalid parameters...\n" + e.Command.Description);
+					await e.SendReplySafe("Invalid parameters...\n" + e.Command.Description);
 					return;
 				}
 
 				string commandId = e.Server.GetCommandOptionsId(e.MessageArgs[0]);
 				if( commandId == null )
 				{
-					await SendMessageToChannel(e.Channel, "I'm sorry but you can not restrict this command.");
+					await e.SendReplySafe("I'm sorry but you can not restrict this command.");
 					return;
 				}
 				if( commandId == "" )
 				{
-					await SendMessageToChannel(e.Channel, $"Command `{e.MessageArgs[0]}` not found.");
+					await e.SendReplySafe($"Command `{e.MessageArgs[0]}` not found.");
 					return;
 				}
 
@@ -1191,7 +1191,7 @@ namespace Botwinder.core
 				}
 
 				dbContext.Dispose();
-				await SendMessageToChannel(e.Channel, responseString);
+				await e.SendReplySafe(responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -1203,14 +1203,14 @@ namespace Botwinder.core
 			newCommand.OnExecute += async e => {
 				if( e.MessageArgs == null || e.MessageArgs.Length < 1 )
 				{
-					await SendMessageToChannel(e.Channel, "Invalid parameters...\n" + e.Command.Description);
+					await e.SendReplySafe("Invalid parameters...\n" + e.Command.Description);
 					return;
 				}
 
 				string commandId = e.Server.GetCommandOptionsId(e.MessageArgs[0]);
 				if( string.IsNullOrEmpty(commandId) )
 				{
-					await SendMessageToChannel(e.Channel, $"Command `{e.MessageArgs[0]}` not found.");
+					await e.SendReplySafe($"Command `{e.MessageArgs[0]}` not found.");
 					return;
 				}
 
@@ -1221,7 +1221,7 @@ namespace Botwinder.core
 				dbContext.SaveChanges();
 				dbContext.Dispose();
 
-				await SendMessageToChannel(e.Channel, "As you wish my thane.");
+				await e.SendReplySafe("As you wish my thane.");
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
@@ -1233,7 +1233,7 @@ namespace Botwinder.core
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				string responseString = "";
-				await SendMessageToChannel(e.Channel, responseString);
+				await e.SendReplySafe(responseString);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 

@@ -13,7 +13,7 @@ namespace Botwinder.core
 {
 	public partial class BotwinderClient : IBotwinderClient, IDisposable
 	{
-		public async Task SendMessageToChannel(SocketTextChannel channel, string message)
+		public async Task SendRawMessageToChannel(SocketTextChannel channel, string message)
 		{
 			await LogMessage(LogType.Response, channel, this.GlobalConfig.UserId, message);
 			await channel.SendMessageSafe(message);

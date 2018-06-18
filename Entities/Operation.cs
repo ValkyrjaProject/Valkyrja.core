@@ -44,7 +44,7 @@ namespace Botwinder.entities
 		{
 			try
 			{
-				if( await Await(async () => await this.CommandArgs.Client.SendMessageToChannel(
+				if( await Await(async () => await this.CommandArgs.Client.SendRawMessageToChannel(
 					 this.CommandArgs.Channel,
 					 string.Format(Localisation.SystemStrings.OperationQueuedString, this.CommandArgs.Client.CurrentOperations.Count, this.CommandArgs.Command.Id))) )
 					return;
@@ -74,7 +74,7 @@ namespace Botwinder.entities
 			{
 				if( await AwaitConnection() )
 				{
-					await this.CommandArgs.Client.SendMessageToChannel(this.CommandArgs.Channel,
+					await this.CommandArgs.Client.SendRawMessageToChannel(this.CommandArgs.Channel,
 						$"<@{this.CommandArgs.Message.Author.Id}>, your operation was canceled: `{this.CommandArgs.Command.Id}`");
 					return true;
 				}

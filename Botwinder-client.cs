@@ -730,13 +730,13 @@ namespace Botwinder.core
 			          server.CustomCommands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId)) )
 			{
 				if( server.CustomCommands[commandString].CanExecute(this, server, channel, message.Author as SocketGuildUser) )
-					return await HandleCustomCommand(server.CustomCommands[commandString], commandOptions, channel, message);
+					return await HandleCustomCommand(server, server.CustomCommands[commandString], commandOptions, channel, message);
 			}
 
 			return false;
 		}
 
-		private async Task<bool> HandleCustomCommand(CustomCommand cmd, CommandOptions commandOptions, SocketTextChannel channel, SocketMessage message)
+		private async Task<bool> HandleCustomCommand(Server server, CustomCommand cmd, CommandOptions commandOptions, SocketTextChannel channel, SocketMessage message)
 		{
 			try
 			{
@@ -777,7 +777,9 @@ namespace Botwinder.core
 				}
 			}
 
-			await SendMessageToChannel(channel, msg);
+			if( server.Config.IgnoreEveryone )
+				msg = msg.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
+			await SendRawMessageToChannel(channel, msg);
 			return true;
 		}
 

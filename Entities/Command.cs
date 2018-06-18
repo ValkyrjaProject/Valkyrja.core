@@ -162,7 +162,7 @@ namespace Botwinder.entities
 
 				if( !string.IsNullOrWhiteSpace(e.TrimmedMessage) && e.TrimmedMessage == "help" )
 				{
-					await e.Client.SendMessageToChannel(e.Channel, e.Command.Description);
+					await e.SendReplySafe(e.Command.Description);
 					return true;
 				}
 
@@ -175,7 +175,7 @@ namespace Botwinder.entities
 					/*}
 					else
 					{
-						await e.Client.SendMessageToChannel(e.Channel, "Command execution timed out. _(Please wait a moment before trying again.)_");
+						await e.SendReplySafe("Command execution timed out. _(Please wait a moment before trying again.)_");
 						throw new TimeoutException();
 					}*/
 				}
@@ -240,9 +240,23 @@ namespace Botwinder.entities
 			this.MessageArgs = messageArgs;
 		}
 
+		public async Task SendReplySafe(string message)
+		{
+			await this.Client.LogMessage(LogType.Response, this.Channel, this.Client.GlobalConfig.UserId, message);
+
+			if( this.Server.Config.IgnoreEveryone )
+				message = message.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
+
+			await this.Channel.SendMessageSafe(message);
+		}
+
 		public async Task SendReplyUnsafe(string message)
 		{
 			await this.Client.LogMessage(LogType.Response, this.Channel, this.Client.GlobalConfig.UserId, message);
+
+			if( this.Server.Config.IgnoreEveryone )
+				message = message.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
+
 			RestUserMessage msg = await this.Channel.SendMessageAsync(message);
 
 			if( this.CommandOptions != null && this.CommandOptions.DeleteReply )
