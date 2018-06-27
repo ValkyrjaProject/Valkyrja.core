@@ -371,7 +371,7 @@ namespace Botwinder.core
 
 		private async Task OnMessageUpdated(SocketMessage originalMessage, SocketMessage updatedMessage, ISocketMessageChannel iChannel)
 		{
-			if( !this.IsConnected )
+			if( !this.IsConnected || originalMessage.Content == updatedMessage.Content )
 				return;
 
 			try
