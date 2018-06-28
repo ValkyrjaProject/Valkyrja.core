@@ -346,18 +346,15 @@ namespace Botwinder.core
 				}
 
 				Server server;
-				if( !this.Servers.ContainsKey(channel.Guild.Id) ||
-					(server = this.Servers[channel.Guild.Id]) == null ||
-					server.Config.IgnoreBots && message.Author.IsBot ||
-				    server.Config.IgnoreEveryone && this.RegexEveryone.IsMatch(message.Content) )
+				if( !this.Servers.ContainsKey(channel.Guild.Id) || (server = this.Servers[channel.Guild.Id]) == null )
+					return;
+				if( server.Config.IgnoreBots && message.Author.IsBot || server.Config.IgnoreEveryone && this.RegexEveryone.IsMatch(message.Content) )
 					return;
 
 				bool commandExecuted = false;
 				string prefix;
-				if( (!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) &&
-				     message.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
-				    (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) &&
-				     message.Content.StartsWith(prefix = server.Config.CommandPrefixAlt)) )
+				if( (!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) && message.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
+				    (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) && message.Content.StartsWith(prefix = server.Config.CommandPrefixAlt)) )
 					commandExecuted = await HandleCommand(server, channel, message, prefix);
 
 				if( !commandExecuted && message.MentionedUsers.Any(u => u.Id == this.DiscordClient.CurrentUser.Id) )
@@ -377,22 +374,17 @@ namespace Botwinder.core
 			try
 			{
 				Server server;
-				if( !(iChannel is SocketTextChannel channel) || updatedMessage?.Author == null ||
-				    !this.Servers.ContainsKey(channel.Guild.Id) || (server = this.Servers[channel.Guild.Id]) == null || server.Config == null)
+				if( !(iChannel is SocketTextChannel channel) || updatedMessage?.Author == null || !this.Servers.ContainsKey(channel.Guild.Id) || (server = this.Servers[channel.Guild.Id]) == null || server.Config == null)
 					return;
-
-				if( server.Config.IgnoreBots && updatedMessage.Author.IsBot ||
-				    server.Config.IgnoreEveryone && this.RegexEveryone.IsMatch(updatedMessage.Content) )
+				if( server.Config.IgnoreBots && updatedMessage.Author.IsBot || server.Config.IgnoreEveryone && this.RegexEveryone.IsMatch(updatedMessage.Content) )
 					return;
 
 				bool commandExecuted = false;
 				if( server.Config.ExecuteOnEdit )
 				{
 					string prefix;
-					if( (!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) &&
-					     updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
-					    (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) &&
-					     updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefixAlt)) )
+					if( (!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) && updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
+					    (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) && updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefixAlt)) )
 						commandExecuted = await HandleCommand(server, channel, updatedMessage, prefix);
 				}
 			}
