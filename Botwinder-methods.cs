@@ -73,6 +73,14 @@ namespace Botwinder.core
 			return val;
 		}
 
+		public bool IsTrialServer(guid id)
+		{
+			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+			Int64 joinedCount = dbContext.ServerStats.FirstOrDefault(s => s.ServerId == id)?.JoinedCount ?? 1;
+			dbContext.Dispose();
+			return joinedCount <= this.GlobalConfig.VipTrialJoins;
+		}
+
 
 		public async Task LogMessage(LogType logType, SocketTextChannel channel, guid authorId, string message)
 		{

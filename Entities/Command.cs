@@ -132,7 +132,7 @@ namespace Botwinder.entities
 				return false;
 			if( this.IsBonusCommand && !client.IsBonusSubscriber(user.Id) )
 				return false;
-			if( this.IsPremiumServerwideCommand && !client.IsPremiumSubscriber(server.Guild.OwnerId) && !client.IsPremiumPartner(server.Id) )
+			if( this.IsPremiumServerwideCommand && !(client.IsPremiumSubscriber(server.Guild.OwnerId) || client.IsPremiumPartner(server.Id)) && !client.IsTrialServer(server.Id) )
 				return false;
 
 			return server.CanExecuteCommand(this.Id, this.RequiredPermissions, channel, user);
