@@ -10,6 +10,8 @@ namespace Botwinder.entities
 	[Table("user_profile_options")]
 	public class UserProfileOption
 	{
+		public const int ValueCharacterLimit = 1000;
+
 		[Required]
 		[Column("serverid")]
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
