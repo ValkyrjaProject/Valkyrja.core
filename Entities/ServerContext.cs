@@ -25,6 +25,8 @@ namespace Botwinder.entities
 		public DbSet<Nickname> Nicknames;
 
 		public DbSet<Quote> Quotes;
+		public DbSet<ProfileOption> ProfileOptions;
+		public DbSet<UserProfileOption> UserProfileOptions;
 
 		public ServerContext(DbContextOptions<ServerContext> options) : base(options)
 		{
@@ -40,6 +42,8 @@ namespace Botwinder.entities
 			this.Usernames = new InternalDbSet<Username>(this);
 			this.Nicknames = new InternalDbSet<Nickname>(this);
 			this.Quotes = new InternalDbSet<Quote>(this);
+			this.ProfileOptions = new InternalDbSet<ProfileOption>(this);
+			this.UserProfileOptions = new InternalDbSet<UserProfileOption>(this);
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -79,6 +83,12 @@ namespace Botwinder.entities
 
 			modelBuilder.Entity<Quote>()
 				.HasKey(p => new{p.ServerId, p.Id});
+
+			modelBuilder.Entity<ProfileOption>()
+				.HasKey(p => new{p.ServerId, p.Option});
+
+			modelBuilder.Entity<UserProfileOption>()
+				.HasKey(p => new{p.ServerId, p.UserId, p.Option});
 		}
 
 		public static ServerContext Create(string connectionString)
