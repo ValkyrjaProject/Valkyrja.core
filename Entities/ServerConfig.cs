@@ -298,6 +298,12 @@ namespace Botwinder.entities
 		[Column("exp_advance_users")]
 		public bool ExpAdvanceUsers{ get; set; } = false;
 
+		[Column("profile_enabled")]
+		public bool ProfileEnabled{ get; set; } = false;
+
+		[Column("memo_enabled")]
+		public bool MemoEnabled{ get; set; } = false;
+
 
 		public string GetPropertyValue(string propertyName)
 		{
