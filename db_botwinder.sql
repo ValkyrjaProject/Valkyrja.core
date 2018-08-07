@@ -145,7 +145,7 @@ CREATE TABLE `exceptions` (
   `data` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1262 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -250,7 +250,7 @@ CREATE TABLE `logs` (
   `datetime` datetime NOT NULL,
   `message` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=471213 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=556308 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -266,7 +266,7 @@ CREATE TABLE `nicknames` (
   `userid` bigint(20) unsigned NOT NULL,
   `nickname` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=77468 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=90599 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -314,6 +314,38 @@ CREATE TABLE `polls` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `profile_options`
+--
+
+DROP TABLE IF EXISTS `profile_options`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `profile_options` (
+  `serverid` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `property_order` bigint(20) NOT NULL DEFAULT 0,
+  `option` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `option_alt` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `label` varchar(2048) COLLATE utf8mb4_unicode_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `quotes`
+--
+
+DROP TABLE IF EXISTS `quotes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `quotes` (
+  `serverid` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `id` bigint(20) NOT NULL DEFAULT 0,
+  `created_time` datetime DEFAULT NULL,
+  `username` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `value` longtext COLLATE utf8mb4_unicode_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `roles`
 --
 
@@ -323,11 +355,12 @@ DROP TABLE IF EXISTS `roles`;
 CREATE TABLE `roles` (
   `serverid` bigint(20) unsigned NOT NULL,
   `roleid` bigint(20) unsigned NOT NULL,
-  `permission_level` bigint(20) NOT NULL DEFAULT 0,
+  `permission_level` tinyint(4) NOT NULL DEFAULT 0,
   `public_id` bigint(20) NOT NULL DEFAULT 0,
   `logging_ignored` tinyint(1) NOT NULL DEFAULT 0,
   `antispam_ignored` tinyint(1) NOT NULL DEFAULT 0,
   `level` bigint(20) NOT NULL DEFAULT 0,
+  `delete_at_time` datetime NOT NULL DEFAULT from_unixtime(0),
   PRIMARY KEY (`roleid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -433,6 +466,10 @@ CREATE TABLE `server_config` (
   `karma_per_level` bigint(20) unsigned NOT NULL DEFAULT 3,
   `exp_max_level` bigint(20) unsigned NOT NULL DEFAULT 0,
   `exp_advance_users` tinyint(1) NOT NULL DEFAULT 0,
+  `profile_enabled` tinyint(1) NOT NULL DEFAULT 0,
+  `memo_enabled` tinyint(1) NOT NULL DEFAULT 0,
+  `log_warnings` tinyint(1) NOT NULL DEFAULT 0,
+  `color_logwarning` int(10) unsigned NOT NULL DEFAULT 16489984,
   PRIMARY KEY (`serverid`),
   UNIQUE KEY `serverid` (`serverid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -553,6 +590,21 @@ CREATE TABLE `timers` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `user_profile_options`
+--
+
+DROP TABLE IF EXISTS `user_profile_options`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_profile_options` (
+  `serverid` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `userid` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `option` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `value` varchar(2048) COLLATE utf8mb4_unicode_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `usernames`
 --
 
@@ -565,7 +617,7 @@ CREATE TABLE `usernames` (
   `userid` bigint(20) unsigned NOT NULL,
   `username` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=939934 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1132097 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -619,4 +671,4 @@ CREATE TABLE `votes` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-05-24 22:44:52
+-- Dump completed on 2018-08-07 19:18:33
