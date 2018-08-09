@@ -27,5 +27,8 @@ namespace Botwinder.entities
 
 		[Column("property_order")]
 		public Int64 Order{ get; set; } = 0;
+
+		[Column("inline")]
+		public bool IsInline{ get; set; } = false;
 	}
 }
