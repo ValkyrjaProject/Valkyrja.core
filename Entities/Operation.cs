@@ -110,9 +110,7 @@ namespace Botwinder.entities
 			}
 
 			if( this.CommandArgs.Client.IsGlobalAdmin(this.CommandArgs.Message.Author.Id) ||
-			    (this.CommandArgs.Client.GlobalConfig.VipSkipQueue &&
-			     (this.CommandArgs.Client.IsPremiumSubscriber(this.CommandArgs.Server.Guild.OwnerId) ||
-			      this.CommandArgs.Client.IsPremiumPartner(this.CommandArgs.Server.Id))) )
+			    (this.CommandArgs.Client.GlobalConfig.VipSkipQueue && this.CommandArgs.Client.IsPremium(this.CommandArgs.Server)) )
 			{
 				lock(this.CommandArgs.Client.OperationsLock)
 				{

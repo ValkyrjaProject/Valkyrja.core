@@ -42,10 +42,9 @@ namespace Botwinder.entities
 			this.Commands = new Dictionary<string, Command>(allCommands);
 		}
 
-		public void ReloadConfig(string dbConnectionString)
+		public void ReloadConfig(string dbConnectionString, ServerContext dbContext)
 		{
 			this.DbConnectionString = dbConnectionString;
-			ServerContext dbContext = ServerContext.Create(dbConnectionString);
 
 			this.Config = dbContext.ServerConfigurations.FirstOrDefault(c => c.ServerId == this.Id);
 			if( this.Config == null )
@@ -84,9 +83,9 @@ namespace Botwinder.entities
 			}
 		}
 
-		public void LoadConfig(string dbConnectionString)
+		public void LoadConfig(string dbConnectionString, ServerContext dbContext)
 		{
-			ReloadConfig(dbConnectionString);
+			ReloadConfig(dbConnectionString, dbContext);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

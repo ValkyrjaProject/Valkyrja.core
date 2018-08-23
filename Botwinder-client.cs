@@ -6,12 +6,9 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using Botwinder.entities;
 using Discord;
-using Discord.Net;
 using Discord.WebSocket;
-using Microsoft.EntityFrameworkCore;
 using guid = System.UInt64;
 
 namespace Botwinder.core
@@ -55,6 +52,8 @@ namespace Botwinder.core
 
 		public readonly ConcurrentDictionary<guid, Server> Servers = new ConcurrentDictionary<guid, Server>();
 		public readonly Dictionary<string, Command> Commands = new Dictionary<string, Command>();
+		public Dictionary<guid, Subscriber> Subscribers = new Dictionary<guid, Subscriber>();
+		public Dictionary<guid, PartneredServer> PartneredServers = new Dictionary<guid, PartneredServer>();
 		public List<Operation> CurrentOperations{ get; set; } = new List<Operation>();
 		public Object OperationsLock{ get; set; } = new Object();
 		public Object DbLock{ get; set; } = new Object();
@@ -524,6 +523,10 @@ namespace Botwinder.core
 				Console.WriteLine("BotwinderClient: UpdateServerConfigs loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 			await UpdateServerConfigs();
 
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine("BotwinderClient: UpdateSubscriptions loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+			await UpdateSubscriptions();
+
 			lock(this.DbLock)
 			{
 				if( this.GlobalConfig.LogDebug )
@@ -616,10 +619,24 @@ namespace Botwinder.core
 
 		private Task UpdateServerConfigs()
 		{
+			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
 			foreach( KeyValuePair<guid, Server> pair in this.Servers )
 			{
-				pair.Value.ReloadConfig(this.DbConnectionString);
+				pair.Value.ReloadConfig(this.DbConnectionString, dbContext);
 			}
+			return Task.CompletedTask;
+		}
+
+		private Task UpdateSubscriptions()
+		{
+			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+
+			this.Subscribers?.Clear();
+			this.Subscribers = dbContext.Subscribers.ToDictionary(s => s.UserId);
+
+			this.PartneredServers?.Clear();
+			this.PartneredServers = dbContext.PartneredServers.ToDictionary(s => s.ServerId);
+
 			return Task.CompletedTask;
 		}
 
@@ -832,21 +849,23 @@ namespace Botwinder.core
 
 		private async Task OnGuildAvailable(SocketGuild guild)
 		{
+			ServerContext dbContext = null;
 			try
 			{
 				while( !this.IsInitialized )
 					await Task.Delay(1000);
 
 				Server server;
+				dbContext = ServerContext.Create(this.DbConnectionString);
 				if( this.Servers.ContainsKey(guild.Id) )
 				{
 					server = this.Servers[guild.Id];
-					server.ReloadConfig(this.DbConnectionString);
+					server.ReloadConfig(this.DbConnectionString, dbContext);
 				}
 				else
 				{
 					server = new Server(guild, this.Commands);
-					server.LoadConfig(this.DbConnectionString);
+					server.LoadConfig(this.DbConnectionString, dbContext);
 					server.Localisation = GlobalContext.Create(this.DbConnectionString).Localisations.FirstOrDefault(l => l.Id == server.Config.LocalisationId);
 					this.Servers.Add(server.Id, server);
 				}
@@ -854,6 +873,10 @@ namespace Botwinder.core
 			catch(Exception exception)
 			{
 				await LogException(exception, "--OnGuildAvailable", guild.Id);
+			}
+			finally
+			{
+				dbContext?.Dispose();
 			}
 		}
 

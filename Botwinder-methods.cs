@@ -35,42 +35,32 @@ namespace Botwinder.core
 
 		public bool IsSubscriber(guid id)
 		{
-			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-			bool val = IsGlobalAdmin(id) || dbContext.Subscribers.Any(u => u.UserId == id);
-			dbContext.Dispose();
-			return val;
+			return IsGlobalAdmin(id) || this.Subscribers.ContainsKey(id);
 		}
 
 		public bool IsPartner(guid id)
 		{
-			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-			bool val = dbContext.PartneredServers.Any(s => s.ServerId == id);
-			dbContext.Dispose();
-			return val;
+			return this.PartneredServers.ContainsKey(id);
 		}
 
 		public bool IsPremiumSubscriber(guid id)
 		{
-			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-			bool val = IsGlobalAdmin(id) || dbContext.Subscribers.Any(u => u.UserId == id && u.IsPremium);
-			dbContext.Dispose();
-			return val;
+			return IsGlobalAdmin(id) || (this.Subscribers.ContainsKey(id) && this.Subscribers[id].IsPremium);
 		}
 
 		public bool IsBonusSubscriber(guid id)
 		{
-			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-			bool val = IsGlobalAdmin(id) || dbContext.Subscribers.Any(u => u.UserId == id && u.HasBonus);
-			dbContext.Dispose();
-			return val;
+			return IsGlobalAdmin(id) || (this.Subscribers.ContainsKey(id) && this.Subscribers[id].HasBonus);
 		}
 
 		public bool IsPremiumPartner(guid id)
 		{
-			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-			bool val = dbContext.PartneredServers.Any(s => s.ServerId == id && s.IsPremium);
-			dbContext.Dispose();
-			return val;
+			return this.PartneredServers.ContainsKey(id) && this.PartneredServers[id].IsPremium;
+		}
+
+		public bool IsPremium(Server server)
+		{
+			return IsPremiumSubscriber(server.Guild.OwnerId) || IsPremiumPartner(server.Id);
 		}
 
 		public bool IsTrialServer(guid id)

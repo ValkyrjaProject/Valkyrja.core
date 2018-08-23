@@ -40,22 +40,22 @@ namespace Botwinder.entities
 		public bool EnforceRequirements{ get; set; } = false;
 
 		[Column("verification_enabled")]
-		public bool VerificationEnabled{ get; set; } = false; //todo - not implemented
+		public bool VerificationEnabled{ get; set; } = false; //(legacy from Mk.II)
 
 		[Column("timers_enabled")]
-		public bool TimersEnabled{ get; set; } = false;
+		public bool TimersEnabled{ get; set; } = false; //Not Implemented anymore (legacy from Mk.II)
 
 		[Column("polls_enabled")]
-		public bool PollsEnabled{ get; set; } = false;
+		public bool PollsEnabled{ get; set; } = false; //Not Implemented anymore (legacy from Mk.II)
 
 		[Column("events_enabled")]
-		public bool EventsEnabled{ get; set; } = false;
+		public bool EventsEnabled{ get; set; } = false; //Not Implemented anymore (legacy from Mk.II)
 
 		[Column("giveaways_enabled")]
-		public bool GiveawaysEnabled{ get; set; } = false;
+		public bool GiveawaysEnabled{ get; set; } = false; //Not Implemented anymore (legacy from Mk.II)
 
 		[Column("livestream_enabled")]
-		public bool LivestreamEnabled{ get; set; } = false;
+		public bool LivestreamEnabled{ get; set; } = false; //Not Implemented anymore (legacy from Mk.II)
 
 		[Column("total_shards")]
 		public Int64 TotalShards{ get; set; } = 1;
@@ -64,7 +64,7 @@ namespace Botwinder.entities
 		public Int64 InitialUpdateDelay{ get; set; } = 3;
 
 		[Column("command_prefix", TypeName = "varchar(255)")]
-		public string CommandPrefix{ get; set; } = "!";
+		public string CommandPrefix{ get; set; } = "!"; //Not Implemented anymore (legacy from Mk.II)
 
 		[Column("main_serverid")]
 		public guid MainServerId{ get; set; } = 155821059960995840;
@@ -76,7 +76,7 @@ namespace Botwinder.entities
 		public bool VipSkipQueue{ get; set; } = false;
 
 		[Column("vip_members_max")]
-		public Int64 VipMembersMax{ get; set; } = 0;
+		public Int64 VipMembersMax{ get; set; } = 0; //Not Implemented anymore (legacy from Mk.II)
 
 		[Column("vip_trial_hours")]
 		public Int64 VipTrialHours{ get; set; } = 36;
