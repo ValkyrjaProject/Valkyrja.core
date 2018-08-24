@@ -42,6 +42,7 @@ namespace Botwinder.core
 
 		private CancellationTokenSource MainUpdateCancel;
 		private Task MainUpdateTask;
+		private Task ModulesUpdateTask;
 
 		public readonly List<IModule> Modules = new List<IModule>();
 
@@ -297,6 +298,12 @@ namespace Botwinder.core
 				this.MainUpdateTask.Start();
 			}
 
+			if( this.ModulesUpdateTask == null )
+			{
+				this.ModulesUpdateTask = Task.Factory.StartNew(UpdateModules, this.MainUpdateCancel.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+				this.ModulesUpdateTask.Start();
+			}
+
 			return Task.CompletedTask;
 		}
 
@@ -493,8 +500,6 @@ namespace Botwinder.core
 					await LogException(exception, "--Update");
 				}
 
-				await UpdateModules();
-
 				TimeSpan deltaTime = DateTime.UtcNow - frameTime;
 				if( this.GlobalConfig.LogDebug )
 					Console.WriteLine($"BotwinderClient: MainUpdate loop took: {deltaTime.TotalMilliseconds} ms");
@@ -534,8 +539,6 @@ namespace Botwinder.core
 				this.GlobalDb.SaveChanges();
 				this.ServerDb.SaveChanges();
 			}
-
-			//todo - maintenance
 		}
 
 		private void UpdateShardStats()
@@ -670,17 +673,41 @@ namespace Botwinder.core
 			}
 		}
 
-		private async Task UpdateModules()
+		private async Task UpdateModules() //endless task
 		{
-			foreach( IModule module in this.Modules )
+			IEnumerable<IModule> modules = this.Modules.Where(m => m.DoUpdate);
+			while( !this.MainUpdateCancel.IsCancellationRequested )
 			{
-				try
+				if( !this.IsInitialized || this.DiscordClient.ConnectionState != ConnectionState.Connected || this.DiscordClient.LoginState != LoginState.LoggedIn ||
+				    DateTime.Now - this.TimeConnected < TimeSpan.FromSeconds(this.GlobalConfig.InitialUpdateDelay) )
 				{
-					await module.Update(this);
+					await Task.Delay(10000);
+					continue;
 				}
-				catch(Exception exception)
+
+				foreach( IModule module in modules )
 				{
-					await LogException(exception, "--ModuleUpdate." + module.ToString());
+					if( this.GlobalConfig.LogDebug )
+						Console.WriteLine($"BotwinderClient: ModuleUpdate.{module.ToString()} triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+
+					DateTime frameTime = DateTime.UtcNow;
+
+					if( this.DiscordClient.ConnectionState != ConnectionState.Connected ||
+					    this.DiscordClient.LoginState != LoginState.LoggedIn )
+						break;
+
+					try
+					{
+						await module.Update(this);
+					}
+					catch(Exception exception)
+					{
+						await LogException(exception, "--ModuleUpdate." + module.ToString());
+					}
+					TimeSpan deltaTime = DateTime.UtcNow - frameTime;
+					if( this.GlobalConfig.LogDebug )
+						Console.WriteLine($"BotwinderClient: ModuleUpdate.{module.ToString()} took: {deltaTime.TotalMilliseconds} ms");
+					await Task.Delay(TimeSpan.FromMilliseconds(Math.Max(this.GlobalConfig.TotalShards * 1000, (TimeSpan.FromSeconds(0.5f / this.GlobalConfig.TargetFps) - deltaTime).TotalMilliseconds)));
 				}
 			}
 		}

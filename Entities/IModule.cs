@@ -15,6 +15,9 @@ namespace Botwinder.entities
 		/// <returns> Return a list of Commands for this module. </returns>
 		List<Command> Init(IBotwinderClient client);
 
+		/// <summary> True to trigger the Update </summary>
+		bool DoUpdate{ get; set; }
+
 		/// <summary> Main Update loop for this module. Do whatever you want. </summary>
 		Task Update(IBotwinderClient client);
 	}
