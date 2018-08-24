@@ -38,4 +38,24 @@ namespace Botwinder.entities
 		[Column("delete_at_time")]
 		public DateTime DeleteAtTime{ get; set; } = DateTime.MinValue;
 	}
+
+	[Table("role_groups")]
+	public class RoleGroupConfig
+	{
+		[Required]
+		[Column("serverid")]
+		[DatabaseGenerated(DatabaseGeneratedOption.None)]
+		public guid ServerId{ get; set; } = 0;
+
+		[Required]
+		[Column("groupid")]
+		[DatabaseGenerated(DatabaseGeneratedOption.None)]
+		public Int64 GroupId{ get; set; } = 0;
+
+		[Column("role_limit")]
+		public Int64 RoleLimit{ get; set; } = 1;
+
+		[Column("delete_at_time", TypeName = "varchar(255)")]
+		public string Name{ get; set; } = "";
+	}
 }
