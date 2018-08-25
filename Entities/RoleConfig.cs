@@ -55,7 +55,7 @@ namespace Botwinder.entities
 		[Column("role_limit")]
 		public Int64 RoleLimit{ get; set; } = 1;
 
-		[Column("delete_at_time", TypeName = "varchar(255)")]
+		[Column("name", TypeName = "varchar(255)")]
 		public string Name{ get; set; } = "";
 	}
 }
