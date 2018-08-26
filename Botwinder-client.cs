@@ -627,6 +627,7 @@ namespace Botwinder.core
 			{
 				pair.Value.ReloadConfig(this.DbConnectionString, dbContext);
 			}
+			dbContext.Dispose();
 			return Task.CompletedTask;
 		}
 

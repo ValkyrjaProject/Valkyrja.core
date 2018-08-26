@@ -65,8 +65,6 @@ namespace Botwinder.entities
 			List<ChannelConfig> channels = dbContext.Channels.Where(c => c.ServerId == this.Id).ToList();
 			this.IgnoredChannels = channels.Where(c => c.Ignored).Select(c => c.ChannelId).ToList();
 
-			dbContext.Dispose();
-
 			SocketRole role;
 			if( this.Config.MuteRoleId != 0 && (role = this.Guild.GetRole(this.Config.MuteRoleId)) != null )
 			{
