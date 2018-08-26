@@ -41,8 +41,9 @@ namespace Botwinder.core
 		private bool _Connected = false;
 
 		private CancellationTokenSource MainUpdateCancel;
-		private Task MainUpdateTask;
-		private Task ModulesUpdateTask;
+		private CancellationTokenSource ModulesUpdateCancel;
+		private Task MainUpdateTask = null;
+		private Task ModulesUpdateTask = null;
 
 		public readonly List<IModule> Modules = new List<IModule>();
 
@@ -300,7 +301,8 @@ namespace Botwinder.core
 
 			if( this.ModulesUpdateTask == null )
 			{
-				this.ModulesUpdateTask = Task.Factory.StartNew(UpdateModules, this.MainUpdateCancel.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+				this.ModulesUpdateCancel = new CancellationTokenSource();
+				this.ModulesUpdateTask = Task.Factory.StartNew(UpdateModules, this.ModulesUpdateCancel.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 				this.ModulesUpdateTask.Start();
 			}
 
