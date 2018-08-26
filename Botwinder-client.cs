@@ -676,6 +676,9 @@ namespace Botwinder.core
 
 		private async Task UpdateModules() //endless task
 		{
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine($"BotwinderClient: ModuleUpdate task started : " + Utils.GetTimestamp(DateTime.UtcNow));
+
 			IEnumerable<IModule> modules = this.Modules.Where(m => m.DoUpdate);
 			while( !this.MainUpdateCancel.IsCancellationRequested )
 			{
