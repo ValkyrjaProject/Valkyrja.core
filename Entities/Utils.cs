@@ -46,9 +46,9 @@ namespace Botwinder.entities
 	{
 		public static string Run(string cmd)
 		{
-			var escapedArgs = cmd.Replace("\"", "\\\"");
+			string escapedArgs = cmd.Replace("\"", "\\\"");
 
-			var process = new Process() {
+			Process process = new Process() {
 				StartInfo = new ProcessStartInfo {
 					FileName = "/bin/bash",
 					Arguments = $"-c \"{escapedArgs}\"",
@@ -60,6 +60,7 @@ namespace Botwinder.entities
 			process.Start();
 			string result = process.StandardOutput.ReadToEnd();
 			process.WaitForExit();
+			process.Dispose();
 			return result;
 		}
 	}
