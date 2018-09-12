@@ -158,7 +158,7 @@ namespace Botwinder.core
 			config.LargeThreshold = 100;
 			config.HandlerTimeout = null;
 			config.MessageCacheSize = 100;
-			config.ConnectionTimeout = int.MaxValue; //todo - figure out something reasonable?
+			config.ConnectionTimeout = 300000;
 
 			this.DiscordClient = new DiscordSocketClient(config);
 

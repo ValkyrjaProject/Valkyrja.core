@@ -7,6 +7,7 @@ using System.Diagnostics;
 using Botwinder.entities;
 using Discord.Net;
 using Discord.WebSocket;
+
 using guid = System.UInt64;
 
 namespace Botwinder.core
