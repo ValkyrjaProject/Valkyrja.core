@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Botwinder.core;
 using Discord;
 using Discord.WebSocket;
 
@@ -19,7 +20,7 @@ namespace Botwinder.entities
 		private string DbConnectionString;
 		public ServerConfig Config;
 		public Localisation Localisation;
-		public readonly Dictionary<string, Command> Commands;
+		public Dictionary<string, Command> Commands;
 		public Dictionary<string, CustomCommand> CustomCommands;
 		public Dictionary<string, CustomAlias> CustomAliases;
 		private CommandOptions CachedCommandOptions;
@@ -35,16 +36,20 @@ namespace Botwinder.entities
 		public Dictionary<guid, RoleConfig> Roles;
 
 
-		public Server(SocketGuild guild, Dictionary<string, Command> allCommands)
+		public Server(SocketGuild guild)
 		{
 			this.Id = guild.Id;
 			this.Guild = guild;
-			this.Commands = new Dictionary<string, Command>(allCommands);
 		}
 
-		public void ReloadConfig(string dbConnectionString, ServerContext dbContext)
+		public void ReloadConfig(string dbConnectionString, ServerContext dbContext, Dictionary<string, Command> allCommands)
 		{
 			this.DbConnectionString = dbConnectionString;
+
+			if( this.Commands?.Count != allCommands.Count )
+			{
+				this.Commands = new Dictionary<string, Command>(allCommands);
+			}
 
 			this.Config = dbContext.ServerConfigurations.FirstOrDefault(c => c.ServerId == this.Id);
 			if( this.Config == null )
@@ -81,9 +86,9 @@ namespace Botwinder.entities
 			}
 		}
 
-		public void LoadConfig(string dbConnectionString, ServerContext dbContext)
+		public void LoadConfig(string dbConnectionString, ServerContext dbContext, Dictionary<string, Command> allCommands)
 		{
-			ReloadConfig(dbConnectionString, dbContext);
+			ReloadConfig(dbConnectionString, dbContext, allCommands);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

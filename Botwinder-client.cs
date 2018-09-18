@@ -623,7 +623,7 @@ namespace Botwinder.core
 			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
 			foreach( KeyValuePair<guid, Server> pair in this.Servers )
 			{
-				pair.Value.ReloadConfig(this.DbConnectionString, dbContext);
+				pair.Value.ReloadConfig(this.DbConnectionString, dbContext, this.Commands);
 			}
 			dbContext.Dispose();
 			return Task.CompletedTask;
@@ -876,12 +876,12 @@ namespace Botwinder.core
 				if( this.Servers.ContainsKey(guild.Id) )
 				{
 					server = this.Servers[guild.Id];
-					server.ReloadConfig(this.DbConnectionString, dbContext);
+					server.ReloadConfig(this.DbConnectionString, dbContext, this.Commands);
 				}
 				else
 				{
-					server = new Server(guild, this.Commands);
-					server.LoadConfig(this.DbConnectionString, dbContext);
+					server = new Server(guild);
+					server.LoadConfig(this.DbConnectionString, dbContext, this.Commands);
 					server.Localisation = GlobalContext.Create(this.DbConnectionString).Localisations.FirstOrDefault(l => l.Id == server.Config.LocalisationId);
 					this.Servers.Add(server.Id, server);
 				}
