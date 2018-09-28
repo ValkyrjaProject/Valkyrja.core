@@ -304,6 +304,12 @@ namespace Botwinder.entities
 		[Column("exp_advance_users")]
 		public bool ExpAdvanceUsers{ get; set; } = false;
 
+		[Column("exp_member_messages")]
+		public Int64 ExpMemberMessages{ get; set; } = 0;
+
+		[Column("exp_member_roleid")]
+		public guid ExpMemberRoleId{ get; set; } = 0;
+
 		[Column("profile_enabled")]
 		public bool ProfileEnabled{ get; set; } = false;
 
