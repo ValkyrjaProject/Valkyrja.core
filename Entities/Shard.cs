@@ -65,7 +65,14 @@ namespace Botwinder.entities
 			this.Disconnects = 0;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public string GetStatsStringShort()
+		{
+			return $"**Shard ID: `{this.Id - 1}`**\n" +
+			       $"  Messages received: `{this.MessagesTotal}`\n" +
+			       $"  Messages per minute: `{this.MessagesPerMinute}`\n" +
+			       $"  Servers: `{this.ServerCount}`\n" +
+			       $"  Members `{this.UserCount}`";
+		}
 		public string GetStatsString()
 		{
 			TimeSpan uptime = this.TimeStarted == DateTime.MinValue ? TimeSpan.Zero : DateTime.UtcNow - this.TimeStarted;

@@ -132,12 +132,13 @@ namespace Botwinder.core
 			newCommand = new Command("global");
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
-			newCommand.Description = "Display all teh numbers.";
+			newCommand.Description = "Display all teh numbers. Use with `long` arg for more numbers.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				StringBuilder shards = new StringBuilder();
 				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
 				Shard globalCount = new Shard();
+				bool longStats = e.TrimmedMessage == "long";
 				foreach( Shard shard in dbContext.Shards )
 				{
 					globalCount.ServerCount += shard.ServerCount;
@@ -150,7 +151,7 @@ namespace Botwinder.core
 					globalCount.OperationsActive += shard.OperationsActive;
 					globalCount.Disconnects += shard.Disconnects;
 
-					shards.AppendLine(shard.GetStatsString());
+					shards.AppendLine(longStats ? shard.GetStatsString() : shard.GetStatsStringShort());
 				}
 
 				string message = "Server Status: <http://status.botwinder.info>\n\n" +
