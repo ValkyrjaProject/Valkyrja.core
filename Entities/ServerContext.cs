@@ -14,6 +14,7 @@ namespace Botwinder.entities
 		public DbSet<ServerStats> ServerStats;
 		public DbSet<ChannelConfig> Channels;
 		public DbSet<RoleConfig> Roles;
+		public DbSet<ReactionAssignedRole> ReactionAssignedRoles;
 		public DbSet<RoleGroupConfig> PublicRoleGroups;
 
 		public DbSet<CommandOptions> CommandOptions;
@@ -35,6 +36,7 @@ namespace Botwinder.entities
 			this.ServerStats = new InternalDbSet<ServerStats>(this);
 			this.Channels = new InternalDbSet<ChannelConfig>(this);
 			this.Roles = new InternalDbSet<RoleConfig>(this);
+			this.ReactionAssignedRoles = new InternalDbSet<ReactionAssignedRole>(this);
 			this.PublicRoleGroups = new InternalDbSet<RoleGroupConfig>(this);
 			this.CommandOptions = new InternalDbSet<CommandOptions>(this);
 			this.CommandChannelOptions = new InternalDbSet<CommandChannelOptions>(this);
@@ -60,6 +62,9 @@ namespace Botwinder.entities
 				.HasKey(p => p.ChannelId);
 
 			modelBuilder.Entity<RoleConfig>()
+				.HasKey(p => p.RoleId);
+
+			modelBuilder.Entity<ReactionAssignedRole>()
 				.HasKey(p => p.RoleId);
 
 			modelBuilder.Entity<RoleGroupConfig>()

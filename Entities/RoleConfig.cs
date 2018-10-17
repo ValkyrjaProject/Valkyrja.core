@@ -58,4 +58,25 @@ namespace Botwinder.entities
 		[Column("name", TypeName = "varchar(255)")]
 		public string Name{ get; set; } = "";
 	}
+
+	[Table("reaction_roles")]
+	public class ReactionAssignedRole
+	{
+		[Key]
+		[Required]
+		[Column("roleid")]
+		[DatabaseGenerated(DatabaseGeneratedOption.None)]
+		public guid RoleId{ get; set; } = 0;
+
+		[Required]
+		[Column("serverid")]
+		public guid ServerId{ get; set; } = 0;
+
+		[Required]
+		[Column("messageid")]
+		public guid MessageId{ get; set; } = 0;
+
+		[Column("emoji", TypeName = "varchar(255)")]
+		public string Emoji{ get; set; } = "";
+	}
 }
