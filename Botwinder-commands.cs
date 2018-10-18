@@ -46,7 +46,7 @@ namespace Botwinder.core
 			else if( this.RegexHardwareHelp.Match(message.Content).Success )
 				responseString = HardwareString;
 			else
-				responseString = "<:BotwinderNomPing:438688419447570442>";
+				responseString = "<:ValkyrjaNomPing:438688419447570442>";
 
 			if( !string.IsNullOrEmpty(responseString) )
 				await SendRawMessageToChannel(channel, responseString);
@@ -154,7 +154,7 @@ namespace Botwinder.core
 					shards.AppendLine(longStats ? shard.GetStatsString() : shard.GetStatsStringShort());
 				}
 
-				string message = "Server Status: <http://status.botwinder.info>\n\n" +
+				string message = "Server Status: <http://status.valkyrja.app>\n\n" +
 				                 $"Global Servers: `{globalCount.ServerCount}`\n" +
 				                 $"Global Members `{globalCount.UserCount}`\n" +
 				                 $"Global Allocated data Memory: `{globalCount.MemoryUsed} MB`\n" +
@@ -716,7 +716,7 @@ namespace Botwinder.core
 				string[] cpuTemp = Bash.Run("sensors | grep Package | sed 's/Package id [01]:\\s*+//g' | sed 's/\\s*(high = +85.0°C, crit = +95.0°C)//g'").Split('\n');
 				string cpuLoad = Bash.Run("grep 'cpu ' /proc/stat | awk '{print ($2+$4)*100/($2+$4+$5)}'");
 				string memoryUsed = Bash.Run("free | grep Mem | awk '{print $3/$2 * 100.0}'");
-				string message = "Server Status: <http://status.botwinder.info>\n" +
+				string message = "Server Status: <http://status.valkyrja.app>\n" +
 				                 "Server Info: <http://rhea-ayase.eu/persephone>" +
 				                 $"```md\n" +
 				                 $"[ Memory usage ][ {double.Parse(memoryUsed):#00.00} % ]\n" +
@@ -724,7 +724,7 @@ namespace Botwinder.core
 				                 $"[    CPU0 Temp ][ {cpuTemp[0]}  ]\n" +
 				                 $"[    CPU1 Temp ][ {cpuTemp[1]}  ]\n" +
 				                 $"[      Threads ][ {threads:#000}     ]\n" +
-				                 $"```\n<:BlobNomBotwinder:436141463299031040> `{time.TotalMilliseconds:#00}`ms <:BotwinderNomBlob:438688429849706497>";
+				                 $"```\n<:BlobNomValkyrja:436141463299031040> `{time.TotalMilliseconds:#00}`ms <:ValkyrjaNomBlob:438688429849706497>";
 
 				await e.SendReplySafe(message);
 				dbContext.Dispose();
@@ -738,7 +738,7 @@ namespace Botwinder.core
 			newCommand.Description = "PMs a list of Custom Commands for the server if used without a parameter. Use with a parameter to search for specific commands.";
 			newCommand.RequiredPermissions = PermissionType.Everyone;
 			newCommand.OnExecute += async e => {
-				StringBuilder response = new StringBuilder("Please refer to the website documentation for the full list of features and commands: <http://botwinder.info/docs>\n\n");
+				StringBuilder response = new StringBuilder("Please refer to the website documentation for the full list of features and commands: <https://valkyrja.app/docs>\n\n");
 				StringBuilder commandStrings = new StringBuilder();
 
 				bool isSpecific = !string.IsNullOrWhiteSpace(e.TrimmedMessage);
@@ -999,7 +999,7 @@ namespace Botwinder.core
 				string response = string.Format(
 					"Use this command with the following parameters:\n" +
 					"  `{0}{1} CommandID PermissionGroup` - where `CommandID` is name of the command, and `PermissionGroups` can be:\n" +
-					"    `ServerOwner`, `Admins`, `Moderators`, `SubModerators`, `Members`, `Everyone` - Look at the docs for reference: <http://botwinder.info/docs>\n" +
+					"    `ServerOwner`, `Admins`, `Moderators`, `SubModerators`, `Members`, `Everyone` - Look at the docs for reference: <https://valkyrja.app/docs>\n" +
 					"    `Nobody` - Block this command from execusion even by Server Owner.\n" +
 					"    `Default` - will set default permissions as seen in the docs.\n"+
 					"  For example `{0}{1} nuke ServerOwner`",

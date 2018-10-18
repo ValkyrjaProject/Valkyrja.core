@@ -46,7 +46,7 @@ namespace Botwinder.core
 		public readonly List<IModule> Modules = new List<IModule>();
 
 		private const string GameStatusConnecting = "Connecting...";
-		private const string GameStatusUrl = "at http://botwinder.info";
+		private const string GameStatusUrl = "at https://valkyrja.app";
 		private readonly Regex RegexCommandParams = new Regex("\"[^\"]+\"|\\S+", RegexOptions.Compiled);
 		private readonly Regex RegexEveryone = new Regex("(@everyone)|(@here)", RegexOptions.Compiled);
 

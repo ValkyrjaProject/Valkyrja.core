@@ -6,21 +6,21 @@ Copyright © 2016 Radka Janek, [rhea-ayase.eu](http://rhea-ayase.eu)
 
 
 
-## The Botwinder
-Please take a look at our website to see what's the bot about, full list of features, invite and configuration: [http://botwinder.info](http://botwinder.info)
+## The Valkyrja
+Please take a look at our website to see what's the bot about, full list of features, invite and configuration: [http://valkyrja.app](http://valkyrja.app)
 
 ## Contributors:
 
 * Please read the [Contributing file](CONTRIBUTING.md) before you start =)
-* Start by cloning [Botwinder.discord](https://github.com/RheaAyase/Botwinder.discord) following the instructions provided - do not clone this repo.
+* Start by cloning [Valkyrja.discord](https://github.com/RheaAyase/Valkyrja.discord) following the instructions provided - do not clone this repo.
 
 ## Project structure
 
-The Botwinder project is split into six repositories:
-* `Botwinder.core` - Core client code.
-* `Botwinder.discord` - Most of the Botwinder's features.
-* `Botwinder.secure` - Private repository containing sensitive code, such as antispam.
-* `Botwinder.service` - Separate bot to manage Botwinder.discord and other systemd services.
-* `Botwinder.web` - The `botwinder.info` website.
-* `Botwinder.status` - The `status.botwinder.info` page - only slightly modified [eZ Server Monitor](https://github.com/shevabam/ezservermonitor-web)
+The Valkyrja project is split into six repositories:
+* `Valkyrja.core` - Core client code.
+* `Valkyrja.discord` - Most of the Valkyrja's features.
+* `Valkyrja.secure` - Private repository containing sensitive code, such as antispam.
+* `Valkyrja.service` - Separate bot to manage Valkyrja.discord and other systemd services.
+* `Valkyrja.web` - The `valkyrja.app` website.
+* `Valkyrja.status` - The `status.valkyrja.app` page - only slightly modified [eZ Server Monitor](https://github.com/shevabam/ezservermonitor-web)
 
