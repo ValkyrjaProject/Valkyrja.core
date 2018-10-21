@@ -1243,6 +1243,16 @@ namespace Botwinder.core
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
+// !patchnotes
+			newCommand = new Command("patchnotes");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "See what new tricks I can do!";
+			newCommand.RequiredPermissions = PermissionType.Everyone;
+			newCommand.OnExecute += async e => {
+				await e.SendReplySafe(GetPatchnotes());
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
 /*
 // !command
 			newCommand = new Command("command");

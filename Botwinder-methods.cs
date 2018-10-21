@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.IO;
 using Botwinder.entities;
 using Discord.Net;
 using Discord.WebSocket;
@@ -278,5 +279,24 @@ namespace Botwinder.core
 
 			return mentionedIds;
 		}
+
+		private string GetPatchnotes()
+		{
+			if( !Directory.Exists("updates") || !File.Exists(Path.Combine("updates", "changelog")) )
+				return "This is not the original <https://valkyrja.app>, therefor I can not tell you, what's new here :<";
+
+			string changelog = File.ReadAllText(Path.Combine("updates", "changelog"));
+			int start = changelog.IndexOf("**Valkyrja");
+			int valkEnd = changelog.Substring(start+1).IndexOf("**Valkyrja");
+			int bwEnd = changelog.Substring(start+1).IndexOf("**Botwinder");
+			int end = valkEnd > start ? valkEnd : bwEnd;
+			int hLength = valkEnd > start ? "**Valkyrja".Length : "**Botwinder".Length;
+
+			if( start >= 0 && end <= changelog.Length && end > start && (changelog = changelog.Substring(start, end-start+hLength)).Length > 0 )
+				return changelog + "\n\nSee the full changelog and upcoming features at <https://valkyrja.app/updates>!";
+
+			return "There is an error in the data so I have failed to retrieve the patchnotes. Sorry mastah!";
+		}
+
 	}
 }
