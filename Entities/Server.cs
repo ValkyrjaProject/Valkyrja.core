@@ -34,7 +34,7 @@ namespace Botwinder.entities
 		public List<guid> IgnoredChannels;
 
 		public Dictionary<guid, RoleConfig> Roles;
-		public Dictionary<guid, ReactionAssignedRole> ReactionAssignedRoles;
+		public List<ReactionAssignedRole> ReactionAssignedRoles;
 
 
 		public Server(SocketGuild guild)
@@ -68,7 +68,7 @@ namespace Botwinder.entities
 			this.CustomCommands = dbContext.CustomCommands.Where(c => c.ServerId == this.Id).ToDictionary(c => c.CommandId);
 			this.CustomAliases = dbContext.CustomAliases.Where(c => c.ServerId == this.Id).ToDictionary(c => c.Alias);
 			this.Roles = dbContext.Roles.Where(c => c.ServerId == this.Id).ToDictionary(c => c.RoleId);
-			this.ReactionAssignedRoles = dbContext.ReactionAssignedRoles.Where(c => c.ServerId == this.Id).ToDictionary(c => c.RoleId);
+			this.ReactionAssignedRoles = dbContext.ReactionAssignedRoles.Where(c => c.ServerId == this.Id).ToList();
 
 			List<ChannelConfig> channels = dbContext.Channels.Where(c => c.ServerId == this.Id).ToList();
 			this.IgnoredChannels = channels.Where(c => c.Ignored).Select(c => c.ChannelId).ToList();
