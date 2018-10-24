@@ -74,7 +74,7 @@ namespace Botwinder.entities
 			this.IgnoredChannels = channels.Where(c => c.Ignored).Select(c => c.ChannelId).ToList();
 
 			SocketRole role;
-			if( this.Config.MuteRoleId != 0 && (role = this.Guild.GetRole(this.Config.MuteRoleId)) != null )
+			if( this.Config.MuteRoleId != 0 && (role = this.Guild.GetRole(this.Config.MuteRoleId)) != null && this.Guild.CurrentUser.GuildPermissions.ManageChannels )
 			{
 				foreach( SocketTextChannel channel in this.Guild.TextChannels )
 				{
