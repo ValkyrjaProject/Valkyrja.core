@@ -49,6 +49,15 @@ namespace Botwinder.core
 		private const string GameStatusUrl = "at https://valkyrja.app";
 		private readonly Regex RegexCommandParams = new Regex("\"[^\"]+\"|\\S+", RegexOptions.Compiled);
 		private readonly Regex RegexEveryone = new Regex("(@everyone)|(@here)", RegexOptions.Compiled);
+		public Regex RegexDiscordInvites;
+		public Regex RegexShortLinks;
+		public Regex RegexExtendedLinks;
+		public Regex RegexYoutubeLinks;
+		public Regex RegexTwitchLinks;
+		public Regex RegexHitboxLinks;
+		public Regex RegexBeamLinks;
+		public Regex RegexImgurOrGifLinks;
+		public Regex RegexTwitterLinks;
 
 		public readonly ConcurrentDictionary<guid, Server> Servers = new ConcurrentDictionary<guid, Server>();
 		public readonly Dictionary<string, Command> Commands = new Dictionary<string, Command>();
