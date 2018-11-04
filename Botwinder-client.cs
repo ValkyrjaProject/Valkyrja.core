@@ -826,7 +826,7 @@ namespace Botwinder.core
 				await OnGuildAvailable(guild);
 
 				string msg = Localisation.SystemStrings.GuildJoined;
-				if( !IsPartner(guild.Id) && !IsSubscriber(guild.OwnerId) )
+				if( this.GlobalConfig.EnforceRequirements && !IsPartner(guild.Id) && !IsSubscriber(guild.OwnerId) )
 					msg += Localisation.SystemStrings.GuildJoinedTrial;
 
 				try
