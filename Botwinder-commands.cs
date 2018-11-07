@@ -724,7 +724,7 @@ namespace Botwinder.core
 				                 $"[    CPU0 Temp ][ {cpuTemp[0]}  ]\n" +
 				                 $"[    CPU1 Temp ][ {cpuTemp[1]}  ]\n" +
 				                 $"[      Threads ][ {threads:#000}     ]\n" +
-				                 $"```\n<:BlobNomValkyrja:436141463299031040> `{time.TotalMilliseconds:#00}`ms <:ValkyrjaNomBlob:438688429849706497>";
+				                 $"```\n<:BlobNomValkyrja:436141463299031040> `{time.TotalMilliseconds:#00}`ms <:ValkyrjaNomBlob:509485197763543050>";
 
 				await e.SendReplySafe(message);
 				dbContext.Dispose();
