@@ -46,7 +46,7 @@ namespace Botwinder.core
 			else if( this.RegexHardwareHelp.Match(message.Content).Success )
 				responseString = HardwareString;
 			else
-				responseString = "<:ValkyrjaNomPing:438688419447570442>";
+				responseString = "<:ValkyrjaNomPing:509482352028942358>";
 
 			if( !string.IsNullOrEmpty(responseString) )
 				await SendRawMessageToChannel(channel, responseString);
