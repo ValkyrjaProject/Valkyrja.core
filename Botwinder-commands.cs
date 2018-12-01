@@ -172,6 +172,49 @@ namespace Botwinder.core
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
+// !getServers
+			newCommand = new Command("getServers");
+			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
+			newCommand.Description = "Query for servers with min - max users.";
+			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.OnExecute += async e => {
+				int min = 0;
+				int max = int.MaxValue;
+				if( e.MessageArgs == null || e.MessageArgs.Length == 0 || !int.TryParse(e.MessageArgs[0], out min) )
+				{
+					await e.SendReplySafe("Requires min max users.");
+					return;
+				}
+
+				if( e.MessageArgs.Length < 2 || !int.TryParse(e.MessageArgs[1], out max) )
+					max = int.MaxValue;
+
+				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				StringBuilder response = new StringBuilder();
+				IEnumerable<ServerStats> foundServers = dbContext.ServerStats.Where(s =>
+					s.UserCount > min && s.UserCount < max ).OrderByDescending(s => s.UserCount);
+				if( !foundServers.Any() )
+				{
+					await e.SendReplySafe("There aren't any servers matching your query.");
+					dbContext.Dispose();
+					return;
+				}
+
+				int count = foundServers.Count();
+				response.AppendLine($"Found **{count}** servers between `{min}` and `{max}` users.\n");
+
+				foreach(ServerStats server in foundServers.Take(5))
+				{
+					response.AppendLine(server.ToStringShort( IsSubscriber(server.OwnerId) || IsPartner(server.ServerId) ));
+					response.AppendLine();
+				}
+
+				dbContext.Dispose();
+				await e.SendReplySafe(response.ToString());
+			};
+			this.Commands.Add(newCommand.Id, newCommand);
+
 // !getServer
 			newCommand = new Command("getServer");
 			newCommand.Type = CommandType.Standard;
@@ -207,7 +250,7 @@ namespace Botwinder.core
 
 				foreach(ServerStats server in foundServers.Take(5))
 				{
-					response.AppendLine(server.ToString());
+					response.AppendLine(server.ToString( IsSubscriber(server.OwnerId) || IsPartner(server.ServerId) ));
 					response.AppendLine();
 				}
 

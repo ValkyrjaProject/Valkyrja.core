@@ -59,5 +59,21 @@ namespace Botwinder.entities
 			       $"Last Joined at: `{Utils.GetTimestamp(this.JoinedTime)}`\n" +
 			       $"Joined count: `{this.JoinedCount}`\n";
 		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public string ToString(bool isSubscriber)
+		{
+			return ToString() + $"Valkyrja Subscriber: `{isSubscriber}`\n";
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public string ToStringShort(bool isSubscriber)
+		{
+			return $"**Server ID: `{this.ServerId}`**\n" +
+			       $"Server Name: `{this.ServerName}`\n" +
+			       $"Discord Partner: `{this.IsDiscordPartner}`\n" +
+			       $"Members count: `{this.UserCount}`\n" +
+			       $"Valkyrja Subscriber: `{isSubscriber}`\n";
+		}
 	}
 }

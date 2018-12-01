@@ -76,7 +76,7 @@ namespace Botwinder.entities
 		public bool VipSkipQueue{ get; set; } = false;
 
 		[Column("vip_members_max")]
-		public Int64 VipMembersMax{ get; set; } = 0; //Not Implemented anymore (legacy from Mk.II)
+		public Int64 MinMembers{ get; set; } = 0; //vip_members_max is no longer used, using this as threshold under which the bot leaves the server.
 
 		[Column("vip_trial_hours")]
 		public Int64 VipTrialHours{ get; set; } = 36;
