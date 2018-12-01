@@ -52,12 +52,12 @@ namespace Botwinder.entities
 			       $"Owner: <@{this.OwnerId}>\n" +
 			       $"Owner ID: `{this.OwnerId}`\n" +
 			       $"Owner name: `{this.OwnerName}`\n" +
-			       $"Discord Partner: `{this.IsDiscordPartner}`\n" +
 			       $"Members count: `{this.UserCount}`\n" +
 			       $"Shard ID: `{this.ShardId}`\n" +
 			       $"First Joined at: `{Utils.GetTimestamp(this.JoinedTimeFirst)}`\n" +
 			       $"Last Joined at: `{Utils.GetTimestamp(this.JoinedTime)}`\n" +
-			       $"Joined count: `{this.JoinedCount}`\n";
+			       $"Joined count: `{this.JoinedCount}`\n" +
+			       $"Discord Partner: `{this.IsDiscordPartner}`\n";
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -71,8 +71,8 @@ namespace Botwinder.entities
 		{
 			return $"**Server ID: `{this.ServerId}`**\n" +
 			       $"Server Name: `{this.ServerName}`\n" +
-			       $"Discord Partner: `{this.IsDiscordPartner}`\n" +
 			       $"Members count: `{this.UserCount}`\n" +
+			       $"Discord Partner: `{this.IsDiscordPartner}`\n" +
 			       $"Valkyrja Subscriber: `{isSubscriber}`\n";
 		}
 	}
