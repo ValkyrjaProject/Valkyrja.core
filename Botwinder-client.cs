@@ -516,7 +516,7 @@ namespace Botwinder.core
 				Console.WriteLine("BotwinderClient: UpdateSubscriptions loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 			await UpdateSubscriptions();
 
-			if( this.GlobalConfig.EnforceRequirements && this.ValidSubscribers )
+			if( (this.GlobalConfig.EnforceRequirements || this.GlobalConfig.MinMembers > 0) && this.ValidSubscribers )
 			{
 				if( this.GlobalConfig.LogDebug )
 					Console.WriteLine("BotwinderClient: BailBadServers loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
@@ -641,6 +641,7 @@ namespace Botwinder.core
 		private Task UpdateSubscriptions()
 		{
 			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+			this.ValidSubscribers = false;
 
 			this.Subscribers?.Clear();
 			this.Subscribers = dbContext.Subscribers.ToDictionary(s => s.UserId);
@@ -930,16 +931,36 @@ namespace Botwinder.core
 							if( serversToLeave.Contains(pair.Value) )
 								continue;
 
-							serversToLeave.Add(pair.Value);
-							if( !this.LeaveNotifiedOwners.Contains(pair.Value.Guild.OwnerId) )
+							//trial
+							if( this.GlobalConfig.EnforceRequirements )
 							{
-								this.LeaveNotifiedOwners.Add(pair.Value.Guild.OwnerId);
-								try
+								serversToLeave.Add(pair.Value);
+								if( !this.LeaveNotifiedOwners.Contains(pair.Value.Guild.OwnerId) )
 								{
-									await pair.Value.Guild.Owner.SendMessageSafe(Localisation.SystemStrings.VipPmLeaving);
+									this.LeaveNotifiedOwners.Add(pair.Value.Guild.OwnerId);
+									try
+									{
+										await pair.Value.Guild.Owner.SendMessageSafe(Localisation.SystemStrings.VipPmLeaving);
+									}
+									catch(Exception) { }
 								}
-								catch(Exception) { }
 							}
+
+							//smol server
+							if( pair.Value.Guild.MemberCount < this.GlobalConfig.MinMembers )
+							{
+								serversToLeave.Add(pair.Value);
+								if( !this.LeaveNotifiedOwners.Contains(pair.Value.Guild.OwnerId) )
+								{
+									this.LeaveNotifiedOwners.Add(pair.Value.Guild.OwnerId);
+									try
+									{
+										await pair.Value.Guild.Owner.SendMessageSafe(Localisation.SystemStrings.SmallPmLeaving);
+									}
+									catch(Exception) { }
+								}
+							}
+
 							continue;
 						}
 

@@ -26,6 +26,9 @@ namespace Botwinder.entities
 		{
 			public const string DiscordShitEmoji = "<:DiscordShit:356545886454677506>";
 
+			public const string SmallPmLeaving = "Hulloh!\n" +
+			                                     "I'm sorry but I can not sit around in empty servers!";
+
 			public const string VipPmLeaving = "Hulloh!\n" +
 			                                   "I'm afraid that you are not eligible to use the Valkyrja bot!\n" +
 			                                   "Take a look at <https://valkyrja.app/invite> for more details. _(Please do read the whole page!)_";
