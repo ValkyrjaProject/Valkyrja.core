@@ -86,10 +86,10 @@ namespace Botwinder.entities
 				.HasKey(p => new{p.ServerId, p.UserId});
 
 			modelBuilder.Entity<Username>()
-				.HasKey(p => p.Id);
+				.HasKey(p => new{p.ServerId, p.UserId, p.Name});
 
 			modelBuilder.Entity<Nickname>()
-				.HasKey(p => p.Id);
+				.HasKey(p => new{p.ServerId, p.UserId, p.Name});
 
 			modelBuilder.Entity<Quote>()
 				.HasKey(p => new{p.ServerId, p.Id});

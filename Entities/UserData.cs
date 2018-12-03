@@ -121,11 +121,6 @@ namespace Botwinder.entities
 	[Table("usernames")]
 	public class Username
 	{
-		[Key]
-		[Column("id")]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public Int64 Id{ get; set; } = 0;
-
 		[Required]
 		[Column("serverid")]
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
@@ -136,18 +131,15 @@ namespace Botwinder.entities
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public guid UserId{ get; set; } = 0;
 
+		[Required]
 		[Column("username")]
+		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public string Name{ get; set; } = "";
 	}
 
 	[Table("nicknames")]
 	public class Nickname
 	{
-		[Key]
-		[Column("id")]
-		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public Int64 Id{ get; set; } = 0;
-
 		[Required]
 		[Column("serverid")]
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
@@ -158,7 +150,9 @@ namespace Botwinder.entities
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public guid UserId{ get; set; } = 0;
 
+		[Required]
 		[Column("nickname")]
+		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public string Name{ get; set; } = "";
 	}
 }
