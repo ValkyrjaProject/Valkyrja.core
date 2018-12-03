@@ -40,10 +40,10 @@ namespace Botwinder.entities
 		public bool EnforceRequirements{ get; set; } = false;
 
 		[Column("verification_enabled")]
-		public bool VerificationEnabled{ get; set; } = false; //(legacy from Mk.II)
+		public bool VerificationUpdateEnabled{ get; set; } = false;
 
 		[Column("timers_enabled")]
-		public bool TimersEnabled{ get; set; } = false; //Not Implemented anymore (legacy from Mk.II)
+		public bool ModuleUpdateEnabled{ get; set; } = false;
 
 		[Column("polls_enabled")]
 		public bool PollsEnabled{ get; set; } = false; //Not Implemented anymore (legacy from Mk.II)

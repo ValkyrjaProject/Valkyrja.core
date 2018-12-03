@@ -924,7 +924,7 @@ namespace Botwinder.core
 						bool trialTimeExceeded = pair.Value.Guild.CurrentUser?.JoinedAt != null &&
 						                         DateTime.UtcNow - pair.Value.Guild.CurrentUser.JoinedAt.Value.ToUniversalTime() > TimeSpan.FromHours(this.GlobalConfig.VipTrialHours);
 
-						//Partnered servers
+						//Not Partnered /trial servers
 						if( !(IsPartner(pair.Value.Id) || IsSubscriber(pair.Value.Guild.OwnerId)) &&
 						    (joinedCountExceeded || trialTimeExceeded) )
 						{
