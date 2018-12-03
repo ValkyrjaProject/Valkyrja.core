@@ -1054,6 +1054,9 @@ namespace Botwinder.core
 
 		private void UpdateUsernames(SocketGuildUser user)
 		{
+			if( !this.GlobalConfig.ModuleUpdateEnabled )
+				return;
+
 			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
 
 			if( !dbContext.Usernames.Any(u => u.ServerId == user.Guild.Id && u.UserId == user.Id && u.Name == user.Username) )
