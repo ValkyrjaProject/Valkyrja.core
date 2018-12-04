@@ -432,10 +432,10 @@ namespace Botwinder.core
 
 		private Task Log(LogEntry logEntry)
 		{
-			//GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-			//dbContext.Log.Add(logEntry);
-			//dbContext.SaveChanges();
-			//dbContext.Dispose();
+			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+			dbContext.Log.Add(logEntry);
+			dbContext.SaveChanges();
+			dbContext.Dispose();
 
 			return Task.CompletedTask;
 		}
