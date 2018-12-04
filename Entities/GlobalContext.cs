@@ -50,7 +50,7 @@ namespace Botwinder.entities
 				.HasKey(p => p.Id);
 
 			modelBuilder.Entity<LogEntry>()
-				.HasKey(p => new{p.Type, p.DateTime});
+				.HasKey(p => p.Id);
 
 			modelBuilder.Entity<ExceptionEntry>()
 				.HasKey(p => p.Id);
