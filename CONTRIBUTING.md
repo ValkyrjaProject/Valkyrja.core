@@ -2,14 +2,16 @@
 
 As a contributor you can directly commit to the project. Please create a new branch for everything, and then submit pull-request. This is done easily right here on the page if you're not awesome enough in the CLI.
 
-Clone the Valkyrja.discord repository recursively to include the Core project:
-* Fork Valkyrja.discord repository, and then clone it recursively to get the Core library as well: `git clone --recursive git@github.com:YOURUSERNAME/Valkyrja.discord.git`
+Clone the repository recursively to include the Core project:
+* Fork this repository, and then clone it recursively to get the Core library as well: `git clone --recursive git@github.com:YOURUSERNAME/Valkyrja.discord.git`
   * If you plan to contribute to the Core as well, fork it as well, and clone them both with `git clone git@github.com:YOURUSERNAME/Valkyrja.discord.git && cd Valkyrja.discord && git clone git@github.com:YOURUSERNAME/Valkyrja.core.git Core`
 * Nuke your nuget cache `rm -rf ~/.nuget/packages/discord.net*` (google the location for windows...)
 
 Fix the project to exclude the private code:
-* Remove `Valkyrja.secure` project reference from the `.sln` file
+* Remove the `Valkyrja.secure` and `.specific` project reference from the `.sln` file on lines [10-11](https://github.com/RheaAyase/Valkyrja.discord/blob/master/Valkyrja.sln#L10) and `14-15` and search for their guids (the long string) - there are at least four other lines for each project that need to be removed, related to build configuration.
+* Remove the `Valkyrja.secure` and `.specific` project reference from the `Bot/Valkyrja.discord.csproj` file on line [12](https://github.com/RheaAyase/Valkyrja.discord/blob/master/Bot/Valkyrja.discord.csproj#L12)
 * Comment out the `#define UsingValkyrjaSecure` in `Program.cs`
+* Comment out the `#define UsingValkyrjaSpecific` in `Program.cs`
 * Do not submit any of these changes, otherwise you will screw up our build!
 
 1. Create a new branch. This can be done easily on github. [e.g.](https://i.imgur.com/EDtnZ56.png)
@@ -53,8 +55,8 @@ Just a few guidelines about the code:
 * Always explicitly declare whether methods are public or private. If they are async, this keyword should be second (or third in case of static methods `public static async Task ...`)
 * Never return `void` with async methods unless you know what you're doing. Return `Task` instead of `void`.
   ```cs
-
-  public class BunnehClient: IClient
+    
+  public class BunnehClient<TUser>: IClient<TUser> where TUser: UserData, new()
   {
     public enum ConnectionState
     {
@@ -63,17 +65,17 @@ Just a few guidelines about the code:
       Good,
       Peachy
     }
-
+    
     internal const int LoopLimit = 60;
-
+    
     public ConnectionState State = ConnectionState.None;
-
+    
     internal int LoopCount{ get; private set; } = 0;
-
-
+  
+		
     /// <summary> This is blocking call that will await til the connection is peachy.
     /// Returns true if the operation was canceled, false otherwise. </summary>
-    public async Task<bool> AwaitConnection(TUser user)
+    public async Task<bool> AwaitConnection<TUser>(TUser user) where TUser: UserData, new()
     {
       while( this.State != ConnectionState.Peachy )
       {
@@ -82,7 +84,7 @@ Just a few guidelines about the code:
 
         await Task.Delay(1000);
       }
-
+  
       await user.SendMessageAsync("You have been connected!");
       return false;
     }
