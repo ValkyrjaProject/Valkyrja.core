@@ -19,18 +19,20 @@ namespace Botwinder.core
 		private readonly Regex RegexHardwareHelp = new Regex(".*(hardware|server).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		private const string HardwareString = "I run on Keyra: <http://rhea-ayase.eu/persephone>\n```md\n" +
 		                                      "|   [Motherboard][Supermicro X9DRi-LN4F+ Dual LGA2011 C602]\n" +
-		                                      "|        2x [CPU][Intel Xeon E5-2690 @3.8GHz, 8 Cores](32t)\n" +
+		                                      "|        2x [CPU][Intel Xeon E5-2690 @3.8GHz 8c](32t)\n" +
 		                                      "|    16x [Memory][Supermicro 4GB DDR3-1600 ECC](64GB)\n" +
 		                                      "|    1x [Storage][OCZ Vertex 450 128GB SSD]\n" +
 		                                      "|    1x [Storage][Seagate Barracuda 3TB 7200RPM]\n" +
 		                                      "|    4x [Storage][Hitachi NAS 4TB 7200RPM](raid5|write1.4GB/s)\n" +
-		                                      "| 2x [CPU Cooler][Corsair H80i v2]\n" +
-		                                      "|        4x [Fan][Noctua NF-F12]\n" +
-		                                      "|        3x [Fan][Noctua NF-A14]\n" +
-		                                      "|          [Case][be quiet! Dark Base Pro]\n" +
+		                                      "| 2x [CPU Cooler][Noctua NH-U12DX i4]\n" +
+		                                      "|    2x [CPU Fan][Noctua NF-F12]\n" +
+		                                      "|    2x [CPU Fan][Noctua NF-A12x15]\n" +
+		                                      "|3x [Exhaust Fan][Noctua NF-A12x25]\n" +
+		                                      "| 2x [Intake Fan][Noctua NF-A14]\n" +
+		                                      "|          [Case][be quiet! Dark Base Pro 900]\n" +
 		                                      "|  [Power Supply][Corsair RM750x Gold]\n" +
 		                                      "```\n" +
-		                                      "...and I'm connected through an APU2C4 router, running RHEL, with 300/300 Mbps and ISP failover.";
+		                                      "...and I'm connected through an APU2C4 router, running RHEL8, with 300/300 Mbps and ISP failover.";
 
 		private async Task HandleMentionResponse(Server server, SocketTextChannel channel, SocketMessage message)
 		{
