@@ -1,8 +1,8 @@
--- MySQL dump 10.16  Distrib 10.2.17-MariaDB, for Linux (x86_64)
+-- MySQL dump 10.16  Distrib 10.3.10-MariaDB, for Linux (x86_64)
 --
 -- Host: localhost    Database: db_botwinder
 -- ------------------------------------------------------
--- Server version	10.2.17-MariaDB
+-- Server version	10.3.10-MariaDB
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -145,7 +145,7 @@ CREATE TABLE `exceptions` (
   `data` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=224 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=27856 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -249,8 +249,9 @@ CREATE TABLE `logs` (
   `type` tinyint(4) NOT NULL,
   `datetime` datetime NOT NULL,
   `message` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4701962 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  PRIMARY KEY (`id`),
+  KEY `logtype_timestamp` (`type`,`datetime`)
+) ENGINE=InnoDB AUTO_INCREMENT=4974902 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -261,12 +262,11 @@ DROP TABLE IF EXISTS `nicknames`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `nicknames` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `serverid` bigint(20) unsigned NOT NULL,
   `userid` bigint(20) unsigned NOT NULL,
   `nickname` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=102281 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  PRIMARY KEY (`serverid`,`userid`,`nickname`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -646,12 +646,11 @@ DROP TABLE IF EXISTS `usernames`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `usernames` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `serverid` bigint(20) unsigned NOT NULL,
   `userid` bigint(20) unsigned NOT NULL,
   `username` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1334367 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  PRIMARY KEY (`serverid`,`userid`,`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -677,6 +676,7 @@ CREATE TABLE `users` (
   `level_relative` bigint(20) NOT NULL DEFAULT 0,
   `exp_relative` bigint(20) NOT NULL,
   `memo` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `username` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`userid`,`serverid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -705,4 +705,4 @@ CREATE TABLE `votes` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2018-10-23 12:22:52
+-- Dump completed on 2019-02-19 20:48:12
