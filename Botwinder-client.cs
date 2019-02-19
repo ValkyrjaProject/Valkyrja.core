@@ -993,33 +993,10 @@ namespace Botwinder.core
 		private Task OnGuildMembersDownloaded(SocketGuild guild)
 		{
 			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
-			List<Username> usernames = dbContext.Usernames.Where(u => u.ServerId == guild.Id).ToList();
-			List<Nickname> nicknames = dbContext.Nicknames.Where(u => u.ServerId == guild.Id).ToList();
 
 			foreach( SocketGuildUser user in guild.Users )
 			{
-				if( !usernames.Any(u => u.UserId == user.Id && u.Name == user.Username) )
-				{
-					Username username = new Username(){
-						ServerId = user.Guild.Id,
-						UserId = user.Id,
-						Name = user.Username
-					};
-					usernames.Add(username);
-					dbContext.Usernames.Add(username);
-				}
-
-				if( !string.IsNullOrEmpty(user.Nickname) &&
-				    !nicknames.Any(u => u.UserId == user.Id && u.Name == user.Nickname) )
-				{
-					Nickname nickname = new Nickname(){
-						ServerId = user.Guild.Id,
-						UserId = user.Id,
-						Name = user.Nickname
-					};
-					nicknames.Add(nickname);
-					dbContext.Nicknames.Add(nickname);
-				}
+				UpdateUsernames(user, dbContext);
 			}
 
 			dbContext.SaveChanges();
@@ -1052,12 +1029,17 @@ namespace Botwinder.core
 			return Task.CompletedTask;
 		}
 
-		private void UpdateUsernames(SocketGuildUser user)
+		private void UpdateUsernames(SocketGuildUser user, ServerContext dbContext = null)
 		{
 			if( !this.GlobalConfig.ModuleUpdateEnabled )
 				return;
 
-			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+			bool dontDispose = false;
+			if( dbContext == null )
+			{
+				dbContext = ServerContext.Create(this.DbConnectionString);
+				dontDispose = true;
+			}
 
 			if( !dbContext.Usernames.Any(u => u.ServerId == user.Guild.Id && u.UserId == user.Id && u.Name == user.Username) )
 			{
@@ -1066,6 +1048,18 @@ namespace Botwinder.core
 					UserId = user.Id,
 					Name = user.Username
 				});
+
+				UserData userData = dbContext.UserDatabase.FirstOrDefault(u => u.ServerId == user.Guild.Id && u.UserId == user.Id);
+				if( userData == null )
+				{
+					userData = new UserData(){
+						ServerId = user.Guild.Id,
+						UserId = user.Id
+					};
+					dbContext.Add(userData);
+				}
+
+				userData.LastUsername = user.Username;
 			}
 
 			if( !string.IsNullOrEmpty(user.Nickname) &&
@@ -1078,6 +1072,7 @@ namespace Botwinder.core
 				});
 			}
 
+			if( dontDispose ) return;
 			dbContext.SaveChanges();
 			dbContext.Dispose();
 		}

@@ -25,6 +25,9 @@ namespace Botwinder.entities
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public guid UserId{ get; set; } = 0;
 
+		[Column("username")]
+		public string LastUsername{ get; set; } = "";
+
 		[Column("verified")]
 		public bool Verified{ get; set; } = false;
 
