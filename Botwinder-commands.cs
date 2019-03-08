@@ -1074,7 +1074,7 @@ namespace Botwinder.core
 				{
 					StringBuilder responseBuilder = new StringBuilder();
 					CommandOptions options = dbContext.GetOrAddCommandOptions(e.Server, commandId);
-					responseBuilder.Append($"Current permissions for {commandId} are:\n" +
+					responseBuilder.Append($"Current permissions for `{commandId}` are:\n" +
 					                       $"`{options.PermissionOverrides.ToString()}`");
 					if( options.PermissionOverrides == PermissionOverrides.Default )
 					{
@@ -1104,32 +1104,32 @@ namespace Botwinder.core
 									permissions = PermissionOverrides.Everyone;
 									break;
 							}
-							responseBuilder.Append($" -> {permissions.ToString()}");
+							responseBuilder.Append($" -> `{permissions.ToString()}`");
 						}
 						else if( e.Server.CustomCommands.ContainsKey(commandId) && (customCommand = e.Server.CustomCommands[commandId]) != null )
-							responseBuilder.Append($" -> Everyone");
+							responseBuilder.Append($" -> `{PermissionOverrides.Everyone}`");
 					}
 
 					if( options.DeleteReply && options.DeleteRequest )
-						responseBuilder.Append("\n\nThis command will attempt to delete both the message that issued the command, and my response.");
+						responseBuilder.Append("\n+ This command will attempt to delete both the message that issued the command, and my response.");
 					else if( options.DeleteReply )
-						responseBuilder.Append("\n\nThis command will attempt to delete my response.");
+						responseBuilder.Append("\n+ This command will attempt to delete my response.");
 					else if( options.DeleteRequest )
-						responseBuilder.Append("\n\nThis command will attempt to delete the message that issued the command.");
+						responseBuilder.Append("\n+ This command will attempt to delete the message that issued the command.");
 
 					IEnumerable<CommandChannelOptions> channelBlacklist = dbContext.CommandChannelOptions.Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId && c.Blacklisted);
 					IEnumerable<CommandChannelOptions> channelWhitelist = dbContext.CommandChannelOptions.Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId && c.Whitelisted);
 					if( channelBlacklist.Any() )
 					{
-						responseBuilder.Append("\n\nThis command can not be invoked in any of the following channels:");
+						responseBuilder.Append("\n+ This command can not be invoked in any of the following channels:");
 						foreach( CommandChannelOptions channelOptions in channelBlacklist )
 						{
-							responseBuilder.Append($"\n<#{channelOptions.ChannelId}>");
+							responseBuilder.Append($"\n    <#{channelOptions.ChannelId}>");
 						}
 					}
 					if( channelWhitelist.Any() )
 					{
-						responseBuilder.Append("\n\nThis command can be invoked only in the following channels:");
+						responseBuilder.Append("\n+ This command can be invoked only in the following channels:");
 						foreach( CommandChannelOptions channelOptions in channelWhitelist )
 						{
 							if( channelBlacklist.Any(c => c.ChannelId == channelOptions.ChannelId) )
