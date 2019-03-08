@@ -1051,34 +1051,104 @@ namespace Botwinder.core
 					e.Server.Config.CommandPrefix,
 					e.Command.Id);
 
-				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
-				    !Enum.TryParse(e.MessageArgs[1], true, out PermissionOverrides permissionOverrides) )
+				if( e.MessageArgs == null  || e.MessageArgs.Length < 1)
 				{
 					await e.SendReplySafe(response);
 					return;
 				}
 
-				string commandId = e.Server.GetCommandOptionsId(e.MessageArgs[0]);
-				if( commandId == null )
-				{
-					await e.SendReplySafe("I'm sorry but you can not restrict this command.");
-					return;
-				}
-				if( commandId == "" )
-				{
-					await e.SendReplySafe($"Command `{e.MessageArgs[0]}` not found.");
-					return;
-				}
-
+				string commandId = "";
 				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
-				CommandOptions options = dbContext.GetOrAddCommandOptions(e.Server, commandId);
+				if( string.IsNullOrEmpty(commandId = e.Server.GetCommandOptionsId(e.MessageArgs[0])) )
+				{
+					if( commandId == null )
+					{
+						response = "I'm sorry but you can not restrict this command.";
+					}
+					else if( commandId == "" )
+					{
+						response = $"Command `{e.MessageArgs[0]}` not found.";
+					}
+				}
+				else if( e.MessageArgs.Length == 1 )
+				{
+					StringBuilder responseBuilder = new StringBuilder();
+					CommandOptions options = dbContext.GetOrAddCommandOptions(e.Server, commandId);
+					responseBuilder.Append($"Current permissions for {commandId} are:\n" +
+					                       $"`{options.PermissionOverrides.ToString()}`");
+					if( options.PermissionOverrides == PermissionOverrides.Default )
+					{
+						Command command = null;
+						CustomCommand customCommand = null;
+						if( e.Server.Commands.ContainsKey(commandId) && (command = e.Server.Commands[commandId]) == null )
+						{
+							PermissionOverrides permissions = PermissionOverrides.Default;
+							switch(command.RequiredPermissions)
+							{
+								case PermissionType.ServerOwner:
+									permissions = PermissionOverrides.ServerOwner;
+									break;
+								case PermissionType.ServerOwner | PermissionType.Admin:
+									permissions = PermissionOverrides.Admins;
+									break;
+								case PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator:
+									permissions = PermissionOverrides.Moderators;
+									break;
+								case PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator | PermissionType.SubModerator:
+									permissions = PermissionOverrides.SubModerators;
+									break;
+								case PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator | PermissionType.SubModerator | PermissionType.Member:
+									permissions = PermissionOverrides.Members;
+									break;
+								default:
+									permissions = PermissionOverrides.Everyone;
+									break;
+							}
+							responseBuilder.Append($" -> {permissions.ToString()}");
+						}
+						else if( e.Server.CustomCommands.ContainsKey(commandId) || (customCommand = e.Server.CustomCommands[commandId]) == null )
+							responseBuilder.Append($" -> Everyone");
+					}
 
-				options.PermissionOverrides = permissionOverrides;
+					if( options.DeleteReply && options.DeleteRequest )
+						responseBuilder.Append("\n\nThis command will attempt to delete both the message that issued the command, and my response.");
+					else if( options.DeleteReply )
+						responseBuilder.Append("\n\nThis command will attempt to delete my response.");
+					else if( options.DeleteRequest )
+						responseBuilder.Append("\n\nThis command will attempt to delete the message that issued the command.");
 
-				dbContext.SaveChanges();
+					IEnumerable<CommandChannelOptions> channelBlacklist = dbContext.CommandChannelOptions.Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId && c.Blacklisted);
+					IEnumerable<CommandChannelOptions> channelWhitelist = dbContext.CommandChannelOptions.Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId && c.Whitelisted);
+					if( channelBlacklist.Any() )
+					{
+						responseBuilder.Append("\n\nThis command can not be invoked in any of the following channels:");
+						foreach( CommandChannelOptions channelOptions in channelBlacklist )
+						{
+							responseBuilder.Append($"\n<#{channelOptions.ChannelId}>");
+						}
+					}
+					if( channelWhitelist.Any() )
+					{
+						responseBuilder.Append("\n\nThis command can be invoked only in the following channels:");
+						foreach( CommandChannelOptions channelOptions in channelWhitelist )
+						{
+							if( channelBlacklist.Any(c => c.ChannelId == channelOptions.ChannelId) )
+								continue;
+							responseBuilder.Append($"\n<#{channelOptions.ChannelId}>");
+						}
+					}
+				}
+				else if( e.MessageArgs.Length == 2 && Enum.TryParse(e.MessageArgs[1], true, out PermissionOverrides permissionOverrides) )
+				{
+					CommandOptions options = dbContext.GetOrAddCommandOptions(e.Server, commandId);
+					options.PermissionOverrides = permissionOverrides;
+					dbContext.SaveChanges();
+					response = "All set!";
+				}
+
 				dbContext.Dispose();
 
-				await e.SendReplySafe("All set!");
+				await e.SendReplySafe(response);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 

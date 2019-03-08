@@ -193,12 +193,10 @@ namespace Botwinder.entities
 						commandPermissions = PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator;
 						break;
 					case PermissionOverrides.SubModerators:
-						commandPermissions = PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator |
-						                      PermissionType.SubModerator;
+						commandPermissions = PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator | PermissionType.SubModerator;
 						break;
 					case PermissionOverrides.Members:
-						commandPermissions = PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator |
-						                      PermissionType.SubModerator | PermissionType.Member;
+						commandPermissions = PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator | PermissionType.SubModerator | PermissionType.Member;
 						break;
 					case PermissionOverrides.Everyone:
 						commandPermissions = PermissionType.Everyone;
