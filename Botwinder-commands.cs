@@ -1080,7 +1080,7 @@ namespace Botwinder.core
 					{
 						Command command = null;
 						CustomCommand customCommand = null;
-						if( e.Server.Commands.ContainsKey(commandId) && (command = e.Server.Commands[commandId]) == null )
+						if( e.Server.Commands.ContainsKey(commandId) && (command = e.Server.Commands[commandId]) != null )
 						{
 							PermissionOverrides permissions = PermissionOverrides.Default;
 							switch(command.RequiredPermissions)
@@ -1106,7 +1106,7 @@ namespace Botwinder.core
 							}
 							responseBuilder.Append($" -> {permissions.ToString()}");
 						}
-						else if( e.Server.CustomCommands.ContainsKey(commandId) || (customCommand = e.Server.CustomCommands[commandId]) == null )
+						else if( e.Server.CustomCommands.ContainsKey(commandId) && (customCommand = e.Server.CustomCommands[commandId]) != null )
 							responseBuilder.Append($" -> Everyone");
 					}
 
