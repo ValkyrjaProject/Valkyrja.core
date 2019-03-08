@@ -1137,6 +1137,8 @@ namespace Botwinder.core
 							responseBuilder.Append($"\n<#{channelOptions.ChannelId}>");
 						}
 					}
+
+					response = responseBuilder.ToString();
 				}
 				else if( e.MessageArgs.Length == 2 && Enum.TryParse(e.MessageArgs[1], true, out PermissionOverrides permissionOverrides) )
 				{
