@@ -183,7 +183,7 @@ namespace Botwinder.core
 			this.DiscordClient.Connected += OnConnected;
 			this.DiscordClient.Ready += OnReady;
 			this.DiscordClient.Disconnected += OnDisconnected;
-			this.Events = new Events(this.DiscordClient);
+			this.Events = new Events(this.DiscordClient, this);
 			this.Events.MessageReceived += OnMessageReceived;
 			this.Events.MessageUpdated += OnMessageUpdated;
 			this.Events.LogEntryAdded += Log;

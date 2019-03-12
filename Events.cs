@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Botwinder.core;
 
 using guid = System.UInt64;
 
@@ -10,6 +11,9 @@ namespace Botwinder.entities
 {
 	public class Events
 	{
+		private BotwinderClient Client;
+
+
 		/// <summary> Triggers only once, as soon as the client connects for the first time. Consider using IModule.Init instead. </summary>
 		public Func<Task> Initialize = null;
 		/// <summary> Triggers after every re-connect (including the first connect) </summary>
@@ -199,8 +203,10 @@ namespace Botwinder.entities
 		/// <see cref="T:string" />: Name of the role. </summary>
 		public Func<Server, SocketGuildUser, string, Task> LogPublicRoleLeave = null;
 
-		public Events(DiscordSocketClient discordClient)
+		public Events(DiscordSocketClient discordClient, BotwinderClient botwinderClient)
 		{
+			this.Client = botwinderClient;
+
 			discordClient.Log += OnLogEntryAdded;
 
 			discordClient.JoinedGuild += OnGuildJoined;
@@ -383,8 +389,20 @@ namespace Botwinder.entities
 				return Task.CompletedTask;
 
 			if( this.MessageReceived != null )
-				Task.Run(async () => await this.MessageReceived(message));
+				Task.Run(async () => await TriggerMessageReceivedEvent(message));
 			return Task.CompletedTask;
+		}
+
+		private async Task TriggerMessageReceivedEvent(SocketMessage message)
+		{
+			try
+			{
+				await this.MessageReceived(message);
+			}
+			catch(Exception exception)
+			{
+				await this.Client.LogException(exception, $"--MessageId: {message.Id}\n--ChannelId: {message.Channel.Id}\n--Content: {message.Content}");
+			}
 		}
 
 		private Task OnMessageUpdated(Cacheable<IMessage, ulong> originalMessage, SocketMessage updatedMessage, ISocketMessageChannel channel)
@@ -402,12 +420,15 @@ namespace Botwinder.entities
 			if( this.MessageDeleted == null )
 				return Task.CompletedTask;
 
+			IMessage msg = null;
 			try
 			{
-				IMessage msg = originalMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
-				Task.Run(async () => await this.MessageDeleted(msg as SocketMessage, channel));
+				msg = originalMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
 			}
 			catch(Exception) { }
+
+			if( msg != null )
+				Task.Run(async () => await this.MessageDeleted(msg as SocketMessage, channel));
 			return Task.CompletedTask;
 		}
 
