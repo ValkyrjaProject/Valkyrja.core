@@ -1034,11 +1034,11 @@ namespace Botwinder.core
 			if( !this.GlobalConfig.ModuleUpdateEnabled )
 				return;
 
-			bool dontDispose = false;
+			bool saveAndDispose = false;
 			if( dbContext == null )
 			{
 				dbContext = ServerContext.Create(this.DbConnectionString);
-				dontDispose = true;
+				saveAndDispose = true;
 			}
 
 			if( !dbContext.Usernames.Any(u => u.ServerId == user.Guild.Id && u.UserId == user.Id && u.Name == user.Username) )
@@ -1056,7 +1056,7 @@ namespace Botwinder.core
 						ServerId = user.Guild.Id,
 						UserId = user.Id
 					};
-					dbContext.Add(userData);
+					dbContext.UserDatabase.Add(userData);
 				}
 
 				userData.LastUsername = user.Username;
@@ -1072,7 +1072,7 @@ namespace Botwinder.core
 				});
 			}
 
-			if( dontDispose ) return;
+			if( !saveAndDispose ) return;
 			dbContext.SaveChanges();
 			dbContext.Dispose();
 		}
