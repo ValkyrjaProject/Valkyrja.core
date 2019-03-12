@@ -1111,7 +1111,7 @@ namespace Botwinder.core
 					}
 
 					if( options.DeleteReply && options.DeleteRequest )
-						responseBuilder.Append("\n+ This command will attempt to delete both the message that issued the command, and my response.");
+						responseBuilder.Append("\n+ This command will attempt to delete both, the message that issued the command and my response.");
 					else if( options.DeleteReply )
 						responseBuilder.Append("\n+ This command will attempt to delete my response.");
 					else if( options.DeleteRequest )
