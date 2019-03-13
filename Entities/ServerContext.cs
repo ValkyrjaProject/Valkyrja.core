@@ -104,7 +104,7 @@ namespace Botwinder.entities
 		public static ServerContext Create(string connectionString)
 		{
 			DbContextOptionsBuilder<ServerContext> optionsBuilder = new DbContextOptionsBuilder<ServerContext>();
-			optionsBuilder.UseMySql(connectionString);
+			optionsBuilder.UseMySql(connectionString).EnableSensitiveDataLogging();
 
 			ServerContext newContext = new ServerContext(optionsBuilder.Options);
 			newContext.Database.EnsureCreated();

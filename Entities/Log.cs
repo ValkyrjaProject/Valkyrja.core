@@ -67,7 +67,7 @@ namespace Botwinder.entities
 		[Column("type", TypeName = "varchar(255)")]
 		public string Type{ get; set; } = "";
 
-		[Column("message", TypeName = "varchar(255)")]
+		[Column("message", TypeName = "varchar(1024)")]
 		public string Message{ get; set; } = "";
 
 		[Column("stack", TypeName = "text")]
