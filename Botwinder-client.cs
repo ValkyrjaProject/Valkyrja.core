@@ -1049,17 +1049,20 @@ namespace Botwinder.core
 					Name = user.Username
 				});
 
-				UserData userData = dbContext.UserDatabase.FirstOrDefault(u => u.ServerId == user.Guild.Id && u.UserId == user.Id);
-				if( userData == null )
+				if( saveAndDispose ) //Update the latest username only when the user joined the server or changed username.
 				{
-					userData = new UserData(){
-						ServerId = user.Guild.Id,
-						UserId = user.Id
-					};
-					dbContext.UserDatabase.Add(userData);
-				}
+					UserData userData = dbContext.UserDatabase.FirstOrDefault(u => u.ServerId == user.Guild.Id && u.UserId == user.Id);
+					if( userData == null )
+					{
+						userData = new UserData(){
+							ServerId = user.Guild.Id,
+							UserId = user.Id
+						};
+						dbContext.UserDatabase.Add(userData);
+					}
 
-				userData.LastUsername = user.Username;
+					userData.LastUsername = user.Username;
+				}
 			}
 
 			if( !string.IsNullOrEmpty(user.Nickname) &&
