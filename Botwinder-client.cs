@@ -627,15 +627,14 @@ namespace Botwinder.core
 			}
 		}
 
-		private Task UpdateServerConfigs()
+		private async Task UpdateServerConfigs()
 		{
 			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
 			foreach( KeyValuePair<guid, Server> pair in this.Servers )
 			{
-				pair.Value.ReloadConfig(this.DbConnectionString, dbContext, this.Commands);
+				await pair.Value.ReloadConfig(this, dbContext, this.Commands);
 			}
 			dbContext.Dispose();
-			return Task.CompletedTask;
 		}
 
 		private Task UpdateSubscriptions()
@@ -886,12 +885,12 @@ namespace Botwinder.core
 				if( this.Servers.ContainsKey(guild.Id) )
 				{
 					server = this.Servers[guild.Id];
-					server.ReloadConfig(this.DbConnectionString, dbContext, this.Commands);
+					await server.ReloadConfig(this, dbContext, this.Commands);
 				}
 				else
 				{
 					server = new Server(guild);
-					server.LoadConfig(this.DbConnectionString, dbContext, this.Commands);
+					await server.LoadConfig(this, dbContext, this.Commands);
 					server.Localisation = GlobalContext.Create(this.DbConnectionString).Localisations.FirstOrDefault(l => l.Id == server.Config.LocalisationId);
 					this.Servers.Add(server.Id, server);
 				}

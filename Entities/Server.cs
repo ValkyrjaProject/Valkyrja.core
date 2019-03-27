@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Botwinder.core;
 using Discord;
@@ -33,6 +34,7 @@ namespace Botwinder.entities
 
 		public List<guid> IgnoredChannels;
 
+		public Regex AlertRegex = null;
 		public Dictionary<guid, RoleConfig> Roles;
 		public List<ReactionAssignedRole> ReactionAssignedRoles;
 		public Object ReactionRolesLock{ get; set; } = new Object();
@@ -44,9 +46,9 @@ namespace Botwinder.entities
 			this.Guild = guild;
 		}
 
-		public void ReloadConfig(string dbConnectionString, ServerContext dbContext, Dictionary<string, Command> allCommands)
+		public async Task ReloadConfig(BotwinderClient client, ServerContext dbContext, Dictionary<string, Command> allCommands)
 		{
-			this.DbConnectionString = dbConnectionString;
+			this.DbConnectionString = client.DbConnectionString;
 
 			if( this.Commands?.Count != allCommands.Count )
 			{
@@ -77,6 +79,23 @@ namespace Botwinder.entities
 			List<ChannelConfig> channels = dbContext.Channels.Where(c => c.ServerId == this.Id).ToList();
 			this.IgnoredChannels = channels.Where(c => c.Ignored).Select(c => c.ChannelId).ToList();
 
+			if( string.IsNullOrWhiteSpace(this.Config.LogAlertRegex) && this.Config.AlertChannelId != 0 )
+			{
+				try
+				{
+					this.AlertRegex = new Regex($"({this.Config.LogAlertRegex})", RegexOptions.Compiled | RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(100));
+				}
+				catch(Exception e)
+				{
+					this.AlertRegex = null;
+					await client.LogException(e, $"ReloadConfig failed AlertRegex: {this.Config.LogAlertRegex}", this.Id);
+				}
+			}
+			else
+			{
+				this.AlertRegex = null;
+			}
+
 			SocketRole role;
 			if( this.Config.MuteRoleId != 0 && (role = this.Guild.GetRole(this.Config.MuteRoleId)) != null && this.Guild.CurrentUser.GuildPermissions.ManageChannels )
 			{
@@ -93,9 +112,9 @@ namespace Botwinder.entities
 			}
 		}
 
-		public void LoadConfig(string dbConnectionString, ServerContext dbContext, Dictionary<string, Command> allCommands)
+		public async Task LoadConfig(BotwinderClient client, ServerContext dbContext, Dictionary<string, Command> allCommands)
 		{
-			ReloadConfig(dbConnectionString, dbContext, allCommands);
+			await ReloadConfig(client, dbContext, allCommands);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

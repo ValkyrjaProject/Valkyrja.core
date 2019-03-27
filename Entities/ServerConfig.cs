@@ -172,6 +172,9 @@ namespace Botwinder.entities
 		[Column("activity_channelid")]
 		public guid ActivityChannelId{ get; set; } = 0;
 
+		[Column("alert_channelid")]
+		public guid AlertChannelId{ get; set; } = 0;
+
 		[Column("log_channelid")]
 		public guid LogChannelId{ get; set; } = 0;
 
@@ -195,6 +198,9 @@ namespace Botwinder.entities
 
 		[Column("color_activitychannel")]
 		public uint ActivityChannelColor{ get; set; } = 65535;
+
+		[Column("color_alertchannel")]
+		public uint AlertChannelColor{ get; set; } = 10421504;
 
 		[Column("color_logchannel")]
 		public uint LogChannelColor{ get; set; } = 255;
@@ -228,6 +234,9 @@ namespace Botwinder.entities
 
 		[Column("log_leave")]
 		public bool LogLeave{ get; set; } = false;
+
+		[Column("log_alert_regex", TypeName = "text")]
+		public string LogAlertRegex{ get; set; } = null;
 
 		[Column("log_message_join", TypeName = "text")]
 		public string LogMessageJoin{ get; set; } = "{0} joined the server.";
