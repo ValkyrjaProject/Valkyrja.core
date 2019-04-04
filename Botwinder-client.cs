@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Botwinder.entities;
 using Discord;
+using Discord.Net;
 using Discord.WebSocket;
 using guid = System.UInt64;
 
@@ -813,7 +814,32 @@ namespace Botwinder.core
 
 			if( server.Config.IgnoreEveryone )
 				msg = msg.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
-			await SendRawMessageToChannel(channel, msg);
+
+			if( msg.StartsWith("{pm}") || msg.StartsWith("{{pm}}") )
+			{
+				if( message.MentionedUsers == null || !message.MentionedUsers.Any() )
+					msg = "I didn't not find them! :<";
+
+				msg = msg.Substring(4).TrimStart('}').Trim();
+
+				foreach( SocketUser user in message.MentionedUsers )
+				{
+					try
+					{
+						await user.SendMessageSafe(msg);
+					}
+					catch(Exception)
+					{
+						await SendRawMessageToChannel(channel, "I'm sorry, I couldn't send the message. Either they blocked me, or use _**that** privacy option._");
+					}
+				}
+
+			}
+			else
+			{
+				await SendRawMessageToChannel(channel, msg);
+			}
+
 			return true;
 		}
 
