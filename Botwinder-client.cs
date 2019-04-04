@@ -50,6 +50,7 @@ namespace Botwinder.core
 		private const string GameStatusUrl = "at https://valkyrja.app";
 		private readonly Regex RegexCommandParams = new Regex("\"[^\"]+\"|\\S+", RegexOptions.Compiled);
 		private readonly Regex RegexEveryone = new Regex("(@everyone)|(@here)", RegexOptions.Compiled);
+		private readonly Regex RegexCustomCommandPm = new Regex("^{?{pm(-sender)?}}?", RegexOptions.Compiled);
 		public Regex RegexDiscordInvites;
 		public Regex RegexShortLinks;
 		public Regex RegexExtendedLinks;
@@ -815,30 +816,38 @@ namespace Botwinder.core
 			if( server.Config.IgnoreEveryone )
 				msg = msg.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
 
-			if( msg.StartsWith("{pm}") || msg.StartsWith("{{pm}}") )
+			if( this.RegexCustomCommandPm.IsMatch(msg) )
 			{
-				if( message.MentionedUsers == null || !message.MentionedUsers.Any() )
-					msg = "I didn't not find them! :<";
 
-				msg = msg.Substring(4).TrimStart('}').Trim();
+				List<SocketUser> toPm = new List<SocketUser>();
+				string pm = msg;
+				msg = "";
 
-				foreach( SocketUser user in message.MentionedUsers )
+				if(pm.StartsWith("{pm}"))
+					if( message.MentionedUsers == null || !message.MentionedUsers.Any() )
+						msg = "I didn't not find them! :<";
+					else
+						toPm.AddRange(message.MentionedUsers);
+				else
+					toPm.Add(message.Author);
+
+				pm = msg.Substring(4).TrimStart('}').Trim();
+
+				foreach( SocketUser user in toPm )
 				{
 					try
 					{
-						await user.SendMessageSafe(msg);
+						await user.SendMessageSafe(pm);
 					}
 					catch(Exception)
 					{
-						await SendRawMessageToChannel(channel, "I'm sorry, I couldn't send the message. Either they blocked me, or use _**that** privacy option._");
+						msg = "I'm sorry, I couldn't send the message. Either I'm blocked, or it's _**that** privacy option._";
+						break;
 					}
 				}
+			}
 
-			}
-			else
-			{
-				await SendRawMessageToChannel(channel, msg);
-			}
+			await SendRawMessageToChannel(channel, msg);
 
 			return true;
 		}
