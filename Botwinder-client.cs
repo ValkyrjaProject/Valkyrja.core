@@ -831,7 +831,7 @@ namespace Botwinder.core
 				else
 					toPm.Add(message.Author);
 
-				pm = msg.Substring(4).TrimStart('}').Trim();
+				pm = pm.Substring("{pm}".Length).TrimStart('}').Trim();
 
 				foreach( SocketUser user in toPm )
 				{
