@@ -50,8 +50,8 @@ namespace Botwinder.core
 		private const string GameStatusUrl = "at https://valkyrja.app";
 		private readonly Regex RegexCommandParams = new Regex("\"[^\"]+\"|\\S+", RegexOptions.Compiled);
 		private readonly Regex RegexEveryone = new Regex("(@everyone)|(@here)", RegexOptions.Compiled);
-		private readonly Regex RegexCustomCommandPmAll = new Regex("^{?{pm(-sender)?}}?", RegexOptions.Compiled);
-		private readonly Regex RegexCustomCommandPmMentioned = new Regex("^{?{pm}}?", RegexOptions.Compiled);
+		private readonly Regex RegexCustomCommandPmAll = new Regex("^<pm(-sender)?>", RegexOptions.Compiled);
+		private readonly Regex RegexCustomCommandPmMentioned = new Regex("^<pm>", RegexOptions.Compiled);
 		public Regex RegexDiscordInvites;
 		public Regex RegexShortLinks;
 		public Regex RegexExtendedLinks;
@@ -785,13 +785,13 @@ namespace Botwinder.core
 			//todo - rewrite using string builder...
 			string msg = cmd.Response;
 
-			if( msg.Contains("{sender}") || msg.Contains("{{sender}}") )
+			if( msg.Contains("{sender}") )
 			{
 				msg = msg.Replace("{{sender}}", "<@{0}>").Replace("{sender}", "<@{0}>");
 				msg = string.Format(msg, message.Author.Id);
 			}
 
-			if( (msg.Contains("{mentioned}") || msg.Contains("{{mentioned}}")) && message.MentionedUsers != null )
+			if( msg.Contains("{mentioned}") && message.MentionedUsers != null )
 			{
 				string mentions = "";
 				SocketUser[] mentionedUsers = message.MentionedUsers.ToArray();
@@ -817,8 +817,8 @@ namespace Botwinder.core
 			if( server.Config.IgnoreEveryone )
 				msg = msg.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
 
-			Match match;
-			if( (match = this.RegexCustomCommandPmAll.Match(msg)).Success )
+			Match match = this.RegexCustomCommandPmAll.Match(msg);
+			if( match.Success )
 			{
 
 				List<SocketUser> toPm = new List<SocketUser>();
