@@ -50,7 +50,8 @@ namespace Botwinder.core
 		private const string GameStatusUrl = "at https://valkyrja.app";
 		private readonly Regex RegexCommandParams = new Regex("\"[^\"]+\"|\\S+", RegexOptions.Compiled);
 		private readonly Regex RegexEveryone = new Regex("(@everyone)|(@here)", RegexOptions.Compiled);
-		private readonly Regex RegexCustomCommandPm = new Regex("^{?{pm(-sender)?}}?", RegexOptions.Compiled);
+		private readonly Regex RegexCustomCommandPmAll = new Regex("^{?{pm(-sender)?}}?", RegexOptions.Compiled);
+		private readonly Regex RegexCustomCommandPmMentioned = new Regex("^{?{pm}}?", RegexOptions.Compiled);
 		public Regex RegexDiscordInvites;
 		public Regex RegexShortLinks;
 		public Regex RegexExtendedLinks;
@@ -816,22 +817,20 @@ namespace Botwinder.core
 			if( server.Config.IgnoreEveryone )
 				msg = msg.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
 
-			if( this.RegexCustomCommandPm.IsMatch(msg) )
+			Match match;
+			if( (match = this.RegexCustomCommandPmAll.Match(msg)).Success )
 			{
 
 				List<SocketUser> toPm = new List<SocketUser>();
 				string pm = msg;
-				msg = "";
+				msg = "It is nao sent.";
 
-				if(pm.StartsWith("{pm}"))
-					if( message.MentionedUsers == null || !message.MentionedUsers.Any() )
-						msg = "I didn't not find them! :<";
-					else
-						toPm.AddRange(message.MentionedUsers);
+				if( this.RegexCustomCommandPmMentioned.IsMatch(pm) && message.MentionedUsers != null && message.MentionedUsers.Any() )
+					toPm.AddRange(message.MentionedUsers);
 				else
 					toPm.Add(message.Author);
 
-				pm = pm.Substring("{pm}".Length).TrimStart('}').Trim();
+				pm = pm.Substring(match.Value.Length).Trim();
 
 				foreach( SocketUser user in toPm )
 				{
