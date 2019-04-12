@@ -49,6 +49,9 @@ namespace Botwinder.entities
 		[Column("antispam_username")]
 		public bool AntispamUsername{ get; set; } = false;
 
+		[Column("antispam_norole")]
+		public bool AntispamNoRole{ get; set; } = false;
+
 		[Column("antispam_invites")]
 		public bool AntispamInvites{ get; set; } = false;
 
