@@ -83,7 +83,7 @@ namespace Botwinder.entities
 			{
 				try
 				{
-					this.AlertRegex = new Regex($".*({this.Config.LogAlertRegex}).*", RegexOptions.Compiled | RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(100));
+					this.AlertRegex = new Regex($"({this.Config.LogAlertRegex})", RegexOptions.Compiled | RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(150));
 				}
 				catch(Exception e)
 				{
