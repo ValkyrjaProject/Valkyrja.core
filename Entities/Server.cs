@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Botwinder.core;
 using Discord;
@@ -18,7 +19,6 @@ namespace Botwinder.entities
 
 		public SocketGuild Guild;
 
-		private string DbConnectionString;
 		public ServerConfig Config;
 		public Localisation Localisation;
 		public Dictionary<string, Command> Commands;
@@ -39,17 +39,21 @@ namespace Botwinder.entities
 		public List<ReactionAssignedRole> ReactionAssignedRoles;
 		public Object ReactionRolesLock{ get; set; } = new Object();
 
+		private readonly SemaphoreSlim DbWriteLock;
+		private readonly BotwinderClient Client;
 
-		public Server(SocketGuild guild)
+
+
+		public Server(SocketGuild guild, BotwinderClient client)
 		{
 			this.Id = guild.Id;
 			this.Guild = guild;
+			this.DbWriteLock = new SemaphoreSlim(0, 1);
+			this.Client = client;
 		}
 
-		public async Task ReloadConfig(BotwinderClient client, ServerContext dbContext, Dictionary<string, Command> allCommands)
+		public async Task ReloadConfig(ServerContext dbContext, Dictionary<string, Command> allCommands)
 		{
-			this.DbConnectionString = client.DbConnectionString;
-
 			if( this.Commands?.Count != allCommands.Count )
 			{
 				this.Commands = new Dictionary<string, Command>(allCommands);
@@ -64,11 +68,12 @@ namespace Botwinder.entities
 			}
 
 			this.CustomCommands?.Clear();
-			this.CustomAliases?.Clear();
-			this.Roles?.Clear();
-
 			this.CustomCommands = dbContext.CustomCommands.Where(c => c.ServerId == this.Id).ToDictionary(c => c.CommandId);
+
+			this.CustomAliases?.Clear();
 			this.CustomAliases = dbContext.CustomAliases.Where(c => c.ServerId == this.Id).ToDictionary(c => c.Alias);
+
+			this.Roles?.Clear();
 			this.Roles = dbContext.Roles.Where(c => c.ServerId == this.Id).ToDictionary(c => c.RoleId);
 			lock(this.ReactionRolesLock)
 			{
@@ -88,7 +93,7 @@ namespace Botwinder.entities
 				catch(Exception e)
 				{
 					this.AlertRegex = null;
-					await client.LogException(e, $"ReloadConfig failed AlertRegex: {this.Config.LogAlertRegex}", this.Id);
+					await this.Client.LogException(e, $"ReloadConfig failed AlertRegex: {this.Config.LogAlertRegex}", this.Id);
 				}
 			}
 			else
@@ -110,11 +115,44 @@ namespace Botwinder.entities
 					} catch(Exception) { }
 				}
 			}
+
+			dbContext.Dispose();
 		}
 
-		public async Task LoadConfig(BotwinderClient client, ServerContext dbContext, Dictionary<string, Command> allCommands)
+		public async Task LoadConfig(ServerContext dbContext, Dictionary<string, Command> allCommands)
 		{
-			await ReloadConfig(client, dbContext, allCommands);
+			await ReloadConfig(dbContext, allCommands);
+		}
+
+		public async Task ModifyChannel(guid channelId, Action<ChannelConfig> action)
+		{
+			await this.DbWriteLock.WaitAsync();
+			ServerContext context = ServerContext.Create(this.Client.DbAccessManager.DbConnectionString);
+			try
+			{
+				ChannelConfig channel = context.Channels.FirstOrDefault(c => c.ServerId == this.Id && c.ChannelId == channelId);
+				if( channel == null )
+				{
+					channel = new ChannelConfig(){
+						ServerId = this.Id,
+						ChannelId = channelId
+					};
+					context.Channels.Add(channel);
+				}
+
+				action(channel);
+
+				context.SaveChanges();
+			}
+			catch(Exception e)
+			{
+				await this.Client.LogException(e, "ModifyOrCreateUserData");
+			}
+			finally
+			{
+				context.Dispose();
+				this.DbWriteLock.Release();
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -126,7 +164,7 @@ namespace Botwinder.entities
 			if( this.CachedCommandOptions != null && this.CachedCommandOptions.CommandId == commandString )
 				return this.CachedCommandOptions;
 
-			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+			ServerContext dbContext = ServerContext.Create(this.Client.DbAccessManager.DbConnectionString);
 			this.CachedCommandOptions = dbContext.CommandOptions.FirstOrDefault(c => c.ServerId == this.Id && c.CommandId == commandString);
 			dbContext.Dispose();
 			return this.CachedCommandOptions;
@@ -140,7 +178,7 @@ namespace Botwinder.entities
 			   (tmp = this.CachedCommandChannelOptions.FirstOrDefault()) != null && tmp.CommandId == commandString )
 				return this.CachedCommandChannelOptions;
 
-			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+			ServerContext dbContext = ServerContext.Create(this.Client.DbAccessManager.DbConnectionString);
 			this.CachedCommandChannelOptions = dbContext.CommandChannelOptions.Where(c => c.ServerId == this.Id && c.CommandId == commandString)?.ToList();
 			dbContext.Dispose();
 			return this.CachedCommandChannelOptions;

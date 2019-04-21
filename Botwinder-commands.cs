@@ -70,8 +70,8 @@ namespace Botwinder.core
 
 				try
 				{
-					GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-					ServerContext serverContext = ServerContext.Create(this.DbConnectionString);
+					GlobalContext dbContext = GlobalContext.Create(this.DbAccessManager.DbConnectionString);
+					ServerContext serverContext = ServerContext.Create(this.DbAccessManager.DbConnectionString);
 
 					string GetSpaces(string txt)
 					{
@@ -138,7 +138,7 @@ namespace Botwinder.core
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				StringBuilder shards = new StringBuilder();
-				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+				GlobalContext dbContext = GlobalContext.Create(this.DbAccessManager.DbConnectionString);
 				Shard globalCount = new Shard();
 				bool longStats = e.TrimmedMessage == "long";
 				foreach( Shard shard in dbContext.Shards )
@@ -192,7 +192,7 @@ namespace Botwinder.core
 				if( e.MessageArgs.Length < 2 || !int.TryParse(e.MessageArgs[1], out max) )
 					max = int.MaxValue;
 
-				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				ServerContext dbContext = ServerContext.Create(this.DbAccessManager.DbConnectionString);
 				StringBuilder response = new StringBuilder();
 				IEnumerable<ServerStats> foundServers = dbContext.ServerStats.Where(s =>
 					s.UserCount > min && s.UserCount < max ).OrderByDescending(s => s.UserCount);
@@ -235,7 +235,7 @@ namespace Botwinder.core
 				guid.TryParse(e.TrimmedMessage, out id);
 				StringBuilder response = new StringBuilder();
 				IEnumerable<ServerStats> foundServers = null;
-				if( !(foundServers = ServerContext.Create(this.DbConnectionString).ServerStats.Where(s =>
+				if( !(foundServers = ServerContext.Create(this.DbAccessManager.DbConnectionString).ServerStats.Where(s =>
 					    s.ServerId == id || s.OwnerId == id ||
 					    s.ServerName.ToLower().Contains($"{e.TrimmedMessage.ToLower()}") ||
 					    s.OwnerName.ToLower().Contains($"{e.TrimmedMessage.ToLower()}")
@@ -311,7 +311,7 @@ namespace Botwinder.core
 
 				guid serverId = 0;
 				ServerConfig config = null;
-				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				ServerContext dbContext = ServerContext.Create(this.DbAccessManager.DbConnectionString);
 				if( !guid.TryParse(e.MessageArgs[0], out serverId) ||
 				    (config = dbContext.ServerConfigurations.FirstOrDefault(s => s.ServerId == serverId)) == null )
 				{
@@ -359,7 +359,7 @@ namespace Botwinder.core
 				ServerConfig foundServer = null;
 				if( string.IsNullOrEmpty(e.TrimmedMessage) ||
 				    !guid.TryParse(e.TrimmedMessage, out id) ||
-				    (foundServer = ServerContext.Create(this.DbConnectionString).ServerConfigurations.FirstOrDefault(s => s.ServerId == id)) == null )
+				    (foundServer = ServerContext.Create(this.DbAccessManager.DbConnectionString).ServerConfigurations.FirstOrDefault(s => s.ServerId == id)) == null )
 				{
 					await e.SendReplySafe("Server not found.");
 					return;
@@ -392,7 +392,7 @@ namespace Botwinder.core
 				}
 
 				string response = "Server not found.";
-				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				ServerContext dbContext = ServerContext.Create(this.DbAccessManager.DbConnectionString);
 				ServerConfig foundServer = dbContext.ServerConfigurations.FirstOrDefault(s => s.ServerId == id);
 				if( foundServer != null )
 				{
@@ -443,7 +443,7 @@ namespace Botwinder.core
 				if( string.IsNullOrEmpty(e.TrimmedMessage) || !int.TryParse(e.TrimmedMessage, out int n) || n <= 0 )
 					n = 5;
 
-				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+				GlobalContext dbContext = GlobalContext.Create(this.DbAccessManager.DbConnectionString);
 				foreach( ExceptionEntry exception in dbContext.Exceptions.Skip(Math.Max(0, dbContext.Exceptions.Count() - n)) )
 				{
 					response.AppendLine(exception.GetMessage());
@@ -466,7 +466,7 @@ namespace Botwinder.core
 			newCommand.OnExecute += async e => {
 				string responseString = "I couldn't find that exception.";
 				ExceptionEntry exception = null;
-				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+				GlobalContext dbContext = GlobalContext.Create(this.DbAccessManager.DbConnectionString);
 				if( !string.IsNullOrEmpty(e.TrimmedMessage) && int.TryParse(e.TrimmedMessage, out int id) && (exception = dbContext.Exceptions.FirstOrDefault(ex => ex.Id == id)) != null )
 					responseString = exception.GetStack();
 
@@ -495,8 +495,8 @@ namespace Botwinder.core
 					id = e.Message.MentionedUsers.First().Id;
 				}
 
-				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-				ServerStats server = ServerContext.Create(this.DbConnectionString).ServerStats
+				GlobalContext dbContext = GlobalContext.Create(this.DbAccessManager.DbConnectionString);
+				ServerStats server = ServerContext.Create(this.DbAccessManager.DbConnectionString).ServerStats
 					.FirstOrDefault(s => s.ServerId == id || s.OwnerId == id);
 				switch(e.MessageArgs[0])
 				{
@@ -558,7 +558,7 @@ namespace Botwinder.core
 					id = e.Message.MentionedUsers.First().Id;
 				}
 
-				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+				GlobalContext dbContext = GlobalContext.Create(this.DbAccessManager.DbConnectionString);
 				Subscriber subscriber = dbContext.Subscribers.FirstOrDefault(s => s.UserId == id);
 				switch(e.MessageArgs[0]) //Nope - mentioned users above mean that there is a parameter.
 				{
@@ -629,7 +629,7 @@ namespace Botwinder.core
 					id = e.Message.MentionedUsers.First().Id;
 				}
 
-				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+				GlobalContext dbContext = GlobalContext.Create(this.DbAccessManager.DbConnectionString);
 				PartneredServer partner = dbContext.PartneredServers.FirstOrDefault(s => s.ServerId == id);
 				switch(e.MessageArgs[0]) //Nope - mentioned users above mean that there is a parameter.
 				{
@@ -755,7 +755,7 @@ namespace Botwinder.core
 			newCommand.OnExecute += async e => {
 				TimeSpan time = DateTime.UtcNow - Utils.GetTimeFromId(e.Message.Id);
 				StringBuilder shards = new StringBuilder();
-				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+				GlobalContext dbContext = GlobalContext.Create(this.DbAccessManager.DbConnectionString);
 
 				Int64 threads = dbContext.Shards.Sum(s => s.ThreadsActive);
 				string[] cpuTemp = Bash.Run("sensors | grep Package | sed 's/Package id [01]:\\s*+//g' | sed 's/\\s*(high = +85.0°C, crit = +95.0°C)//g'").Split('\n');
@@ -998,7 +998,7 @@ namespace Botwinder.core
 								alias.CommandId = cmd.ParentId;
 						}
 
-						ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+						ServerContext dbContext = ServerContext.Create(this.DbAccessManager.DbConnectionString);
 						dbContext.CustomAliases.Add(alias);
 						dbContext.SaveChanges();
 						dbContext.Dispose();
@@ -1015,7 +1015,7 @@ namespace Botwinder.core
 							break;
 						}
 
-						ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+						ServerContext dbContext = ServerContext.Create(this.DbAccessManager.DbConnectionString);
 						CustomAlias alias = new CustomAlias{ServerId = e.Server.Id, Alias = e.MessageArgs[1]};
 						dbContext.CustomAliases.Attach(alias);
 						dbContext.CustomAliases.Remove(alias);
@@ -1058,7 +1058,7 @@ namespace Botwinder.core
 				}
 
 				string commandId = "";
-				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				ServerContext dbContext = ServerContext.Create(this.DbAccessManager.DbConnectionString);
 				if( string.IsNullOrEmpty(commandId = e.Server.GetCommandOptionsId(e.MessageArgs[0])) )
 				{
 					if( commandId == null )
@@ -1179,7 +1179,7 @@ namespace Botwinder.core
 					return;
 				}
 
-				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				ServerContext dbContext = ServerContext.Create(this.DbAccessManager.DbConnectionString);
 				CommandOptions options = dbContext.GetOrAddCommandOptions(e.Server, commandId);
 
 				options.DeleteRequest = deleteRequest;
@@ -1217,7 +1217,7 @@ namespace Botwinder.core
 					return;
 				}
 
-				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				ServerContext dbContext = ServerContext.Create(this.DbAccessManager.DbConnectionString);
 				CommandOptions options = dbContext.GetOrAddCommandOptions(e.Server, commandId);
 
 				options.DeleteReply = deleteReply;
@@ -1256,7 +1256,7 @@ namespace Botwinder.core
 					return;
 				}
 
-				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				ServerContext dbContext = ServerContext.Create(this.DbAccessManager.DbConnectionString);
 				CommandChannelOptions commandOptions = dbContext.GetOrAddCommandChannelOptions(e.Server.Id, channelId, commandId);
 
 				string responseString = "Success! \\o/";
@@ -1306,7 +1306,7 @@ namespace Botwinder.core
 					return;
 				}
 
-				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				ServerContext dbContext = ServerContext.Create(this.DbAccessManager.DbConnectionString);
 				CommandChannelOptions commandOptions = dbContext.GetOrAddCommandChannelOptions(e.Server.Id, channelId, commandId);
 
 				string responseString = "Success! \\o/";
@@ -1349,7 +1349,7 @@ namespace Botwinder.core
 					return;
 				}
 
-				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				ServerContext dbContext = ServerContext.Create(this.DbAccessManager.DbConnectionString);
 				await dbContext.CommandChannelOptions.Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId)
 					.ForEachAsync(c => c.Blacklisted = c.Whitelisted = false);
 

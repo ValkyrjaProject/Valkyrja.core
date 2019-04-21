@@ -111,6 +111,7 @@ namespace Botwinder.entities
 			return newContext;
 		}
 
+		[Obsolete]
 		public UserData GetOrAddUser(guid serverId, guid userId)
 		{
 			UserData userData = this.UserDatabase.FirstOrDefault(u => u.ServerId == serverId && u.UserId == userId);

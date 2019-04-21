@@ -67,7 +67,7 @@ namespace Botwinder.core
 
 		public bool IsTrialServer(guid id)
 		{
-			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+			ServerContext dbContext = ServerContext.Create(this.DbAccessManager.DbConnectionString);
 			Int64 joinedCount = dbContext.ServerStats.FirstOrDefault(s => s.ServerId == id)?.JoinedCount ?? 1;
 			dbContext.Dispose();
 			return joinedCount <= this.GlobalConfig.VipTrialJoins;
@@ -179,33 +179,6 @@ namespace Botwinder.core
 
 			await Task.Delay(500);
 			Environment.Exit(0);
-		}
-
-		public List<UserData> GetMentionedUsersData(ServerContext dbContext, CommandArguments e) //todo - Move this elsewhere...
-		{
-			List<guid> mentionedUserIds = GetMentionedUserIds(e);
-
-			if( !mentionedUserIds.Any() )
-				return new List<UserData>();
-
-			List<UserData> found = dbContext.UserDatabase.Where(u => u.ServerId == e.Server.Id && mentionedUserIds.Contains(u.UserId)).ToList();
-			if( found.Count < mentionedUserIds.Count )
-			{
-				for( int i = 0; i < mentionedUserIds.Count; i++ )
-				{
-					if(found.Any(u => u.UserId == mentionedUserIds[i]))
-						continue;
-
-					UserData newUserData = new UserData(){
-						ServerId = e.Server.Id,
-						UserId = mentionedUserIds[i]
-					};
-
-					dbContext.UserDatabase.Add(newUserData); //No need to save this here.
-					found.Add(newUserData);
-				}
-			}
-			return found;
 		}
 
 		public List<SocketGuildUser> GetMentionedGuildUsers(CommandArguments e) //todo - Move this elsewhere...
