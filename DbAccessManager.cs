@@ -26,8 +26,31 @@ namespace Botwinder.core
 			this.UserDatabaseLock = new SemaphoreSlim(0, 1);
 		}
 
+		public async Task<List<UserData>> GetReadOnlyUserData(Func<UserData, bool> query)
+		{
+			await Lock();
+			List<UserData> userData = null;
+			ServerContext context = ServerContext.Create(this.DbConnectionString);
+			try
+			{
+				userData = context.UserDatabase.Where(query).ToList();
+			}
+			catch(Exception e)
+			{
+				await this.Client.LogException(e, "ModifyOrCreateUserData");
+			}
+			finally
+			{
+				context.Dispose();
+				Unlock();
+			}
+
+			return userData;
+		}
+
 		public async Task<UserData> GetReadOnlyUserData(guid serverId, guid userId)
 		{
+			await Lock();
 			UserData userData = null;
 			ServerContext context = ServerContext.Create(this.DbConnectionString);
 			try
@@ -48,6 +71,7 @@ namespace Botwinder.core
 			finally
 			{
 				context.Dispose();
+				Unlock();
 			}
 
 			return userData;
@@ -84,8 +108,7 @@ namespace Botwinder.core
 			}
 		}
 
-		/* Does not create missing entries = probably useless.
-		public async Task ModifyUserData(Func<UserData, bool> query, Action<UserData> action)
+		public async Task ModifyUserData(Func<UserData, bool> query, Func<UserData, Task> action)
 		{
 			await Lock();
 			ServerContext context = ServerContext.Create(this.DbConnectionString);
@@ -93,7 +116,7 @@ namespace Botwinder.core
 			{
 				IEnumerable<UserData> users = context.UserDatabase.Where(query);
 				foreach( UserData userData in users )
-					action(userData);
+					await action(userData);
 
 				context.SaveChanges();
 			}
@@ -106,7 +129,7 @@ namespace Botwinder.core
 				context.Dispose();
 				Unlock();
 			}
-		}*/
+		}
 
 		public async Task<int> ForEachModifyUserData(guid serverId, IEnumerable<guid> userIds, Func<guid, UserData, Task<bool>> action)
 		{
