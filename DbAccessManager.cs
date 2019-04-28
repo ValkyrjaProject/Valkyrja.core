@@ -26,6 +26,26 @@ namespace Botwinder.core
 			this.UserDatabaseLock = new SemaphoreSlim(0, 1);
 		}
 
+		public async Task<List<ChannelConfig>> GetReadOnlyChannelConfig(Func<ChannelConfig, bool> query)
+		{
+			List<ChannelConfig> channels = null;
+			ServerContext context = ServerContext.Create(this.DbConnectionString);
+			try
+			{
+				channels = context.Channels.Where(query).ToList();
+			}
+			catch(Exception e)
+			{
+				await this.Client.LogException(e, "GetReadOnlyChannelConfig");
+			}
+			finally
+			{
+				context.Dispose();
+			}
+
+			return channels;
+		}
+
 		public async Task<List<UserData>> GetReadOnlyUserData(Func<UserData, bool> query)
 		{
 			await Lock();
@@ -37,7 +57,7 @@ namespace Botwinder.core
 			}
 			catch(Exception e)
 			{
-				await this.Client.LogException(e, "ModifyOrCreateUserData");
+				await this.Client.LogException(e, "GetReadOnlyUserData");
 			}
 			finally
 			{
@@ -66,7 +86,7 @@ namespace Botwinder.core
 			}
 			catch(Exception e)
 			{
-				await this.Client.LogException(e, "ModifyOrCreateUserData");
+				await this.Client.LogException(e, "GetReadOnlyUserData");
 			}
 			finally
 			{
@@ -99,7 +119,7 @@ namespace Botwinder.core
 			}
 			catch(Exception e)
 			{
-				await this.Client.LogException(e, "ModifyOrCreateUserData");
+				await this.Client.LogException(e, "ModifyUserData");
 			}
 			finally
 			{
@@ -200,25 +220,23 @@ namespace Botwinder.core
 
 		public async Task UpdateUsernames(SocketGuild guild)
 		{
-			await Lock();
 			ServerContext context = ServerContext.Create(this.DbConnectionString);
 			try
 			{
 				foreach( SocketGuildUser user in guild.Users )
 				{
-					UpdateNickname(user, context); //TODO: Not UserData - Doesn't need a lock? Different lock?
+					UpdateNickname(user, context); //Not UserData - Doesn't need a lock? Different lock?
 				}
 
 				context.SaveChanges();
 			}
 			catch(Exception e)
 			{
-				await this.Client.LogException(e, "ModifyOrCreateUserData");
+				await this.Client.LogException(e, "UpdateUsernames");
 			}
 			finally
 			{
 				context.Dispose();
-				Unlock();
 			}
 		}
 
@@ -238,7 +256,7 @@ namespace Botwinder.core
 			}
 			catch(Exception e)
 			{
-				await this.Client.LogException(e, "ModifyOrCreateUserData");
+				await this.Client.LogException(e, "UpdateUsername");
 			}
 			finally
 			{
