@@ -58,6 +58,9 @@ namespace Botwinder.entities
 		[Column("antispam_invites_ban")]
 		public bool AntispamInvitesBan{ get; set; } = false;
 
+		[Column("antispam_porn")]
+		public bool AntispamPorn{ get; set; } = false;
+
 		[Column("antispam_duplicate")]
 		public bool AntispamDuplicate{ get; set; } = false;
 

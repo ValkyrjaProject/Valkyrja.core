@@ -18,6 +18,7 @@ namespace Botwinder.entities
 		public DbSet<ExceptionEntry> Exceptions;
 		public DbSet<Shard> Shards;
 		public DbSet<Localisation> Localisations;
+		public DbSet<AntispamUrl> AntispamUrls;
 
 		public GlobalContext(DbContextOptions<GlobalContext> options) : base(options)
 		{
@@ -30,6 +31,7 @@ namespace Botwinder.entities
 			this.Exceptions = new InternalDbSet<ExceptionEntry>(this);
 			this.Shards = new InternalDbSet<Shard>(this);
 			this.Localisations = new InternalDbSet<Localisation>(this);
+			this.AntispamUrls = new InternalDbSet<AntispamUrl>(this);
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -59,6 +61,9 @@ namespace Botwinder.entities
 				.HasKey(p => p.Id);
 
 			modelBuilder.Entity<Localisation>()
+				.HasKey(p => p.Id);
+
+			modelBuilder.Entity<AntispamUrl>()
 				.HasKey(p => p.Id);
 		}
 
