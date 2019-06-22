@@ -172,6 +172,9 @@ namespace Botwinder.entities
 		[Column("karma_consume_verb", TypeName = "varchar(255)")]
 		public string KarmaConsumeVerb{ get; set; } = "nommed";
 
+		[Column("tempchannel_categoryid")]
+		public guid TempChannelCategoryId{ get; set; } = 0;
+
 		[Column("voice_channelid")]
 		public guid VoiceChannelId{ get; set; } = 0;
 
