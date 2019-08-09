@@ -331,6 +331,9 @@ namespace Botwinder.entities
 		[Column("exp_member_roleid")]
 		public guid ExpMemberRoleId{ get; set; } = 0;
 
+		[Column("profile_channelid")]
+		public guid ProfileChannelId{ get; set; } = 0;
+
 		[Column("profile_enabled")]
 		public bool ProfileEnabled{ get; set; } = false;
 
