@@ -99,7 +99,7 @@ namespace Botwinder.entities
 			SocketRole role;
 			if( this.Config.MuteRoleId != 0 && (role = this.Guild.GetRole(this.Config.MuteRoleId)) != null && this.Guild.CurrentUser.GuildPermissions.ManageChannels )
 			{
-				foreach( SocketGuildChannel channel in this.Guild.Channels.Where(c => c is SocketTextChannel || c is SocketCategoryChannel) )
+				foreach( SocketGuildChannel channel in this.Guild.Channels.Where(c => (c is SocketTextChannel || c is SocketCategoryChannel) && !(c is SocketNewsChannel)) )
 				{
 					if( this.Config.MuteIgnoreChannelId == channel.Id ||
 					    channel.PermissionOverwrites.Any(p => p.TargetId == role.Id))
