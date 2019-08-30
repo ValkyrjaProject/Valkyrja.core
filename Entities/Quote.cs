@@ -40,5 +40,16 @@ namespace Botwinder.entities
 		{
 			return string.Format(QuoteString, this.Value.Replace("_","\\_"), this.Username.Replace('*',' '), this.CreatedTime);
 		}
+
+		public Quote Clone(Int64 newId)
+		{
+			return new Quote(){
+				ServerId = this.ServerId,
+				Id = newId,
+				CreatedTime = this.CreatedTime,
+				Username = this.Username,
+				Value = this.Value
+			};
+		}
 	}
 }
