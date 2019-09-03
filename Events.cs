@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Botwinder.core;
-
+using Discord.Net;
 using guid = System.UInt64;
 
 namespace Botwinder.entities
@@ -410,7 +410,10 @@ namespace Botwinder.entities
 			if( this.MessageUpdated == null )
 				return Task.CompletedTask;
 
-			IMessage msg = originalMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
+			IMessage msg = null;
+			if( channel is SocketGuildChannel guildChannel && guildChannel.Guild.CurrentUser.GuildPermissions.ReadMessageHistory )
+				msg = originalMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
+
 			Task.Run(async () => await this.MessageUpdated(msg as SocketMessage, updatedMessage, channel));
 			return Task.CompletedTask;
 		}

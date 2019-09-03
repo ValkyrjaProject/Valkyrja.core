@@ -169,7 +169,7 @@ namespace Botwinder.core
 			config.AlwaysDownloadUsers = this.DbConfig.DownloadUsers;
 			config.LargeThreshold = 100;
 			config.HandlerTimeout = null;
-			config.MessageCacheSize = 100;
+			config.MessageCacheSize = 500;
 			config.ConnectionTimeout = 300000;
 
 			this.DiscordClient = new DiscordSocketClient(config);
