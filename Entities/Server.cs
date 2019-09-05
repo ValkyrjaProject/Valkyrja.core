@@ -283,5 +283,36 @@ namespace Botwinder.entities
 
 			return propertyValue.Replace("@everyone", "@-everyone");
 		}
+
+		public SocketRole GetRole(string expression, out string response)
+		{
+			guid id = 0;
+			IEnumerable<SocketRole> roles = this.Guild.Roles;
+			IEnumerable<SocketRole> foundRoles = null;
+			SocketRole role = null;
+
+			if( !(guid.TryParse(expression, out id) && (role = this.Guild.GetRole(id)) != null) &&
+			    !(foundRoles = roles.Where(r => r.Name == expression)).Any() &&
+			    !(foundRoles = roles.Where(r => r.Name.ToLower() == expression.ToLower())).Any() &&
+			    !(foundRoles = roles.Where(r => r.Name.ToLower().Contains(expression.ToLower()))).Any() )
+			{
+				response = "I did not find a role based on that expression.";
+				return null;
+			}
+
+			if( foundRoles.Count() > 1 )
+			{
+				response = "I found more than one role with that expression, please be more specific.";
+				return null;
+			}
+
+			if( role == null )
+			{
+				role = foundRoles.First();
+			}
+
+			response = "Done.";
+			return role;
+		}
 	}
 }
