@@ -300,7 +300,7 @@ namespace Botwinder.entities
 				return null;
 			}
 
-			if( foundRoles.Count() > 1 )
+			if( foundRoles != null && foundRoles.Count() > 1 )
 			{
 				response = "I found more than one role with that expression, please be more specific.";
 				return null;
