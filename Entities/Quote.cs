@@ -15,7 +15,7 @@ namespace Botwinder.entities
 	[Table("quotes")]
 	public class Quote
 	{
-		private const string QuoteString = "> _{0}_\n    **{1}**; {2:dddd, d MMMM yyyy}";
+		private const string QuoteString = "> _{0}_\n        **{1}**; {2:dddd, d MMMM yyyy}";
 
 		[Required]
 		[Column("serverid")]
