@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Botwinder.core;
 using Discord;
+using Discord.Net;
 using Discord.WebSocket;
 
 using guid = System.UInt64;
@@ -14,6 +15,8 @@ namespace Botwinder.entities
 {
 	public class Server
 	{
+		private BotwinderClient Client;
+
 		public readonly guid Id;
 
 		public SocketGuild Guild;
@@ -39,6 +42,8 @@ namespace Botwinder.entities
 		public List<ReactionAssignedRole> ReactionAssignedRoles;
 		public Object ReactionRolesLock{ get; set; } = new Object();
 
+		private int HttpExceptionCount = 0;
+
 
 		public Server(SocketGuild guild)
 		{
@@ -48,6 +53,7 @@ namespace Botwinder.entities
 
 		public async Task ReloadConfig(BotwinderClient client, ServerContext dbContext, Dictionary<string, Command> allCommands)
 		{
+			this.Client = client;
 			this.DbConnectionString = client.DbConnectionString;
 
 			if( this.Commands?.Count != allCommands.Count )
@@ -313,6 +319,24 @@ namespace Botwinder.entities
 
 			response = "Done.";
 			return role;
+		}
+
+		public async Task HandleHttpException(HttpException exception)
+		{
+			string logMsg = "HttpException - further logging disabled";
+			if( (int)exception.HttpCode >= 500 )
+				logMsg = "DiscordPoop";
+			else
+			{
+				if( ++this.HttpExceptionCount > 3 )
+				{
+					logMsg = null;
+					await this.Guild.Owner.SendMessageAsync($"Received error code `{(int)exception.HttpCode}`\n\nPlease fix my permissions and channel access on your Discord Server `{this.Guild.Name}`.\n\nIf you are unsure what's going on, consult our support team at {GlobalConfig.DiscordInvite}");
+				}
+			}
+
+			if( !string.IsNullOrEmpty(logMsg) )
+				await this.Client.LogException(exception, logMsg, this.Id);
 		}
 	}
 }
