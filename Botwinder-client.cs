@@ -622,7 +622,10 @@ namespace Botwinder.core
 						dbContext.ServerConfigurations.First(s => s.ServerId == pair.Value.Id).InviteUrl =
 							(await pair.Value.Guild.DefaultChannel.CreateInviteAsync(0)).Url;
 					}
-					catch(Exception) { }
+					catch( Exception )
+					{
+						dbContext.ServerConfigurations.First(s => s.ServerId == pair.Value.Id).InviteUrl = "NoPermission";
+					}
 
 					dbContext.SaveChanges();
 					dbContext.Dispose();
