@@ -267,10 +267,10 @@ namespace Botwinder.core
 						break;
 					if( mentionedIds.Contains(id) )
 					{
-						//I do not understand why did I write the below code. Leaving it in case it had meaning.
-						//List<string> newArgs = new List<string>(e.MessageArgs);
-						//newArgs.RemoveAt(i--);
-						//e.MessageArgs = newArgs.ToArray();
+						//This code is necessary to be able to further parse arguments by some commands (e.g. ban reason)
+						List<string> newArgs = new List<string>(e.MessageArgs);
+						newArgs.RemoveAt(i--);
+						e.MessageArgs = newArgs.ToArray();
 						continue;
 					}
 
