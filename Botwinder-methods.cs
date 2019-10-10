@@ -254,11 +254,11 @@ namespace Botwinder.core
 		{
 			List<guid> mentionedIds = new List<guid>();
 
-			if( e.Message.MentionedUsers != null && e.Message.MentionedUsers.Any() )
+			/*if( e.Message.MentionedUsers != null && e.Message.MentionedUsers.Any() )
 			{
 				mentionedIds.AddRange(e.Message.MentionedUsers.Select(u => u.Id));
 			}
-			else if( e.MessageArgs != null && e.MessageArgs.Length > 0 )
+			else*/ if( e.MessageArgs != null && e.MessageArgs.Length > 0 )
 			{
 				for( int i = 0; i < e.MessageArgs.Length; i++)
 				{
