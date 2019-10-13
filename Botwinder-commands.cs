@@ -21,7 +21,7 @@ namespace Botwinder.core
 		                                      "|   [Motherboard][Supermicro X9DRi-LN4F+ Dual LGA2011 C602]\n" +
 		                                      "|        2x [CPU][Intel Xeon E5-2690 @3.8GHz 8c](32t)\n" +
 		                                      "|    16x [Memory][Supermicro 4GB DDR3-1600 ECC](64GB)\n" +
-		                                      "|    1x [Storage][OCZ Vertex 450 128GB SSD]\n" +
+		                                      "|    2x [Storage][Samsung 830 Pro 128GB SSD](raid1)\n" +
 		                                      "|    1x [Storage][Seagate Barracuda 3TB 7200RPM]\n" +
 		                                      "|    4x [Storage][Hitachi NAS 4TB 7200RPM](raid5|write1.4GB/s)\n" +
 		                                      "| 2x [CPU Cooler][Noctua NH-U12DX i4]\n" +
@@ -32,7 +32,7 @@ namespace Botwinder.core
 		                                      "|          [Case][be quiet! Dark Base Pro 900]\n" +
 		                                      "|  [Power Supply][Corsair RM750x Gold]\n" +
 		                                      "```\n" +
-		                                      "...and I'm connected through an APU2C4 router, running RHEL8, with 300/300 Mbps and ISP failover.";
+		                                      "...and I'm connected through an APU2C4 router, running pfsense, with 300/300 Mbps and ISP failover.";
 
 		private async Task HandleMentionResponse(Server server, SocketTextChannel channel, SocketMessage message)
 		{
