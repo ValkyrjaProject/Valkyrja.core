@@ -244,7 +244,7 @@ namespace Botwinder.entities
 		[Column("log_leave")]
 		public bool LogLeave{ get; set; } = false;
 
-		[Column("alert_role_mention", TypeName = "text")]
+		[Column("alert_role_mention")]
 		public guid AlertRoleMention{ get; set; } = 0;
 
 		[Column("log_alert_regex", TypeName = "text")]
