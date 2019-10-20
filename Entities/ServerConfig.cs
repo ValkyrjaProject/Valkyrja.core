@@ -223,6 +223,9 @@ namespace Botwinder.entities
 		[Column("color_logmessages")]
 		public uint LogMessagesColor{ get; set; } = 16776960;
 
+		[Column("log_antispam_kick")]
+		public bool LogAntispamKick{ get; set; } = false;
+
 		[Column("log_warnings")]
 		public bool LogWarnings{ get; set; } = false;
 
