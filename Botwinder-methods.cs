@@ -263,7 +263,7 @@ namespace Botwinder.core
 				for( int i = 0; i < e.MessageArgs.Length; i++)
 				{
 					guid id;
-					if( !guid.TryParse(e.MessageArgs[i].Trim('<','@','>'), out id) || id < int.MaxValue )
+					if( !guid.TryParse(e.MessageArgs[i].Trim('<','@','!','>'), out id) || id < int.MaxValue )
 						break;
 					if( mentionedIds.Contains(id) )
 					{
