@@ -16,7 +16,7 @@ namespace Botwinder.entities
 	[Table("quotes")]
 	public class Quote
 	{
-		private const string QuoteString = "> _{0}_\n        **{1}**; {2:dddd, d MMMM yyyy}";
+		private const string QuoteString = "{0}\n        **{1}**; {2:dddd, d MMMM yyyy}";
 
 		[Required]
 		[Column("serverid")]
@@ -39,8 +39,8 @@ namespace Botwinder.entities
 
 		public override string ToString()
 		{
-			string value = Regex.Replace(Regex.Replace(this.Value.Replace("_","\\_"), "^", "> _"), "$", "_");
-			return string.Format(QuoteString, value, this.Username.Replace('*',' '), this.CreatedTime);
+			string formattedValue = Regex.Replace(Regex.Replace(this.Value.Replace("_","\\_"), "^", "> _", RegexOptions.Multiline), "$", "_", RegexOptions.Multiline);
+			return string.Format(QuoteString, formattedValue, this.Username.Replace('*',' '), this.CreatedTime);
 		}
 
 		public Quote Clone(Int64 newId)
