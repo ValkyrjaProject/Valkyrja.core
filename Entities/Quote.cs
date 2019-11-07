@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+using System.Text.RegularExpressions;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
@@ -38,7 +39,8 @@ namespace Botwinder.entities
 
 		public override string ToString()
 		{
-			return string.Format(QuoteString, this.Value.Replace("_","\\_"), this.Username.Replace('*',' '), this.CreatedTime);
+			string value = Regex.Replace(Regex.Replace(this.Value.Replace("_","\\_"), "^", "> _"), "$", "_");
+			return string.Format(QuoteString, value, this.Username.Replace('*',' '), this.CreatedTime);
 		}
 
 		public Quote Clone(Int64 newId)
