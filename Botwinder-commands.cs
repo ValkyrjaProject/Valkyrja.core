@@ -418,19 +418,7 @@ namespace Botwinder.core
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
-// !maintenance
-			newCommand = new Command("maintenance");
-			newCommand.Type = CommandType.Standard;
-			newCommand.IsCoreCommand = true;
-			newCommand.Description = "Performe maintenance";
-			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
-			newCommand.OnExecute += async e =>{
-				await e.SendReplySafe("Okay, this may take a while...");
-				await LogMaintenanceAndExit();
-			};
-			this.Commands.Add(newCommand.Id, newCommand);
-
-// !restart
+/// !restart
 			newCommand = new Command("restart");
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
