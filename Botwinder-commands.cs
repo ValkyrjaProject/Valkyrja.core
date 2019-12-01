@@ -83,21 +83,22 @@ namespace Botwinder.core
 
 					Dictionary<string, int> count = new Dictionary<string, int>();
 					List<Command> commands = this.Commands.Values.ToList();
+					List<LogEntry> logs = dbContext.Log.ToList();
 
 					int c = 0;
-#pragma warning disable 1998
-					bool canceled = await e.Operation.While(() => c < commands.Count, async () => {
-#pragma warning restore 1998
-						Command cmd = commands[c];
+					foreach( Command cmd in commands )
+					{
 						string key, cmdName = key = cmd.Id;
 						if( cmd.IsAlias && !string.IsNullOrEmpty(cmd.ParentId) )
 							key = cmd.ParentId;
 
 						Dictionary<guid, ServerConfig> configCache = new Dictionary<ulong, ServerConfig>();
-						foreach( LogEntry log in dbContext.Log )
-						{
+#pragma warning disable 1998
+						bool canceled = await e.Operation.While(() => c < logs.Count, async () => {
+#pragma warning restore 1998
+							LogEntry log = logs[c];
 							if( log.Type != LogType.Command )
-								continue;
+								return false;
 
 							if( !configCache.ContainsKey(log.ServerId) )
 								configCache.Add(log.ServerId, serverContext.ServerConfigurations.First(s => s.ServerId == log.ServerId));
@@ -108,13 +109,13 @@ namespace Botwinder.core
 									count.Add(key, 0);
 								count[key]++;
 							}
-						}
 
-						return false;
-					});
+							return false;
+						});
 
-					if( canceled )
-						return;
+						if( canceled )
+							return;
+					}
 
 					foreach(KeyValuePair<string, int> pair in count.OrderByDescending(p => p.Value))
 					{
