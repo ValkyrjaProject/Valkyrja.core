@@ -60,7 +60,7 @@ namespace Botwinder.core
 
 // !stats
 			newCommand = new Command("stats");
-			newCommand.Type = CommandType.Standard;
+			newCommand.Type = CommandType.LargeOperation;
 			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Display all teh command numbers.";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
@@ -82,28 +82,39 @@ namespace Botwinder.core
 					}
 
 					Dictionary<string, int> count = new Dictionary<string, int>();
+					List<Command> commands = this.Commands.Values.ToList();
 
-					foreach( Command cmd in this.Commands.Values )
-					{
+					int c = 0;
+#pragma warning disable 1998
+					bool canceled = await e.Operation.While(() => c < commands.Count, async () => {
+#pragma warning restore 1998
+						Command cmd = commands[c];
 						string key, cmdName = key = cmd.Id;
 						if( cmd.IsAlias && !string.IsNullOrEmpty(cmd.ParentId) )
 							key = cmd.ParentId;
 
-						//Please don't read this query :D
-
-						bool IsCommand(LogEntry log)
+						Dictionary<guid, ServerConfig> configCache = new Dictionary<ulong, ServerConfig>();
+						foreach( LogEntry log in dbContext.Log )
 						{
-							return log.Type == LogType.Command && (log.Message?.StartsWith(
-							    (serverContext.ServerConfigurations.First(c => c.ServerId == log.ServerId)?.CommandPrefix ?? "") + cmdName)
-							    ?? false);
+							if( log.Type != LogType.Command )
+								continue;
+
+							if( !configCache.ContainsKey(log.ServerId) )
+								configCache.Add(log.ServerId, serverContext.ServerConfigurations.First(s => s.ServerId == log.ServerId));
+
+							if( log.Message?.StartsWith(configCache[log.ServerId]?.CommandPrefix ?? "" + cmdName) ?? false )
+							{
+								if( !count.ContainsKey(key) )
+									count.Add(key, 0);
+								count[key]++;
+							}
 						}
 
-						int cmdCount = dbContext.Log.Count(IsCommand);
+						return false;
+					});
 
-						if( !count.ContainsKey(key) )
-							count.Add(key, 0);
-						count[key] += cmdCount;
-					}
+					if( canceled )
+						return;
 
 					foreach(KeyValuePair<string, int> pair in count.OrderByDescending(p => p.Value))
 					{

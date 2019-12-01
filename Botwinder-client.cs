@@ -878,14 +878,13 @@ namespace Botwinder.core
 			}
 		}
 
-#pragma warning disable 1998
-		private async Task OnGuildUpdated(SocketGuild originalGuild, SocketGuild updatedGuild)
-#pragma warning restore 1998
+		private Task OnGuildUpdated(SocketGuild originalGuild, SocketGuild updatedGuild)
 		{
 			if( !this.Servers.ContainsKey(originalGuild.Id) )
-				return;
+				return Task.CompletedTask;
 
 			this.Servers[originalGuild.Id].Guild = updatedGuild;
+			return Task.CompletedTask;
 		}
 
 		private async Task OnGuildLeft(SocketGuild guild)
