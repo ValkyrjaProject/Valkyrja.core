@@ -140,7 +140,7 @@ namespace Botwinder.core
 				}
 				await e.SendReplySafe(message.ToString());
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !global
 			newCommand = new Command("global");
@@ -184,7 +184,7 @@ namespace Botwinder.core
 				dbContext.Dispose();
 				await e.SendReplySafe(message);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !getServers
 			newCommand = new Command("getServers");
@@ -227,7 +227,7 @@ namespace Botwinder.core
 				dbContext.Dispose();
 				await e.SendReplySafe(response.ToString());
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !getServer
 			newCommand = new Command("getServer");
@@ -270,7 +270,7 @@ namespace Botwinder.core
 
 				await e.SendReplySafe(response.ToString());
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !getProperty
 			newCommand = new Command("getProperty");
@@ -305,7 +305,7 @@ namespace Botwinder.core
 
 				await e.SendReplySafe(propertyValue);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !setProperty
 			newCommand = new Command("setProperty");
@@ -357,7 +357,7 @@ namespace Botwinder.core
 				dbContext.Dispose();
 				await e.SendReplySafe(propertyValueOld);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !getInvite
 			newCommand = new Command("getInvite");
@@ -385,7 +385,7 @@ namespace Botwinder.core
 
 				await e.SendReplySafe(foundServer.InviteUrl);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !clearInvite
 			newCommand = new Command("clearInvite");
@@ -416,7 +416,7 @@ namespace Botwinder.core
 				await e.SendReplySafe(response);
 				dbContext.Dispose();
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 /// !restart
 			newCommand = new Command("restart");
@@ -429,7 +429,7 @@ namespace Botwinder.core
 				await Task.Delay(1000);
 				Environment.Exit(0);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 			this.Commands.Add("shutdown", newCommand.CreateAlias("shutdown"));
 
 // !getExceptions
@@ -455,7 +455,7 @@ namespace Botwinder.core
 					responseString = "I did not record any errors :stuck_out_tongue:";
 				await e.SendReplySafe(responseString);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !getException
 			newCommand = new Command("getException");
@@ -473,7 +473,7 @@ namespace Botwinder.core
 				dbContext.Dispose();
 				await e.SendReplySafe(responseString);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !blacklist
 			newCommand = new Command("blacklist");
@@ -535,7 +535,7 @@ namespace Botwinder.core
 				dbContext.Dispose();
 				await e.SendReplySafe(responseString);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !subscriber
 			newCommand = new Command("subscriber");
@@ -606,7 +606,7 @@ namespace Botwinder.core
 				dbContext.Dispose();
 				await e.SendReplySafe(responseString);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !partner
 			newCommand = new Command("partner");
@@ -671,7 +671,7 @@ namespace Botwinder.core
 				dbContext.Dispose();
 				await e.SendReplySafe(responseString);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !operations
 			newCommand = new Command("operations");
@@ -709,7 +709,7 @@ namespace Botwinder.core
 
 				await e.SendReplySafe(responseString);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !cancel
 			newCommand = new Command("cancel");
@@ -729,7 +729,7 @@ namespace Botwinder.core
 
 				await e.SendReplySafe(responseString);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !say
 			newCommand = new Command("say");
@@ -744,7 +744,7 @@ namespace Botwinder.core
 					return;
 				await e.SendReplySafe(e.TrimmedMessage);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !status
 			newCommand = new Command("status");
@@ -774,7 +774,7 @@ namespace Botwinder.core
 				await e.SendReplySafe(message);
 				dbContext.Dispose();
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 			this.Commands.Add("ping", newCommand.CreateAlias("ping"));
 
 // !help
@@ -917,7 +917,7 @@ namespace Botwinder.core
 
 				await e.SendReplySafe(response.ToString());
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !alias
 			newCommand = new Command("alias");
@@ -1032,7 +1032,7 @@ namespace Botwinder.core
 
 				await e.SendReplySafe(responseString);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !permissions
 			newCommand = new Command("permissions");
@@ -1152,7 +1152,7 @@ namespace Botwinder.core
 
 				await e.SendReplySafe(response);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !deleteRequest
 			newCommand = new Command("deleteRequest");
@@ -1189,8 +1189,8 @@ namespace Botwinder.core
 
 				await e.SendReplySafe("Okay...");
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
-			this.Commands.Add("removeRequest", newCommand.CreateAlias("removeRequest"));
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
+			this.Commands.Add("removerequest", newCommand.CreateAlias("removeRequest"));
 
 // !deleteReply
 			newCommand = new Command("deleteReply");
@@ -1227,8 +1227,8 @@ namespace Botwinder.core
 
 				await e.SendReplySafe("Okay...");
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
-			this.Commands.Add("removeReply", newCommand.CreateAlias("removeReply"));
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
+			this.Commands.Add("removereply", newCommand.CreateAlias("removeReply"));
 
 // !cmdChannelWhitelist
 			newCommand = new Command("cmdChannelWhitelist");
@@ -1278,7 +1278,7 @@ namespace Botwinder.core
 				dbContext.Dispose();
 				await e.SendReplySafe(responseString);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !cmdChannelBlacklist
 			newCommand = new Command("cmdChannelBlacklist");
@@ -1328,7 +1328,7 @@ namespace Botwinder.core
 				dbContext.Dispose();
 				await e.SendReplySafe(responseString);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !cmdResetRestrictions
 			newCommand = new Command("cmdResetRestrictions");
@@ -1358,7 +1358,7 @@ namespace Botwinder.core
 
 				await e.SendReplySafe("As you wish my thane.");
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 // !patchnotes
 			newCommand = new Command("patchnotes");
@@ -1368,7 +1368,7 @@ namespace Botwinder.core
 			newCommand.OnExecute += async e => {
 				await e.SendReplySafe(GetPatchnotes());
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 /*
 // !command
@@ -1380,7 +1380,7 @@ namespace Botwinder.core
 				string responseString = "";
 				await e.SendReplySafe(responseString);
 			};
-			this.Commands.Add(newCommand.Id, newCommand);
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
 */
 

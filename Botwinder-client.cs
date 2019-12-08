@@ -672,13 +672,14 @@ namespace Botwinder.core
 
 					foreach( Command cmd in newCommands )
 					{
-						if( this.Commands.ContainsKey(cmd.Id) )
+						string cmdLowercase = cmd.Id.ToLower();
+						if( this.Commands.ContainsKey(cmdLowercase) )
 						{
-							this.Commands[cmd.Id] = cmd;
+							this.Commands[cmdLowercase] = cmd;
 							continue;
 						}
 
-						this.Commands.Add(cmd.Id, cmd);
+						this.Commands.Add(cmdLowercase, cmd);
 					}
 				}
 				catch(Exception exception)
@@ -750,7 +751,7 @@ namespace Botwinder.core
 			if( this.GlobalConfig.LogDebug )
 				Console.WriteLine($"Command: {commandString} | {trimmedMessage}");
 
-			CommandOptions commandOptions = server.GetCommandOptions(commandString);
+			commandString = commandString.ToLower();
 
 			if( server.Commands.ContainsKey(commandString) ||
 			    (server.CustomAliases.ContainsKey(commandString) &&
@@ -760,7 +761,7 @@ namespace Botwinder.core
 				if( command.IsAlias && !string.IsNullOrEmpty(command.ParentId) ) //Internal, not-custom alias.
 					command = server.Commands[command.ParentId];
 
-				CommandArguments args = new CommandArguments(this, command, server, channel, message, originalCommandString, trimmedMessage, parameters, commandOptions);
+				CommandArguments args = new CommandArguments(this, command, server, channel, message, originalCommandString, trimmedMessage, parameters, server.GetCommandOptions(command.Id));
 
 				if( command.CanExecute(this, server, channel, message.Author as SocketGuildUser) )
 					return await command.Execute(args);
@@ -769,8 +770,9 @@ namespace Botwinder.core
 			         (server.CustomAliases.ContainsKey(commandString) &&
 			          server.CustomCommands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId)) )
 			{
-				if( server.CustomCommands[commandString].CanExecute(this, server, channel, message.Author as SocketGuildUser) )
-					return await HandleCustomCommand(server, server.CustomCommands[commandString], commandOptions, channel, message);
+				CustomCommand customCommand = server.CustomCommands[commandString];
+				if( customCommand.CanExecute(this, server, channel, message.Author as SocketGuildUser) )
+					return await HandleCustomCommand(server, customCommand, server.GetCommandOptions(customCommand.CommandId), channel, message);
 			}
 
 			return false;
