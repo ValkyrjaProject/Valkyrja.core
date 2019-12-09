@@ -3,6 +3,7 @@ using System.Collections;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Botwinder.entities;
@@ -418,7 +419,7 @@ namespace Botwinder.core
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 
-/// !restart
+// !restart
 			newCommand = new Command("restart");
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
@@ -754,22 +755,24 @@ namespace Botwinder.core
 			newCommand.RequiredPermissions = PermissionType.Everyone;
 			newCommand.OnExecute += async e => {
 				TimeSpan time = DateTime.UtcNow - Utils.GetTimeFromId(e.Message.Id);
-				StringBuilder shards = new StringBuilder();
 				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
 
 				Int64 threads = dbContext.Shards.Sum(s => s.ThreadsActive);
 				string cpuLoad = Bash.Run("grep 'cpu ' /proc/stat | awk '{print ($2+$4)*100/($2+$4+$5)}'");
 				string memoryUsed = Bash.Run("free | grep Mem | awk '{print $3/$2 * 100.0}'");
-				string message = "Server Status: <http://status.valkyrja.app>\n" +
-				                 "Server Info: <http://rhea-ayase.eu/persephone>" +
+				string subscription = IsPartner(e.Server.Id) ? "Partner   " : (IsSubscriber(e.Server.Guild.OwnerId) ? "Subscriber" : "");
+
+				string message = "Server Status: <https://status.valkyrja.app>\n" +
 				                 $"```md\n" +
-				                 $"[ Memory usage ][ {double.Parse(memoryUsed):#00.00} % ]\n" +
-				                 $"[     CPU Load ][ {double.Parse(cpuLoad):#00.00} % ]\n" +
-				                 $"[      Threads ][ {threads:#000}     ]\n" +
+				                 $"[ Memory usage ][ {double.Parse(memoryUsed):#00.00} %    ]\n" +
+				                 $"[     CPU Load ][ {double.Parse(cpuLoad):#00.00} %    ]\n" +
+				                 $"[      Threads ][ {threads:#000}        ]\n" +
+				                 $"[     Shard ID ][ {this.CurrentShard.Id:00}         ]\n" +
+				                 $"[ Subscription ][ {subscription} ]\n" +
 				                 $"```\n<:ValkThink:535541641507897354> `{time.TotalMilliseconds:#00}`ms <:ValkyrjaNomBlob:509485197763543050>";
 
-				await e.SendReplySafe(message);
 				dbContext.Dispose();
+				await e.SendReplySafe(message);
 			};
 			this.Commands.Add(newCommand.Id, newCommand);
 			this.Commands.Add("ping", newCommand.CreateAlias("ping"));
