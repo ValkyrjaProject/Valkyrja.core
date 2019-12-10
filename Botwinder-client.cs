@@ -759,7 +759,7 @@ namespace Botwinder.core
 			{
 				Command command = server.Commands[commandString];
 				if( command.IsAlias && !string.IsNullOrEmpty(command.ParentId) ) //Internal, not-custom alias.
-					command = server.Commands[command.ParentId];
+					command = server.Commands[command.ParentId.ToLower()];
 
 				CommandArguments args = new CommandArguments(this, command, server, channel, message, originalCommandString, trimmedMessage, parameters, server.GetCommandOptions(command.Id));
 
