@@ -154,31 +154,29 @@ namespace Botwinder.entities
 		}
 
 		///<summary> Returns the correct commandId if it exists, empty otherwise. Returns null if it is restricted command. </summary>
-		public string GetCommandOptionsId(string commandId)
+		public string GetCommandOptionsId(string commandString)
 		{
-			commandId = commandId.ToLower();
-			if( (!this.CustomAliases.ContainsKey(commandId) &&
-			     !this.Commands.ContainsKey(commandId) &&
-			     !this.CustomCommands.ContainsKey(commandId)) )
-			{
-				return "";
-			}
+			string commandId = "";
+			commandString = commandString.ToLower();
 
-			if( this.CustomAliases.ContainsKey(commandId) )
-				commandId = this.CustomAliases[commandId].CommandId.ToLower();
+			if( this.CustomAliases.ContainsKey(commandString) )
+				commandString = this.CustomAliases[commandString].CommandId.ToLower();
 
-			if( this.Commands.ContainsKey(commandId) )
+			if( this.Commands.ContainsKey(commandString) )
 			{
 				Command command;
-				if( (command = this.Commands[commandId]).IsCoreCommand ||
+				if( (command = this.Commands[commandString]).IsCoreCommand ||
 				    command.RequiredPermissions == PermissionType.OwnerOnly )
 				{
 					return null;
 				}
 
+				commandId = command.Id;
 				if( command.IsAlias && !string.IsNullOrEmpty(command.ParentId) )
 					commandId = command.ParentId;
 			}
+			else if( this.CustomCommands.ContainsKey(commandString) )
+				commandId = this.CustomCommands[commandString].CommandId;
 
 			return commandId;
 		}
