@@ -126,8 +126,9 @@ namespace Botwinder.entities
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public CommandOptions GetCommandOptions(string commandString)
 		{
-			if( this.CustomAliases.ContainsKey(commandString) )
-				commandString = this.CustomAliases[commandString].CommandId;
+			string lowerCommandString = commandString.ToLower();
+			if( this.CustomAliases.ContainsKey(lowerCommandString) )
+				commandString = this.CustomAliases[lowerCommandString].CommandId;
 
 			if( this.CachedCommandOptions != null && this.CachedCommandOptions.CommandId == commandString )
 				return this.CachedCommandOptions;
@@ -155,6 +156,7 @@ namespace Botwinder.entities
 		///<summary> Returns the correct commandId if it exists, empty otherwise. Returns null if it is restricted command. </summary>
 		public string GetCommandOptionsId(string commandId)
 		{
+			commandId = commandId.ToLower();
 			if( (!this.CustomAliases.ContainsKey(commandId) &&
 			     !this.Commands.ContainsKey(commandId) &&
 			     !this.CustomCommands.ContainsKey(commandId)) )
@@ -163,7 +165,7 @@ namespace Botwinder.entities
 			}
 
 			if( this.CustomAliases.ContainsKey(commandId) )
-				commandId = this.CustomAliases[commandId].CommandId;
+				commandId = this.CustomAliases[commandId].CommandId.ToLower();
 
 			if( this.Commands.ContainsKey(commandId) )
 			{

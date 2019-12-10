@@ -854,8 +854,8 @@ namespace Botwinder.core
 						    regex.Match(cmd.Id).Success )
 						{
 							Command command = cmd;
-							if( cmd.IsAlias && e.Server.Commands.ContainsKey(cmd.ParentId) )
-								command = e.Server.Commands[cmd.ParentId];
+							if( cmd.IsAlias && e.Server.Commands.ContainsKey(cmd.ParentId.ToLower()) )
+								command = e.Server.Commands[cmd.ParentId.ToLower()];
 
 							if( includedCommandIds.Contains(command.Id) )
 								continue;
@@ -885,11 +885,11 @@ namespace Botwinder.core
 							if( ++count > 5 )
 								break;
 
-							if( e.Server.Commands.ContainsKey(alias.CommandId) )
-								AddCommand(e.Server.Commands[alias.CommandId]);
-							else if( e.Server.CustomCommands.ContainsKey(alias.CommandId) )
+							if( e.Server.Commands.ContainsKey(alias.CommandId.ToLower()) )
+								AddCommand(e.Server.Commands[alias.CommandId.ToLower()]);
+							else if( e.Server.CustomCommands.ContainsKey(alias.CommandId.ToLower()) )
 							{
-								AddCustomCommand(e.Server.CustomCommands[alias.CommandId]);
+								AddCustomCommand(e.Server.CustomCommands[alias.CommandId.ToLower()]);
 							}
 						}
 					}
@@ -977,23 +977,23 @@ namespace Botwinder.core
 							CommandId = e.MessageArgs[2],
 							ServerId = e.Server.Id
 						};
-						if( e.Server.Commands.ContainsKey(alias.Alias) ||
-						    e.Server.CustomCommands.ContainsKey(alias.Alias) ||
-						    e.Server.CustomAliases.ContainsKey(alias.Alias) )
+						if( e.Server.Commands.ContainsKey(alias.Alias.ToLower()) ||
+						    e.Server.CustomCommands.ContainsKey(alias.Alias.ToLower()) ||
+						    e.Server.CustomAliases.ContainsKey(alias.Alias.ToLower()) )
 						{
 							responseString = $"I already have a command with this name (`{alias.Alias}`)";
 							break;
 						}
-						if( !e.Server.Commands.ContainsKey(alias.CommandId) &&
-						    !e.Server.CustomCommands.ContainsKey(alias.CommandId) )
+						if( !e.Server.Commands.ContainsKey(alias.CommandId.ToLower()) &&
+						    !e.Server.CustomCommands.ContainsKey(alias.CommandId.ToLower()) )
 						{
 							responseString = $"Target command not found (`{alias.CommandId}`)";
 							break;
 						}
 
-						if( e.Server.Commands.ContainsKey(alias.CommandId) )
+						if( e.Server.Commands.ContainsKey(alias.CommandId.ToLower()) )
 						{
-							Command cmd = e.Server.Commands[alias.CommandId];
+							Command cmd = e.Server.Commands[alias.CommandId.ToLower()];
 							if( cmd.IsAlias && !string.IsNullOrEmpty(cmd.ParentId) )
 								alias.CommandId = cmd.ParentId;
 						}
@@ -1009,7 +1009,7 @@ namespace Botwinder.core
 					case "delete":
 					case "remove":
 					{
-						if( e.Server.CustomAliases == null || !e.Server.CustomAliases.ContainsKey(e.MessageArgs[1]) )
+						if( e.Server.CustomAliases == null || !e.Server.CustomAliases.ContainsKey(e.MessageArgs[1].ToLower()) )
 						{
 							responseString = $"Alias not found. (`{e.MessageArgs[1]}`)";
 							break;
@@ -1080,7 +1080,7 @@ namespace Botwinder.core
 					{
 						Command command = null;
 						CustomCommand customCommand = null;
-						if( e.Server.Commands.ContainsKey(commandId) && (command = e.Server.Commands[commandId]) != null )
+						if( e.Server.Commands.ContainsKey(commandId.ToLower()) && (command = e.Server.Commands[commandId.ToLower()]) != null )
 						{
 							PermissionOverrides permissions = PermissionOverrides.Default;
 							switch(command.RequiredPermissions)
@@ -1106,7 +1106,7 @@ namespace Botwinder.core
 							}
 							responseBuilder.Append($" -> `{permissions.ToString()}`");
 						}
-						else if( e.Server.CustomCommands.ContainsKey(commandId) && (customCommand = e.Server.CustomCommands[commandId]) != null )
+						else if( e.Server.CustomCommands.ContainsKey(commandId.ToLower()) && (customCommand = e.Server.CustomCommands[commandId.ToLower()]) != null )
 							responseBuilder.Append($" -> `{PermissionOverrides.Everyone}`");
 					}
 

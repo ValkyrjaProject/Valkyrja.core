@@ -755,7 +755,7 @@ namespace Botwinder.core
 
 			if( server.Commands.ContainsKey(commandString) ||
 			    (server.CustomAliases.ContainsKey(commandString) &&
-			     server.Commands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId)) )
+			     server.Commands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId.ToLower())) )
 			{
 				Command command = server.Commands[commandString];
 				if( command.IsAlias && !string.IsNullOrEmpty(command.ParentId) ) //Internal, not-custom alias.
@@ -768,7 +768,7 @@ namespace Botwinder.core
 			}
 			else if( server.CustomCommands.ContainsKey(commandString) ||
 			         (server.CustomAliases.ContainsKey(commandString) &&
-			          server.CustomCommands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId)) )
+			          server.CustomCommands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId.ToLower())) )
 			{
 				CustomCommand customCommand = server.CustomCommands[commandString];
 				if( customCommand.CanExecute(this, server, channel, message.Author as SocketGuildUser) )
