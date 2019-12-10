@@ -767,7 +767,7 @@ namespace Botwinder.core
 				                 $"[ Memory usage ][ {double.Parse(memoryUsed):#00.00} %    ]\n" +
 				                 $"[     CPU Load ][ {double.Parse(cpuLoad):#00.00} %    ]\n" +
 				                 $"[      Threads ][ {threads:#000}        ]\n" +
-				                 $"[     Shard ID ][ {this.CurrentShard.Id:00}         ]\n" +
+				                 $"[     Shard ID ][ {this.CurrentShard.Id-1:00}         ]\n" +
 				                 $"[ Subscription ][ {subscription} ]\n" +
 				                 $"```\n<:ValkThink:535541641507897354> `{time.TotalMilliseconds:#00}`ms <:ValkyrjaNomBlob:509485197763543050>";
 
