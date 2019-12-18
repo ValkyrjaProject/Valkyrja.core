@@ -24,12 +24,12 @@
 
 	public static class PermissionType
 	{
-		public const byte OwnerOnly		= 0;
-		public const byte Everyone		= 1 << (int)PermissionOverrides.Everyone;
-		public const byte ServerOwner 	= 1 << (int)PermissionOverrides.ServerOwner;
-		public const byte Admin 		= 1 << (int)PermissionOverrides.Admins;
-		public const byte Moderator 	= 1 << (int)PermissionOverrides.Moderators;
-		public const byte SubModerator 	= 1 << (int)PermissionOverrides.SubModerators;
-		public const byte Member 		= 1 << (int)PermissionOverrides.Members;
+		public const byte OwnerOnly    = 0;
+		public const byte Everyone     = 1 << (int)PermissionOverrides.Everyone;
+		public const byte ServerOwner  = 1 << (int)PermissionOverrides.ServerOwner;
+		public const byte Admin        = 1 << (int)PermissionOverrides.Admins;
+		public const byte Moderator    = 1 << (int)PermissionOverrides.Moderators;
+		public const byte SubModerator = 1 << (int)PermissionOverrides.SubModerators;
+		public const byte Member       = 1 << (int)PermissionOverrides.Members;
 	}
 }
