@@ -84,7 +84,7 @@ namespace Botwinder.core
 
 					Dictionary<string, int> count = new Dictionary<string, int>();
 					List<Command> commands = this.Commands.Values.ToList();
-					List<LogEntry> logs = dbContext.Log.ToList();
+					List<LogEntry> logs = dbContext.Log.Where(l => l.Type == LogType.Command).ToList();
 
 					int c = 0;
 					foreach( Command cmd in commands )
@@ -98,9 +98,6 @@ namespace Botwinder.core
 						bool canceled = await e.Operation.While(() => c < logs.Count, async () => {
 #pragma warning restore 1998
 							LogEntry log = logs[c];
-							if( log.Type != LogType.Command )
-								return false;
-
 							if( !configCache.ContainsKey(log.ServerId) )
 								configCache.Add(log.ServerId, serverContext.ServerConfigurations.First(s => s.ServerId == log.ServerId));
 
