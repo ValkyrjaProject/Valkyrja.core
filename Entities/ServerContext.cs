@@ -6,7 +6,7 @@ using Pomelo.EntityFrameworkCore.MySql;
 
 using guid = System.UInt64;
 
-namespace Botwinder.entities
+namespace Valkyrja.entities
 {
 	public class ServerContext: DbContext
 	{

@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Botwinder.entities;
+using Valkyrja.entities;
 using Discord;
 using Discord.Net;
 using Discord.WebSocket;
 using guid = System.UInt64;
 
-namespace Botwinder.core
+namespace Valkyrja.core
 {
-	public partial class BotwinderClient : IBotwinderClient, IDisposable
+	public partial class ValkyrjaClient : IValkyrjaClient, IDisposable
 	{
 		public readonly DbConfig DbConfig;
 		private GlobalContext GlobalDb;
@@ -79,7 +79,7 @@ namespace Botwinder.core
 		public List<guid> AntispamMessageIDs = new List<guid>();
 
 
-		public BotwinderClient(int shardIdOverride = -1)
+		public ValkyrjaClient(int shardIdOverride = -1)
 		{
 			this.TimeStarted = DateTime.UtcNow;
 			this.DbConfig = DbConfig.Load();
@@ -129,7 +129,7 @@ namespace Botwinder.core
 				if( (this.DbConfig.ForceShardId == 0 && this.GlobalConfig.TotalShards > this.GlobalDb.Shards.Count()) ||
 				    this.DbConfig.ForceShardId > this.GlobalDb.Shards.Count() + 1 ) //they start at 1...
 				{
-					Console.WriteLine("BotwinderClient: TotalShards (or forceId) exceeds the Shards count!!!");
+					Console.WriteLine("ValkyrjaClient: TotalShards (or forceId) exceeds the Shards count!!!");
 					Dispose();
 					Environment.Exit(1);
 				}
@@ -147,7 +147,7 @@ namespace Botwinder.core
 					return this.CurrentShard;
 				}
 
-				Console.WriteLine("BotwinderClient: Waiting for a shard...");
+				Console.WriteLine("ValkyrjaClient: Waiting for a shard...");
 				while( GetShard() == null )
 				{
 					await Task.Delay(Utils.Random.Next(5000, 10000));
@@ -157,7 +157,7 @@ namespace Botwinder.core
 				lock(this.DbLock)
 					this.GlobalDb.SaveChanges();
 			}
-			Console.WriteLine($"BotwinderClient: Shard {this.CurrentShard.Id - 1} taken.");
+			Console.WriteLine($"ValkyrjaClient: Shard {this.CurrentShard.Id - 1} taken.");
 
 			this.CurrentShard.ResetStats(this.TimeStarted);
 
@@ -209,7 +209,7 @@ namespace Botwinder.core
 
 		private void LoadConfig()
 		{
-			Console.WriteLine("BotwinderClient: Loading configuration...");
+			Console.WriteLine("ValkyrjaClient: Loading configuration...");
 
 			lock(this.DbLock)
 			{
@@ -234,14 +234,14 @@ namespace Botwinder.core
 					this.GlobalConfig = new GlobalConfig(){ConfigName = this.DbConfig.ConfigName};
 					this.GlobalDb.GlobalConfigs.Add(this.GlobalConfig);
 					this.GlobalDb.SaveChanges();
-					Console.WriteLine("BotwinderClient: Configuration created.");
+					Console.WriteLine("ValkyrjaClient: Configuration created.");
 					Environment.Exit(0);
 				}
 
 				this.SupportTeam = this.GlobalDb.SupportTeam.Select(u => u.UserId).ToList();
 			}
 
-			Console.WriteLine("BotwinderClient: Configuration loaded.");
+			Console.WriteLine("ValkyrjaClient: Configuration loaded.");
 		}
 
 //Events
@@ -260,7 +260,7 @@ namespace Botwinder.core
 				while( IsAnyShardConnecting() )
 				{
 					if( !awaited )
-						Console.WriteLine("BotwinderClient: Waiting for other shards to connect...");
+						Console.WriteLine("ValkyrjaClient: Waiting for other shards to connect...");
 
 					awaited = true;
 					await Task.Delay(Utils.Random.Next(5000, 10000));
@@ -273,12 +273,12 @@ namespace Botwinder.core
 					await Task.Delay(5000); //Ensure sufficient delay between connecting shards.
 			}
 
-			Console.WriteLine("BotwinderClient: Connecting...");
+			Console.WriteLine("ValkyrjaClient: Connecting...");
 		}
 
 		private async Task OnConnected()
 		{
-			Console.WriteLine("BotwinderClient: Connected.");
+			Console.WriteLine("ValkyrjaClient: Connected.");
 
 			try
 			{
@@ -301,7 +301,7 @@ namespace Botwinder.core
 		private Task OnReady()
 		{
 			if( this.GlobalConfig.LogDebug )
-				Console.WriteLine("BotwinderClient: Ready.");
+				Console.WriteLine("ValkyrjaClient: Ready.");
 
 			if( this.MainUpdateTask == null )
 			{
@@ -315,7 +315,7 @@ namespace Botwinder.core
 
 		private async Task OnDisconnected(Exception exception)
 		{
-			Console.WriteLine("BotwinderClient: Disconnected.");
+			Console.WriteLine("ValkyrjaClient: Disconnected.");
 			this.IsConnected = false;
 			this.CurrentShard.Disconnects++;
 
@@ -346,7 +346,7 @@ namespace Botwinder.core
 			try
 			{
 				if( this.GlobalConfig.LogDebug )
-					Console.WriteLine("BotwinderClient: MessageReceived on thread " + Thread.CurrentThread.ManagedThreadId);
+					Console.WriteLine("ValkyrjaClient: MessageReceived on thread " + Thread.CurrentThread.ManagedThreadId);
 
 				this.CurrentShard.MessagesTotal++;
 				this.MessagesThisMinute++;
@@ -447,19 +447,19 @@ namespace Botwinder.core
 		private async Task MainUpdate()
 		{
 			if( this.GlobalConfig.LogDebug )
-				Console.WriteLine("BotwinderClient: MainUpdate started.");
+				Console.WriteLine("ValkyrjaClient: MainUpdate started.");
 
 			while( !this.MainUpdateCancel.IsCancellationRequested )
 			{
 				if( this.GlobalConfig.LogDebug )
-					Console.WriteLine("BotwinderClient: MainUpdate loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+					Console.WriteLine("ValkyrjaClient: MainUpdate loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 
 				DateTime frameTime = DateTime.UtcNow;
 
 				if( !this.IsInitialized )
 				{
 					if( this.GlobalConfig.LogDebug )
-						Console.WriteLine("BotwinderClient: Initialized.");
+						Console.WriteLine("ValkyrjaClient: Initialized.");
 					try
 					{
 						this.IsInitialized = true;
@@ -497,7 +497,7 @@ namespace Botwinder.core
 				try
 				{
 					if( this.GlobalConfig.LogDebug )
-						Console.WriteLine("BotwinderClient: Update loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+						Console.WriteLine("ValkyrjaClient: Update loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 
 					await Update();
 				}
@@ -508,7 +508,7 @@ namespace Botwinder.core
 
 				TimeSpan deltaTime = DateTime.UtcNow - frameTime;
 				if( this.GlobalConfig.LogDebug )
-					Console.WriteLine($"BotwinderClient: MainUpdate loop took: {deltaTime.TotalMilliseconds} ms");
+					Console.WriteLine($"ValkyrjaClient: MainUpdate loop took: {deltaTime.TotalMilliseconds} ms");
 				await Task.Delay(TimeSpan.FromMilliseconds(Math.Max(this.GlobalConfig.TotalShards * 1000, (TimeSpan.FromSeconds(1f / this.GlobalConfig.TargetFps) - deltaTime).TotalMilliseconds)));
 			}
 		}
@@ -516,36 +516,36 @@ namespace Botwinder.core
 		private async Task Update()
 		{
 			if( this.GlobalConfig.LogDebug )
-				Console.WriteLine("BotwinderClient: UpdateSubscriptions loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+				Console.WriteLine("ValkyrjaClient: UpdateSubscriptions loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 			await UpdateSubscriptions();
 
 			if( (this.GlobalConfig.EnforceRequirements || this.GlobalConfig.MinMembers > 0) && this.ValidSubscribers )
 			{
 				if( this.GlobalConfig.LogDebug )
-					Console.WriteLine("BotwinderClient: BailBadServers loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+					Console.WriteLine("ValkyrjaClient: BailBadServers loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 				await BailBadServers();
 			}
 
 			if( this.GlobalConfig.LogDebug )
-				Console.WriteLine("BotwinderClient: UpdateShardStats loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+				Console.WriteLine("ValkyrjaClient: UpdateShardStats loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 			UpdateShardStats();
 
 			if( this.GlobalConfig.LogDebug )
-				Console.WriteLine("BotwinderClient: UpdateServerStats loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+				Console.WriteLine("ValkyrjaClient: UpdateServerStats loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 			await UpdateServerStats();
 
 			if( this.GlobalConfig.LogDebug )
-				Console.WriteLine("BotwinderClient: UpdateServerConfigs loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+				Console.WriteLine("ValkyrjaClient: UpdateServerConfigs loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 			await UpdateServerConfigs();
 
 			if( this.GlobalConfig.LogDebug )
-				Console.WriteLine("BotwinderClient: UpdateModules loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+				Console.WriteLine("ValkyrjaClient: UpdateModules loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 			await UpdateModules();
 
 			lock(this.DbLock)
 			{
 				if( this.GlobalConfig.LogDebug )
-					Console.WriteLine("BotwinderClient: SaveDatabase loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+					Console.WriteLine("ValkyrjaClient: SaveDatabase loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 				this.GlobalDb.SaveChanges();
 				this.ServerDb.SaveChanges();
 			}
@@ -695,7 +695,7 @@ namespace Botwinder.core
 			foreach( IModule module in modules )
 			{
 				if( this.GlobalConfig.LogDebug )
-					Console.WriteLine($"BotwinderClient: ModuleUpdate.{module.ToString()} triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+					Console.WriteLine($"ValkyrjaClient: ModuleUpdate.{module.ToString()} triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 
 				DateTime frameTime = DateTime.UtcNow;
 
@@ -713,7 +713,7 @@ namespace Botwinder.core
 				}
 
 				if( this.GlobalConfig.LogDebug )
-					Console.WriteLine($"BotwinderClient: ModuleUpdate.{module.ToString()} took: {(DateTime.UtcNow - frameTime).TotalMilliseconds} ms");
+					Console.WriteLine($"ValkyrjaClient: ModuleUpdate.{module.ToString()} took: {(DateTime.UtcNow - frameTime).TotalMilliseconds} ms");
 			}
 		}
 

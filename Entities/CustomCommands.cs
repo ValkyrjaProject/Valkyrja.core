@@ -8,7 +8,7 @@ using Discord.WebSocket;
 
 using guid = System.UInt64;
 
-namespace Botwinder.entities
+namespace Valkyrja.entities
 {
 	[Table("custom_commands")]
 	public class CustomCommand
@@ -29,7 +29,7 @@ namespace Botwinder.entities
 
 		/// <summary> Returns true if the User has permission to execute this command. </summary>
 		/// <param name="commandChannelOptions"> List of all the channel options for specific command. </param>
-		public bool CanExecute(IBotwinderClient client, Server server, SocketGuildChannel channel,
+		public bool CanExecute(IValkyrjaClient client, Server server, SocketGuildChannel channel,
 			SocketGuildUser user)
 		{
 			if( client.IsGlobalAdmin(user.Id) )

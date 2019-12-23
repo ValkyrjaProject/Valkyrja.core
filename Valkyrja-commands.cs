@@ -6,14 +6,14 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Botwinder.entities;
+using Valkyrja.entities;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
 using guid = System.UInt64;
 
-namespace Botwinder.core
+namespace Valkyrja.core
 {
-	public partial class BotwinderClient : IBotwinderClient, IDisposable
+	public partial class ValkyrjaClient : IValkyrjaClient, IDisposable
 	{
 		private readonly Regex RegexMentionHelp = new Regex(".*(help|commands).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		private readonly Regex RegexPrefixHelp = new Regex(".*(command character|prefix).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -38,7 +38,7 @@ namespace Botwinder.core
 		private async Task HandleMentionResponse(Server server, SocketTextChannel channel, SocketMessage message)
 		{
 			if( this.GlobalConfig.LogDebug )
-				Console.WriteLine("BotwinderClient: MentionReceived");
+				Console.WriteLine("ValkyrjaClient: MentionReceived");
 
 			string responseString = "";
 

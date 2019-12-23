@@ -3,7 +3,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-namespace Botwinder.entities
+namespace Valkyrja.entities
 {
 	public class Operation
 	{

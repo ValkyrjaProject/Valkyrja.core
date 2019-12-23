@@ -4,18 +4,18 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Botwinder.core;
+using Valkyrja.core;
 using Discord;
 using Discord.Net;
 using Discord.WebSocket;
 
 using guid = System.UInt64;
 
-namespace Botwinder.entities
+namespace Valkyrja.entities
 {
 	public class Server
 	{
-		private BotwinderClient Client;
+		private ValkyrjaClient Client;
 
 		public readonly guid Id;
 
@@ -51,7 +51,7 @@ namespace Botwinder.entities
 			this.Guild = guild;
 		}
 
-		public async Task ReloadConfig(BotwinderClient client, ServerContext dbContext, Dictionary<string, Command> allCommands)
+		public async Task ReloadConfig(ValkyrjaClient client, ServerContext dbContext, Dictionary<string, Command> allCommands)
 		{
 			this.Client = client;
 			this.DbConnectionString = client.DbConnectionString;
@@ -118,7 +118,7 @@ namespace Botwinder.entities
 			}
 		}
 
-		public async Task LoadConfig(BotwinderClient client, ServerContext dbContext, Dictionary<string, Command> allCommands)
+		public async Task LoadConfig(ValkyrjaClient client, ServerContext dbContext, Dictionary<string, Command> allCommands)
 		{
 			await ReloadConfig(client, dbContext, allCommands);
 		}

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 using guid = System.UInt64;
 
-namespace Botwinder.entities
+namespace Valkyrja.entities
 {
 	[Table("server_stats")]
 	public class ServerStats

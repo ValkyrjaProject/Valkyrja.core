@@ -10,7 +10,7 @@ using Discord.WebSocket;
 
 using guid = System.UInt64;
 
-namespace Botwinder.entities
+namespace Valkyrja.entities
 {
 	public class Command
 	{
@@ -65,7 +65,7 @@ namespace Botwinder.entities
 		/// <summary> The Code Stuff! </summary>
 		public Func<CommandArguments, Task> OnExecute = null;
 
-		/// <summary> Initializes a new instance of the <see cref="Botwinder.entities.Command"/> class. </summary>
+		/// <summary> Initializes a new instance of the <see cref="Valkyrja.entities.Command"/> class. </summary>
 		/// <param name="id"> You will execute the command by using CommandCharacter+Command.ID </param>
 		public Command(string id)
 		{
@@ -119,7 +119,7 @@ namespace Botwinder.entities
 		}
 
 		/// <summary> Returns true if the User has permission to execute this command. </summary>
-		public bool CanExecute(IBotwinderClient client, Server server, SocketGuildChannel channel, SocketGuildUser user)
+		public bool CanExecute(IValkyrjaClient client, Server server, SocketGuildChannel channel, SocketGuildUser user)
 		{
 			if( client.IsGlobalAdmin(user.Id) )
 				return true;
@@ -200,7 +200,7 @@ namespace Botwinder.entities
 	public class CommandArguments
 	{
 		/// <summary> Reference to the client. </summary>
-		public IBotwinderClient Client{ get; private set; }
+		public IValkyrjaClient Client{ get; private set; }
 
 		/// <summary> The parrent command. </summary>
 		public Command Command{ get; private set; }
@@ -230,7 +230,7 @@ namespace Botwinder.entities
 		public Operation Operation{ get; set; } //Necessary evul.
 
 
-		public CommandArguments(IBotwinderClient client, Command command, Server server, SocketTextChannel channel, SocketMessage message, string commandId, string trimmedMessage, string[] messageArgs, CommandOptions options = null)
+		public CommandArguments(IValkyrjaClient client, Command command, Server server, SocketTextChannel channel, SocketMessage message, string commandId, string trimmedMessage, string[] messageArgs, CommandOptions options = null)
 		{
 			this.Client = client;
 			this.Command = command;

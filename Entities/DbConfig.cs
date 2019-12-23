@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using System.IO;
 using Newtonsoft.Json;
 
-namespace Botwinder.entities
+namespace Valkyrja.entities
 {
 	public class DbConfig
 	{
@@ -14,7 +14,7 @@ namespace Botwinder.entities
 		public string Port = "3306";
 		public string Username = "db_user";
 		public string Password = "db_password";
-		public string Database = "db_botwinder";
+		public string Database = "db_valkyrja";
 		public string ConfigName = "default";
 		public int ForceShardId = 0;
 		public bool UseShardLock = false;

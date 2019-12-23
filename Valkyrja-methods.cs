@@ -5,15 +5,15 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.IO;
-using Botwinder.entities;
+using Valkyrja.entities;
 using Discord.Net;
 using Discord.WebSocket;
 
 using guid = System.UInt64;
 
-namespace Botwinder.core
+namespace Valkyrja.core
 {
-	public partial class BotwinderClient : IBotwinderClient, IDisposable
+	public partial class ValkyrjaClient : IValkyrjaClient, IDisposable
 	{
 		public async Task SendRawMessageToChannel(SocketTextChannel channel, string message)
 		{
@@ -289,9 +289,9 @@ namespace Botwinder.core
 			string changelog = File.ReadAllText(Path.Combine("updates", "changelog"));
 			int start = changelog.IndexOf("**Valkyrja");
 			int valkEnd = changelog.Substring(start+1).IndexOf("**Valkyrja");
-			int bwEnd = changelog.Substring(start+1).IndexOf("**Botwinder");
+			int bwEnd = changelog.Substring(start+1).IndexOf("**Valkyrja");
 			int end = valkEnd > start ? valkEnd : bwEnd;
-			int hLength = valkEnd > start ? "**Valkyrja".Length : "**Botwinder".Length;
+			int hLength = valkEnd > start ? "**Valkyrja".Length : "**Valkyrja".Length;
 
 			if( start >= 0 && end <= changelog.Length && end > start && (changelog = changelog.Substring(start, end-start+hLength)).Length > 0 )
 				return changelog + "\n\nSee the full changelog and upcoming features at <https://valkyrja.app/updates>!";

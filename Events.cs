@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using Botwinder.core;
+using Valkyrja.core;
 using Discord.Net;
 using guid = System.UInt64;
 
-namespace Botwinder.entities
+namespace Valkyrja.entities
 {
 	public class Events
 	{
-		private BotwinderClient Client;
+		private ValkyrjaClient Client;
 
 
 		/// <summary> Triggers only once, as soon as the client connects for the first time. Consider using IModule.Init instead. </summary>
@@ -24,7 +24,7 @@ namespace Botwinder.entities
 		internal Func<Task> Ready = null;
 		/// <summary> Log entry was added. </summary>
 		public Func<LogEntry, Task> LogEntryAdded = null;
-		/// <summary> Exception was added. Don't call this event directly, call BotwinderClient.LogException </summary>
+		/// <summary> Exception was added. Don't call this event directly, call ValkyrjaClient.LogException </summary>
 		public Func<ExceptionEntry, Task> Exception = null;
 
 		public Func<SocketGuild, Task> JoinedGuild = null;
@@ -203,9 +203,9 @@ namespace Botwinder.entities
 		/// <see cref="T:string" />: Name of the role. </summary>
 		public Func<Server, SocketGuildUser, string, Task> LogPublicRoleLeave = null;
 
-		public Events(DiscordSocketClient discordClient, BotwinderClient botwinderClient)
+		public Events(DiscordSocketClient discordClient, ValkyrjaClient valkyrjaClient)
 		{
-			this.Client = botwinderClient;
+			this.Client = valkyrjaClient;
 
 			discordClient.Log += OnLogEntryAdded;
 

@@ -1,4 +1,4 @@
-﻿namespace Botwinder.entities
+﻿namespace Valkyrja.entities
 {
 	public enum RolePermissionLevel
 	{

@@ -5,9 +5,9 @@ using Discord.WebSocket;
 
 using guid = System.UInt64;
 
-namespace Botwinder.entities
+namespace Valkyrja.entities
 {
-	public interface IBotwinderClient
+	public interface IValkyrjaClient
 	{
 		bool IsConnected{ get; set; }
 		GlobalConfig GlobalConfig{ get; set; }

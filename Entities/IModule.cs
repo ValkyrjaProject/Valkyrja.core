@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 using guid = System.UInt64;
 
-namespace Botwinder.entities
+namespace Valkyrja.entities
 {
 	public interface IModule
 	{
@@ -13,13 +13,13 @@ namespace Botwinder.entities
 
 		/// <summary> Initialise the module, startup call only. </summary>
 		/// <returns> Return a list of Commands for this module. </returns>
-		List<Command> Init(IBotwinderClient client);
+		List<Command> Init(IValkyrjaClient client);
 
 		/// <summary> True to trigger the Update </summary>
 		bool DoUpdate{ get; set; }
 
 		/// <summary> Main Update loop for this module. Do whatever you want. </summary>
-		Task Update(IBotwinderClient client);
+		Task Update(IValkyrjaClient client);
 	}
 
 	/*
@@ -35,16 +35,16 @@ namespace Botwinder.entities
 	{
 		public Func<Exception, string, guid, Task> HandleException{ get; set; }
 
-		public List<Command> Init(IBotwinderClient iClient)
+		public List<Command> Init(IValkyrjaClient iClient)
 		{
 			//This way you can actually use all the sweets that the client offers...
-			BotwinderClient client = iClient as BotwinderClient;
+			ValkyrjaClient client = iClient as ValkyrjaClient;
 			throw new NotImplementedException();
 		}
 
-		public Task Update(IBotwinderClient iClient)
+		public Task Update(IValkyrjaClient iClient)
 		{
-			BotwinderClient client = iClient as BotwinderClient;
+			ValkyrjaClient client = iClient as ValkyrjaClient;
 			throw new NotImplementedException();
 		}
 	}

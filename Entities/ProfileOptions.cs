@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 using guid = System.UInt64;
 
-namespace Botwinder.entities
+namespace Valkyrja.entities
 {
 	[Table("profile_options")]
 	public class ProfileOption
