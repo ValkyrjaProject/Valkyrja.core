@@ -69,10 +69,10 @@ namespace Valkyrja.core
 				await e.SendReplySafe("I'm counting! Do not disturb!! >_<");
 				StringBuilder message = new StringBuilder("Lifetime Command stats:\n```md\n");
 
+				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+				ServerContext serverContext = ServerContext.Create(this.DbConnectionString);
 				try
 				{
-					GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-					ServerContext serverContext = ServerContext.Create(this.DbConnectionString);
 
 					string GetSpaces(string txt)
 					{
@@ -120,9 +120,13 @@ namespace Valkyrja.core
 					});
 
 					if( canceled )
+					{
+						serverContext.Dispose();
+						dbContext.Dispose();
 						return;
+					}
 
-					foreach(KeyValuePair<string, int> pair in count.OrderByDescending(p => p.Value))
+					foreach( KeyValuePair<string, int> pair in count.OrderByDescending(p => p.Value) )
 					{
 						string newMessage = $"[{GetSpaces(pair.Key)}{pair.Key} ][ {pair.Value}{GetSpaces(pair.Value.ToString())}]\n";
 						if( message.Length + newMessage.Length >= GlobalConfig.MessageCharacterLimit )
@@ -132,16 +136,20 @@ namespace Valkyrja.core
 							message.Clear();
 							message.Append("```md\n");
 						}
+
 						message.Append(newMessage);
 					}
 
 					message.Append("```");
-					serverContext.Dispose();
-					dbContext.Dispose();
 				}
-				catch(Exception ex)
+				catch( Exception ex )
 				{
 					message.Append(ex.Message);
+				}
+				finally
+				{
+					serverContext.Dispose();
+					dbContext.Dispose();
 				}
 				await e.SendReplySafe(message.ToString());
 			};
