@@ -83,37 +83,44 @@ namespace Valkyrja.core
 					}
 
 					Dictionary<string, int> count = new Dictionary<string, int>();
-					List<Command> commands = this.Commands.Values.ToList();
 					List<LogEntry> logs = dbContext.Log.Where(l => l.Type == LogType.Command).ToList();
+					Dictionary<guid, ServerConfig> configCache = new Dictionary<ulong, ServerConfig>();
 
 					int c = 0;
-					foreach( Command cmd in commands )
-					{
-						string key, cmdName = key = cmd.Id;
-						if( cmd.IsAlias && !string.IsNullOrEmpty(cmd.ParentId) )
-							key = cmd.ParentId;
-
-						Dictionary<guid, ServerConfig> configCache = new Dictionary<ulong, ServerConfig>();
 #pragma warning disable 1998
-						bool canceled = await e.Operation.While(() => c < logs.Count, async () => {
+					bool canceled = await e.Operation.While(() => c < logs.Count, async () => {
 #pragma warning restore 1998
-							LogEntry log = logs[c];
-							if( !configCache.ContainsKey(log.ServerId) )
-								configCache.Add(log.ServerId, serverContext.ServerConfigurations.First(s => s.ServerId == log.ServerId));
+						LogEntry log = logs[c];
+						if( !configCache.ContainsKey(log.ServerId) )
+							configCache.Add(log.ServerId, serverContext.ServerConfigurations.First(s => s.ServerId == log.ServerId));
 
-							if( log.Message?.StartsWith(configCache[log.ServerId]?.CommandPrefix ?? "" + cmdName) ?? false )
-							{
-								if( !count.ContainsKey(key) )
-									count.Add(key, 0);
-								count[key]++;
-							}
-
+						ServerConfig config = configCache[log.ServerId];
+						string msg = log.Message.StartsWith(config.CommandPrefix) ? log.Message.Substring(config.CommandPrefix.Length) :
+							!string.IsNullOrWhiteSpace(config.CommandPrefixAlt) && log.Message.StartsWith(config.CommandPrefixAlt) ? log.Message.Substring(config.CommandPrefixAlt.Length) : null;
+						if( msg == null )
 							return false;
-						});
 
-						if( canceled )
-							return;
-					}
+						GetCommandAndParams(msg, out string cmdString, out _, out _);
+						cmdString = cmdString.ToLower();
+						Command cmd = null;
+						if( (this.Commands.ContainsKey(cmdString) && (cmd = this.Commands[cmdString]) != null) ||
+						    (this.Servers.ContainsKey(config.ServerId) && this.Servers[config.ServerId].CustomAliases.ContainsKey(cmdString) && (cmdString = this.Servers[config.ServerId].CustomAliases[cmdString].CommandId) != null) )
+						{
+							//Command cmd = this.Commands[cmdString];
+							string key = cmd.Id;
+							if( cmd.IsAlias && !string.IsNullOrEmpty(cmd.ParentId) )
+								key = cmd.ParentId;
+
+							if( !count.ContainsKey(key) )
+								count.Add(key, 0);
+							count[key]++;
+						}
+
+						return false;
+					});
+
+					if( canceled )
+						return;
 
 					foreach(KeyValuePair<string, int> pair in count.OrderByDescending(p => p.Value))
 					{
