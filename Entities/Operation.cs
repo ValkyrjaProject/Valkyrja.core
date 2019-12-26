@@ -69,7 +69,7 @@ namespace Valkyrja.entities
 				throw new ArgumentNullException();
 
 			int i = 0;
-			int iterationsToYield = this.CommandArgs.Command.Type == CommandType.LargeOperation ? 3 : 10;
+			int iterationsToYield = this.CommandArgs.Command.Type == CommandType.LargeOperation ? 50 : 10;
 			while( condition() )
 			{
 				if( await AwaitConnection() )

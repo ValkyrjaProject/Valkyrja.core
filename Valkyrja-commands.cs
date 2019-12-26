@@ -69,8 +69,6 @@ namespace Valkyrja.core
 				await e.SendReplySafe("I'm counting! Do not disturb!! >_<");
 				StringBuilder message = new StringBuilder("Lifetime Command stats:\n```md\n");
 
-				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-				ServerContext serverContext = ServerContext.Create(this.DbConnectionString);
 				try
 				{
 
@@ -82,9 +80,15 @@ namespace Valkyrja.core
 						return spaces;
 					}
 
-					Dictionary<string, int> count = new Dictionary<string, int>();
+					GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
 					List<LogEntry> logs = dbContext.Log.Where(l => l.Type == LogType.Command).ToList();
-					Dictionary<guid, ServerConfig> configCache = new Dictionary<ulong, ServerConfig>();
+					dbContext.Dispose();
+
+					ServerContext serverContext = ServerContext.Create(this.DbConnectionString);
+					Dictionary<guid, ServerConfig> configCache = serverContext.ServerConfigurations.ToDictionary(s => s.ServerId);
+					serverContext.Dispose();
+
+					Dictionary<string, int> count = new Dictionary<string, int>();
 
 					int c = 0;
 #pragma warning disable 1998
@@ -92,8 +96,7 @@ namespace Valkyrja.core
 #pragma warning restore 1998
 						LogEntry log = logs[c];
 						if( !configCache.ContainsKey(log.ServerId) )
-							configCache.Add(log.ServerId, serverContext.ServerConfigurations.First(s => s.ServerId == log.ServerId));
-
+							return false;
 						ServerConfig config = configCache[log.ServerId];
 						string msg = log.Message.StartsWith(config.CommandPrefix) ? log.Message.Substring(config.CommandPrefix.Length) :
 							!string.IsNullOrWhiteSpace(config.CommandPrefixAlt) && log.Message.StartsWith(config.CommandPrefixAlt) ? log.Message.Substring(config.CommandPrefixAlt.Length) : null;
@@ -121,8 +124,6 @@ namespace Valkyrja.core
 
 					if( canceled )
 					{
-						serverContext.Dispose();
-						dbContext.Dispose();
 						return;
 					}
 
@@ -145,11 +146,6 @@ namespace Valkyrja.core
 				catch( Exception ex )
 				{
 					message.Append(ex.Message);
-				}
-				finally
-				{
-					serverContext.Dispose();
-					dbContext.Dispose();
 				}
 				await e.SendReplySafe(message.ToString());
 			};
