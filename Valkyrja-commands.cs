@@ -75,39 +75,35 @@ namespace Valkyrja.core
 					string GetSpaces(string txt)
 					{
 						string spaces = "";
-						for( int i = txt.Length; i <= 20; i++ )
+						for( int i = txt.Length; i <= 21; i++ )
 							spaces += " ";
 						return spaces;
 					}
 
-					GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-					List<LogEntry> logs = dbContext.Log.Where(l => l.Type == LogType.Command).ToList();
-					dbContext.Dispose();
+					Dictionary<string, int> count = new Dictionary<string, int>();
 
 					ServerContext serverContext = ServerContext.Create(this.DbConnectionString);
 					Dictionary<guid, ServerConfig> configCache = serverContext.ServerConfigurations.ToDictionary(s => s.ServerId);
 					serverContext.Dispose();
 
-					Dictionary<string, int> count = new Dictionary<string, int>();
-
-					int c = 0;
-#pragma warning disable 1998
-					bool canceled = await e.Operation.While(() => c < logs.Count, async () => {
-#pragma warning restore 1998
-						LogEntry log = logs[c];
+					GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+					IEnumerable<LogEntry> logs = dbContext.Log.Where(l => l.Type == LogType.Command);
+					foreach( LogEntry log in logs )
+					{
 						if( !configCache.ContainsKey(log.ServerId) )
-							return false;
+							continue;
 						ServerConfig config = configCache[log.ServerId];
 						string msg = log.Message.StartsWith(config.CommandPrefix) ? log.Message.Substring(config.CommandPrefix.Length) :
 							!string.IsNullOrWhiteSpace(config.CommandPrefixAlt) && log.Message.StartsWith(config.CommandPrefixAlt) ? log.Message.Substring(config.CommandPrefixAlt.Length) : null;
 						if( msg == null )
-							return false;
+							continue;
 
 						GetCommandAndParams(msg, out string cmdString, out _, out _);
 						cmdString = cmdString.ToLower();
 						Command cmd = null;
 						if( (this.Commands.ContainsKey(cmdString) && (cmd = this.Commands[cmdString]) != null) ||
-						    (this.Servers.ContainsKey(config.ServerId) && this.Servers[config.ServerId].CustomAliases.ContainsKey(cmdString) && (cmdString = this.Servers[config.ServerId].CustomAliases[cmdString].CommandId) != null) )
+						    (this.Servers.ContainsKey(config.ServerId) && this.Servers[config.ServerId].CustomAliases.ContainsKey(cmdString) && (cmdString = this.Servers[config.ServerId].CustomAliases[cmdString].CommandId) != null &&
+						     this.Commands.ContainsKey(cmdString) && (cmd = this.Commands[cmdString]) != null) )
 						{
 							//Command cmd = this.Commands[cmdString];
 							string key = cmd.Id;
@@ -118,17 +114,13 @@ namespace Valkyrja.core
 								count.Add(key, 0);
 							count[key]++;
 						}
-
-						return false;
-					});
-
-					if( canceled )
-					{
-						return;
 					}
+					dbContext.Dispose();
 
+					int total = 0;
 					foreach( KeyValuePair<string, int> pair in count.OrderByDescending(p => p.Value) )
 					{
+						total += pair.Value;
 						string newMessage = $"[{GetSpaces(pair.Key)}{pair.Key} ][ {pair.Value}{GetSpaces(pair.Value.ToString())}]\n";
 						if( message.Length + newMessage.Length >= GlobalConfig.MessageCharacterLimit )
 						{
@@ -142,10 +134,12 @@ namespace Valkyrja.core
 					}
 
 					message.Append("```");
+					message.Append($"Total commands used: `{total}`");
 				}
 				catch( Exception ex )
 				{
 					message.Append(ex.Message);
+					message.Append(ex.StackTrace);
 				}
 				await e.SendReplySafe(message.ToString());
 			};
