@@ -365,8 +365,9 @@ namespace Valkyrja.core
 
 				bool commandExecuted = false;
 				string prefix;
-				if( (!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) && message.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
-				    (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) && message.Content.StartsWith(prefix = server.Config.CommandPrefixAlt)) )
+				if( message.Author.Id != this.DiscordClient.CurrentUser.Id &&
+					((!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) && message.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
+				     (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) && message.Content.StartsWith(prefix = server.Config.CommandPrefixAlt))) )
 					commandExecuted = await HandleCommand(server, channel, message, prefix);
 
 				if( !commandExecuted && message.MentionedUsers.Any(u => u.Id == this.DiscordClient.CurrentUser.Id) )
@@ -395,8 +396,9 @@ namespace Valkyrja.core
 				if( server.Config.ExecuteOnEdit )
 				{
 					string prefix;
-					if( (!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) && updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
-					    (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) && updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefixAlt)) )
+					if( updatedMessage.Author.Id != this.DiscordClient.CurrentUser.Id &&
+					    ((!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) && updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
+					     (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) && updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefixAlt))) )
 						commandExecuted = await HandleCommand(server, channel, updatedMessage, prefix);
 				}
 			}
