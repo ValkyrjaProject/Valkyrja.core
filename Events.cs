@@ -424,11 +424,22 @@ namespace Valkyrja.entities
 				return Task.CompletedTask;
 
 			IMessage msg = null;
+			SocketGuildChannel c = channel as SocketGuildChannel;
+			if( c == null || !this.Client.Servers.ContainsKey(c.Guild.Id) )
+				return Task.CompletedTask;
+
 			try
 			{
 				msg = originalMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
 			}
-			catch(Exception) { }
+			catch( HttpException e )
+			{
+				this.Client.Servers[c.Guild.Id].HandleHttpException(e).GetAwaiter().GetResult();
+			}
+			catch( Exception e )
+			{
+				this.Client.LogException(e, "Event Exception", c.Guild.Id).GetAwaiter().GetResult();
+			}
 
 			if( msg != null )
 				Task.Run(async () => await this.MessageDeleted(msg as SocketMessage, channel));
@@ -441,8 +452,26 @@ namespace Valkyrja.entities
 			if( this.ReactionAdded == null )
 				return Task.CompletedTask;
 
-			IUserMessage msg = originalMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
-			Task.Run(async () => await this.ReactionAdded(msg, channel, reaction));
+			IUserMessage msg = null;
+			SocketGuildChannel c = channel as SocketGuildChannel;
+			if( c == null || !this.Client.Servers.ContainsKey(c.Guild.Id) )
+				return Task.CompletedTask;
+
+			try
+			{
+				msg = originalMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
+			}
+			catch( HttpException e )
+			{
+				this.Client.Servers[c.Guild.Id].HandleHttpException(e).GetAwaiter().GetResult();
+			}
+			catch( Exception e )
+			{
+				this.Client.LogException(e, "Event Exception", c.Guild.Id).GetAwaiter().GetResult();
+			}
+
+			if( msg != null )
+				Task.Run(async () => await this.ReactionAdded(msg, channel, reaction));
 			return Task.CompletedTask;
 		}
 
@@ -451,8 +480,26 @@ namespace Valkyrja.entities
 			if( this.ReactionRemoved == null )
 				return Task.CompletedTask;
 
-			IUserMessage msg = originalMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
-			Task.Run(async () => await this.ReactionRemoved(msg, channel, reaction));
+			IUserMessage msg = null;
+			SocketGuildChannel c = channel as SocketGuildChannel;
+			if( c == null || !this.Client.Servers.ContainsKey(c.Guild.Id) )
+				return Task.CompletedTask;
+
+			try
+			{
+				msg = originalMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
+			}
+			catch( HttpException e )
+			{
+				this.Client.Servers[c.Guild.Id].HandleHttpException(e).GetAwaiter().GetResult();
+			}
+			catch( Exception e )
+			{
+				this.Client.LogException(e, "Event Exception", c.Guild.Id).GetAwaiter().GetResult();
+			}
+
+			if( msg != null )
+				Task.Run(async () => await this.ReactionRemoved(msg, channel, reaction));
 			return Task.CompletedTask;
 		}
 
@@ -461,8 +508,26 @@ namespace Valkyrja.entities
 			if( this.ReactionsCleared == null )
 				return Task.CompletedTask;
 
-			IUserMessage msg = originalMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
-			Task.Run(async () => await this.ReactionsCleared(msg, channel));
+			IUserMessage msg = null;
+			SocketGuildChannel c = channel as SocketGuildChannel;
+			if( c == null || !this.Client.Servers.ContainsKey(c.Guild.Id) )
+				return Task.CompletedTask;
+
+			try
+			{
+				msg = originalMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
+			}
+			catch( HttpException e )
+			{
+				this.Client.Servers[c.Guild.Id].HandleHttpException(e).GetAwaiter().GetResult();
+			}
+			catch( Exception e )
+			{
+				this.Client.LogException(e, "Event Exception", c.Guild.Id).GetAwaiter().GetResult();
+			}
+
+			if( msg != null )
+				Task.Run(async () => await this.ReactionsCleared(msg, channel));
 			return Task.CompletedTask;
 		}
 
