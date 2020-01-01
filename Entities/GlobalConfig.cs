@@ -101,7 +101,13 @@ namespace Valkyrja.entities
 		public Int64 AntispamMessageCacheSize{ get; set; } = 0;
 
 		[Column("antispam_allowed_duplicates")]
-		public Int64 AntispamAllowedDuplicates{ get; set; } = 0;
+		public Int64 AntispamAllowedDuplicateMessages{ get; set; } = 0;
+
+		[Column("antispam_allowed_duplicateusers")]
+		public Int64 AntispamAllowedDuplicateUsernames{ get; set; } = 0;
+
+		[Column("antispam_duplicateusers_period")]
+		public Int64 AntispamUsernamePeriod{ get; set; } = 0;
 
 		[Column("target_fps")]
 		public float TargetFps{ get; set; } = 0.05f;

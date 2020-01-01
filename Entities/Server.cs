@@ -34,6 +34,7 @@ namespace Valkyrja.entities
 		public Dictionary<guid, int> AntispamMuteCount = new Dictionary<guid, int>();
 		public Dictionary<guid, int> AntispamMessageCount = new Dictionary<guid, int>();
 		public Dictionary<guid, SocketMessage[]> AntispamRecentMessages = new Dictionary<guid, SocketMessage[]>();
+		public List<SocketGuildUser> AntispamRecentUsernames = new List<SocketGuildUser>();
 
 		public List<guid> IgnoredChannels;
 
