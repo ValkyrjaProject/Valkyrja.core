@@ -46,6 +46,9 @@ namespace Valkyrja.entities
 		[Column("antispam_priority")]
 		public bool AntispamPriority{ get; set; } = false;
 
+		[Column("antispam_mute_insteadof_ban")]
+		public bool AntispamMuteInsteadOfBan{ get; set; } = false;
+
 		[Column("antispam_username")]
 		public bool AntispamUsername{ get; set; } = false;
 
