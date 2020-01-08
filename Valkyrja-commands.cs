@@ -20,7 +20,7 @@ namespace Valkyrja.core
 		private readonly Regex RegexHardwareHelp = new Regex(".*(hardware|server).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		private const string HardwareString = "I used to run on Dual Xeon server. It bork. Now it's the below!\n```md\n" +
 		                                      "|     [Mainboard][Asus PRIME x570-Pro]\n" +
-		                                      "|        2x [CPU][AMD Ryzen 3950X @4.6GHz 16c](32t)\n" +
+		                                      "|           [CPU][AMD Ryzen 3950X @4.6GHz 16c](32t)\n" +
 		                                      "|     4x [Memory][Corsair 32GB DDR4-3000 CL16](128GB)\n" +
 		                                      "|    2x [Storage][Samsung 830 Pro 128GB SSD](raid1)\n" +
 		                                      "|    1x [Storage][Seagate Barracuda 3TB 7200RPM]\n" +
