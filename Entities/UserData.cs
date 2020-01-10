@@ -81,17 +81,14 @@ namespace Valkyrja.entities
 			List<string> foundUsernames = dbContext.Usernames
 				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
 				.Select(u => u.Name.Replace('`', '\'')).ToList();
-			whoisString.Append($"    Known {foundUsernames.Count} usernames: ");
-			whoisString.Append(foundUsernames.Take(5).ToNames());
-			if( foundUsernames.Count > 5 )
-				whoisString.Append($" (to see them all use `names <userid or mention>`)");
-			whoisString.AppendLine();
+			whoisString.Append($"    `{foundUsernames.Count}` known usernames: ");
+			whoisString.AppendLine(foundUsernames.ToNames());
 
 			List<string> foundNicknames = dbContext.Nicknames
 				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
 				.Select(u => u.Name.Replace('`', '\'')).ToList();
-			whoisString.Append($"    Known {foundNicknames.Count} nicknames: ");
-			whoisString.Append(foundNicknames.Skip(foundNicknames.Count < 5 ? 0 : foundNicknames.Count-5).ToNames());
+			whoisString.Append($"    `{foundNicknames.Count}` known nicknames: ");
+			whoisString.AppendLine(foundNicknames.ToNames());
 
 			return whoisString.ToString().Replace("@everyone", "@-everyone").Replace("@here", "@-here");
 		}
@@ -127,7 +124,7 @@ namespace Valkyrja.entities
 			List<string> foundUsernames = dbContext.Usernames
 				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
 				.Select(u => u.Name.Replace('`', '\'')).ToList();
-			whoisString.Append($"    Known {foundUsernames.Count} usernames: ");
+			whoisString.Append($"    `{foundUsernames.Count}` known usernames: ");
 			whoisString.Append(foundUsernames.Take(5).ToNames());
 			if( foundUsernames.Count > 5 )
 				whoisString.Append($" (to see them all use `names <userid or mention>`)");
@@ -136,7 +133,7 @@ namespace Valkyrja.entities
 			List<string> foundNicknames = dbContext.Nicknames
 				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
 				.Select(u => u.Name.Replace('`', '\'')).ToList();
-			whoisString.Append($"    Known {foundNicknames.Count} nicknames: ");
+			whoisString.Append($"    `{foundNicknames.Count}` known nicknames: ");
 			whoisString.Append(foundNicknames.Skip(foundNicknames.Count < 5 ? 0 : foundNicknames.Count-5).ToNames());
 			if( foundNicknames.Count > 5 )
 				whoisString.Append($" (to see them all use `names <userid or mention>`)");
