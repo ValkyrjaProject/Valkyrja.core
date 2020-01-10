@@ -111,9 +111,10 @@ namespace Valkyrja.entities
 			if( this.WarningCount > 0 || !string.IsNullOrEmpty(this.Notes) )
 			{
 				whoisString.AppendLine($"They have {this.WarningCount} warnings, with these notes:");
+				int i = 0;
 				foreach( string w in this.Notes.Split('|') )
 				{
-					whoisString.AppendLine($"* {w.Trim()}");
+					whoisString.AppendLine($"**{++i})** {w.Trim()}");
 				}
 			}
 
