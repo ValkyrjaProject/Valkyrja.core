@@ -67,6 +67,34 @@ namespace Valkyrja.entities
 		[Column("memo", TypeName = "text")]
 		public string Memo{ get; set; } = "";
 
+		public string GetNamesString(ServerContext dbContext, SocketGuildUser user = null)
+		{
+			StringBuilder whoisString = new StringBuilder();
+
+			if( user != null )
+				whoisString.AppendLine($"<@{this.UserId}>: `{this.UserId}` | `{user.GetUsername()}`\n" +
+				                       $"    Account created at: `{Utils.GetTimestamp(Utils.GetTimeFromId(this.UserId))}`");
+			else
+				whoisString.AppendLine($"<@{this.UserId}>: `{this.UserId}`\n" +
+				                       $"    Account created at: `{Utils.GetTimestamp(Utils.GetTimeFromId(this.UserId))}`");
+
+			List<string> foundUsernames = dbContext.Usernames
+				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
+				.Select(u => u.Name.Replace('`', '\'')).ToList();
+			whoisString.Append($"    Known {foundUsernames.Count} usernames: ");
+			whoisString.Append(foundUsernames.Take(5).ToNames());
+			if( foundUsernames.Count > 5 )
+				whoisString.Append($" (to see them all use `names <userid or mention>`)");
+			whoisString.AppendLine();
+
+			List<string> foundNicknames = dbContext.Nicknames
+				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
+				.Select(u => u.Name.Replace('`', '\'')).ToList();
+			whoisString.Append($"    Known {foundNicknames.Count} nicknames: ");
+			whoisString.Append(foundNicknames.Skip(foundNicknames.Count < 5 ? 0 : foundNicknames.Count-5).ToNames());
+
+			return whoisString.ToString().Replace("@everyone", "@-everyone").Replace("@here", "@-here");
+		}
 		public string GetWhoisString(ServerContext dbContext, SocketGuildUser user = null)
 		{
 			StringBuilder whoisString = new StringBuilder();
@@ -99,14 +127,20 @@ namespace Valkyrja.entities
 			List<string> foundUsernames = dbContext.Usernames
 				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
 				.Select(u => u.Name.Replace('`', '\'')).ToList();
-			whoisString.Append("    Known usernames: ");
-			whoisString.AppendLine(foundUsernames.ToNames());
+			whoisString.Append($"    Known {foundUsernames.Count} usernames: ");
+			whoisString.Append(foundUsernames.Take(5).ToNames());
+			if( foundUsernames.Count > 5 )
+				whoisString.Append($" (to see them all use `names <userid or mention>`)");
+			whoisString.AppendLine();
 
 			List<string> foundNicknames = dbContext.Nicknames
 				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
 				.Select(u => u.Name.Replace('`', '\'')).ToList();
-			whoisString.Append("    Known nicknames: ");
-			whoisString.AppendLine(foundNicknames.ToNames());
+			whoisString.Append($"    Known {foundNicknames.Count} nicknames: ");
+			whoisString.Append(foundNicknames.Skip(foundNicknames.Count < 5 ? 0 : foundNicknames.Count-5).ToNames());
+			if( foundNicknames.Count > 5 )
+				whoisString.Append($" (to see them all use `names <userid or mention>`)");
+			whoisString.AppendLine();
 
 			if( this.WarningCount > 0 || !string.IsNullOrEmpty(this.Notes) )
 			{
