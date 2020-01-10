@@ -109,7 +109,13 @@ namespace Valkyrja.entities
 			whoisString.AppendLine(foundNicknames.ToNames());
 
 			if( this.WarningCount > 0 || !string.IsNullOrEmpty(this.Notes) )
-				whoisString.AppendLine($"They have {this.WarningCount} warnings, with these notes: {this.Notes}");
+			{
+				whoisString.AppendLine($"They have {this.WarningCount} warnings, with these notes:");
+				foreach( string w in this.Notes.Split('|') )
+				{
+					whoisString.AppendLine($"* {w.Trim()}");
+				}
+			}
 
 			return whoisString.ToString().Replace("@everyone", "@-everyone").Replace("@here", "@-here");
 		}
