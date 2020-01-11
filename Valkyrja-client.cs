@@ -1070,7 +1070,7 @@ namespace Valkyrja.core
 
 		private void UpdateUsernames(SocketGuildUser user, ServerContext dbContext = null)
 		{
-			if( !this.GlobalConfig.ModuleUpdateEnabled )
+			if( !this.GlobalConfig.ModuleUpdateEnabled || !this.Servers.ContainsKey(user.Guild.Id) || !this.Servers[user.Guild.Id].Config.Nicknames )
 				return;
 
 			bool saveAndDispose = false;

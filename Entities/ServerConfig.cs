@@ -28,6 +28,12 @@ namespace Valkyrja.entities
 		[Column("timezone_utc_relative")]
 		public Int64 TimezoneUtcRelative{ get; set; } = 0;
 
+		[Column("tos")]
+		public bool ToS{ get; set; } = false;
+
+		[Column("nicknames")]
+		public bool Nicknames{ get; set; } = true;
+
 		[Column("ignore_bots")]
 		public bool IgnoreBots{ get; set; } = true;
 
