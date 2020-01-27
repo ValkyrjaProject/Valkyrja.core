@@ -767,11 +767,11 @@ namespace Valkyrja.core
 
 				string message = "Server Status: <https://status.valkyrja.app>\n" +
 				                 $"```md\n" +
-				                 $"[ Memory usage ][ {memoryPercentage:#00.00} % ({memoryPercentage/100*128:000.00}/128GB) ]\n" +
-				                 $"[     CPU Load ][ {double.Parse(cpuLoad):#00.00} % ({temp[1]})      ]\n" +
-				                 $"[      Threads ][ {threads:#000}                    ]\n" +
-				                 $"[     Shard ID ][ {this.CurrentShard.Id-1:00}                     ]\n" +
-				                 $"[ Subscription ][ {subscription}             ]\n" +
+				                 $"[ Memory usage ][ {memoryPercentage:#00.00} % ({memoryPercentage/100*128:000.00}/128 GB) ]\n" +
+				                 $"[     CPU Load ][ {double.Parse(cpuLoad):#00.00} % ({temp[1]})       ]\n" +
+				                 $"[      Threads ][ {threads:#000}                     ]\n" +
+				                 $"[     Shard ID ][ {this.CurrentShard.Id-1:00}                      ]\n" +
+				                 $"[ Subscription ][ {subscription}              ]\n" +
 				                 $"```\n<:ValkThink:535541641507897354> `{time.TotalMilliseconds:#00}`ms <:ValkyrjaNomBlob:509485197763543050>";
 
 				dbContext.Dispose();
