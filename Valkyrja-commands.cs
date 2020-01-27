@@ -761,14 +761,16 @@ namespace Valkyrja.core
 				Int64 threads = dbContext.Shards.Sum(s => s.ThreadsActive);
 				string cpuLoad = Bash.Run("grep 'cpu ' /proc/stat | awk '{print ($2+$4)*100/($2+$4+$5)}'");
 				string memoryUsed = Bash.Run("free | grep Mem | awk '{print $3/$2 * 100.0}'");
+				double memoryPercentage = double.Parse(memoryUsed);
+				string[] temp = Bash.Run("sensors | egrep '(temp1|Tdie|Tctl)' | awk '{print $2}'").Split('\n');
 				string subscription = IsPartner(e.Server.Id) ? "Partner   " : (IsSubscriber(e.Server.Guild.OwnerId) ? "Subscriber" : "");
 
 				string message = "Server Status: <https://status.valkyrja.app>\n" +
 				                 $"```md\n" +
-				                 $"[ Memory usage ][ {double.Parse(memoryUsed):#00.00} %    ]\n" +
-				                 $"[     CPU Load ][ {double.Parse(cpuLoad):#00.00} %    ]\n" +
-				                 $"[      Threads ][ {threads:#000}        ]\n" +
-				                 $"[     Shard ID ][ {this.CurrentShard.Id-1:00}         ]\n" +
+				                 $"[ Memory usage ][ {memoryPercentage:#00.00} % ({memoryPercentage:000.00}/128GB) ]\n" +
+				                 $"[     CPU Load ][ {double.Parse(cpuLoad):#00.00} % ({temp[1]})      ]\n" +
+				                 $"[      Threads ][ {threads:#000}                    ]\n" +
+				                 $"[     Shard ID ][ {this.CurrentShard.Id-1:00}                     ]\n" +
 				                 $"[ Subscription ][ {subscription} ]\n" +
 				                 $"```\n<:ValkThink:535541641507897354> `{time.TotalMilliseconds:#00}`ms <:ValkyrjaNomBlob:509485197763543050>";
 
