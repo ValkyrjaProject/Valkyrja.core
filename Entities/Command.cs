@@ -187,7 +187,7 @@ namespace Valkyrja.entities
 			}
 			catch (HttpException exception)
 			{
-				await e.Server.HandleHttpException(exception);
+				await e.Server.HandleHttpException(exception, $"This happened in <#{e.Channel.Id}> when executing `{e.CommandId}`");
 			}
 			catch(Exception exception)
 			{

@@ -323,7 +323,7 @@ namespace Valkyrja.entities
 			return role;
 		}
 
-		public async Task HandleHttpException(HttpException exception)
+		public async Task HandleHttpException(HttpException exception, string helptext = "")
 		{
 			string logMsg = "HttpException - further logging disabled";
 			if( (int)exception.HttpCode >= 500 )
@@ -333,7 +333,7 @@ namespace Valkyrja.entities
 				if( ++this.HttpExceptionCount > 3 )
 				{
 					logMsg = null;
-					await this.Guild.Owner.SendMessageAsync($"Received error code `{(int)exception.HttpCode}`\n\nPlease fix my permissions and channel access on your Discord Server `{this.Guild.Name}`.\n\nIf you are unsure what's going on, consult our support team at {GlobalConfig.DiscordInvite}");
+					await this.Guild.Owner.SendMessageAsync($"Received error code `{(int)exception.HttpCode}`\n{helptext}\n\nPlease fix my permissions and channel access on your Discord Server `{this.Guild.Name}`.\n\nIf you are unsure what's going on, consult our support team at {GlobalConfig.DiscordInvite}");
 				}
 			}
 
