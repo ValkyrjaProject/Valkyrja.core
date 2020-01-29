@@ -52,9 +52,6 @@ namespace Valkyrja.entities
 		[Column("antispam_priority")]
 		public bool AntispamPriority{ get; set; } = false;
 
-		[Column("antispam_mute_insteadof_ban")]
-		public bool AntispamMuteInsteadOfBan{ get; set; } = false;
-
 		[Column("antispam_username")]
 		public bool AntispamUsername{ get; set; } = false;
 
@@ -137,7 +134,10 @@ namespace Valkyrja.entities
 		public bool AntispamLinksImgurBan{ get; set; } = false;
 
 		[Column("antispam_tolerance")]
-		public Int64 AntispamTolerance{ get; set; } = 7;
+		public Int64 AntispamTolerance{ get; set; } = 2;
+
+		[Column("antispam_tolerance_ban")]
+		public Int64 AntispamToleranceBan{ get; set; } = 6;
 
 		[Column("antispam_voice_switching")]
 		public bool AntispamVoiceChannelSwitching{ get; set; } = false;
