@@ -33,7 +33,8 @@ namespace Valkyrja.entities
 		public DateTime ClearAntispamMuteTime = DateTime.UtcNow;
 		public Dictionary<guid, int> AntispamMuteCount = new Dictionary<guid, int>();
 		public Dictionary<guid, int> AntispamMessageCount = new Dictionary<guid, int>();
-		public Dictionary<guid, SocketMessage[]> AntispamRecentMessages = new Dictionary<guid, SocketMessage[]>();
+		public Dictionary<guid, SocketMessage[]> AntispamRecentUserMessages = new Dictionary<guid, SocketMessage[]>();
+		public SocketMessage[] AntispamRecentMessages = null;
 		public Dictionary<guid, int> UserMentionCount = new Dictionary<guid, int>();
 		public List<SocketGuildUser> AntispamRecentUsernames = new List<SocketGuildUser>();
 

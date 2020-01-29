@@ -76,6 +76,9 @@ namespace Valkyrja.entities
 		[Column("antispam_duplicate_crossserver")]
 		public bool AntispamDuplicateCrossserver{ get; set; } = false;
 
+		[Column("antispam_duplicate_multiuser")]
+		public bool AntispamDuplicateMultiuser{ get; set; } = false;
+
 		[Column("antispam_duplicate_ban")]
 		public bool AntispamDuplicateBan{ get; set; } = false;
 
