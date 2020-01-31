@@ -21,7 +21,7 @@ namespace Valkyrja.core
 		private const string HardwareString = "I used to run on Dual Xeon server. It bork. Now it's the below!\n```md\n" +
 		                                      "|     [Mainboard][Asus PRIME x570-Pro]\n" +
 		                                      "|           [CPU][AMD Ryzen 3950X @4.6GHz 16c](32t)\n" +
-		                                      "|     4x [Memory][Corsair 32GB DDR4-3000 CL16](128GB)\n" +
+		                                      "|     4x [Memory][G.Skill Ripjaws V 32GB DDR4-3200 CL16](128GB)\n" +
 		                                      "|    2x [Storage][Samsung 830 Pro 128GB SSD](raid1)\n" +
 		                                      "|    1x [Storage][Seagate Barracuda 3TB 7200RPM]\n" +
 		                                      "|    4x [Storage][Hitachi NAS 4TB 7200RPM](raid5|write1.4GB/s)\n" +
