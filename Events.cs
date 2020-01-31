@@ -388,6 +388,8 @@ namespace Valkyrja.entities
 			if( this.PriorityMessageReceived != null && this.PriorityMessageReceived(message).GetAwaiter().GetResult() )
 				return Task.CompletedTask;
 
+			this.Client.Monitoring.Messages.Inc();
+
 			if( this.MessageReceived != null )
 				Task.Run(async () => await TriggerMessageReceivedEvent(message));
 			return Task.CompletedTask;

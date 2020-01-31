@@ -17,6 +17,7 @@ namespace Valkyrja.core
 	public partial class ValkyrjaClient : IValkyrjaClient, IDisposable
 	{
 		public readonly DbConfig DbConfig;
+		public Monitoring Monitoring{ get; set; }
 		private GlobalContext GlobalDb;
 		private ServerContext ServerDb;
 		public GlobalConfig GlobalConfig{ get; set; }
@@ -84,6 +85,7 @@ namespace Valkyrja.core
 			this.TimeStarted = DateTime.UtcNow;
 			this.DbConfig = DbConfig.Load();
 			this.DbConnectionString = this.DbConfig.GetDbConnectionString();
+			this.Monitoring = new Monitoring(this.DbConfig, shardIdOverride);
 			this.GlobalDb = GlobalContext.Create(this.DbConnectionString);
 			this.ServerDb = ServerContext.Create(this.DbConnectionString);
 			if( ++shardIdOverride > 0 )
@@ -93,6 +95,7 @@ namespace Valkyrja.core
 		public void Dispose()
 		{
 			Console.WriteLine("Disposing of the client.");
+			this.Monitoring.Dispose();
 
 			if( this.CurrentShard != null )
 			{
@@ -107,15 +110,11 @@ namespace Valkyrja.core
 				dbContext.Dispose();
 			}
 
-			if( this.GlobalDb != null )
-				this.GlobalDb.Dispose();
+			this.GlobalDb?.Dispose();
 			this.GlobalDb = null;
 
-			if( this.ServerDb != null )
-				this.ServerDb.Dispose();
+			this.ServerDb?.Dispose();
 			this.ServerDb = null;
-
-			//todo
 
 			Console.WriteLine("Disposed of the client.");
 		}
@@ -317,6 +316,7 @@ namespace Valkyrja.core
 		{
 			Console.WriteLine("ValkyrjaClient: Disconnected.");
 			this.IsConnected = false;
+			this.Monitoring.Disconnects.Inc();
 			this.CurrentShard.Disconnects++;
 
 			if( exception.Message != "WebSocket connection was closed" ) //hack to not spam my logs

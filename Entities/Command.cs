@@ -155,6 +155,7 @@ namespace Valkyrja.entities
 
 			try
 			{
+				e.Client.Monitoring.Commands.Inc();
 				await e.Client.LogMessage(LogType.Command, e.Channel, e.Message);
 
 				if (this.SendTyping)

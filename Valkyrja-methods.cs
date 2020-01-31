@@ -109,6 +109,11 @@ namespace Valkyrja.core
 			if( exception is RateLimitedException )
 				return;
 
+			if( exception is HttpException httpException && (int)httpException.HttpCode >= 500 )
+			{
+				this.Monitoring.Error500s.Inc();
+			}
+
 			Console.WriteLine(exception.Message);
 			Console.WriteLine(exception.StackTrace);
 			Console.WriteLine($"{data} | ServerId:{serverId}");

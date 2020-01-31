@@ -12,6 +12,7 @@ namespace Valkyrja.entities
 		bool IsConnected{ get; set; }
 		GlobalConfig GlobalConfig{ get; set; }
 		Shard CurrentShard{ get; set; }
+		Monitoring Monitoring{ get; set; }
 		List<Operation> CurrentOperations{ get; set; }
 		Object OperationsLock{ get; set; }
 

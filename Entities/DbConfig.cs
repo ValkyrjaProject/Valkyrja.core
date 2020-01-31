@@ -16,6 +16,9 @@ namespace Valkyrja.entities
 		public string Password = "db_password";
 		public string Database = "db_valkyrja";
 		public string ConfigName = "default";
+		public string PrometheusEndpoint = "";
+		public string PrometheusJob = "";
+		public long PrometheusInterval = 5000;
 		public int ForceShardId = 0;
 		public bool UseShardLock = false;
 		public bool DownloadUsers = true;
