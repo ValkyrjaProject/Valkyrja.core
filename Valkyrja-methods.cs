@@ -109,7 +109,7 @@ namespace Valkyrja.core
 			if( exception is RateLimitedException )
 				return;
 
-			if( exception is HttpException httpException && (int)httpException.HttpCode >= 500 )
+			if( (exception is HttpException httpException && (int)httpException.HttpCode >= 500) || data.Contains("Error handling Dispatch") )
 			{
 				this.Monitoring.Error500s.Inc();
 			}

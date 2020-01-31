@@ -10,7 +10,7 @@ namespace Valkyrja.entities
 		public readonly Counter Disconnects = Metrics.CreateCounter("discord_valk_dc", "Valkyrja: disconnects");
 		public readonly Counter Error500s = Metrics.CreateCounter("discord_valk_500", "Valkyrja: Discord server error 500s");
 		public readonly Counter Messages = Metrics.CreateCounter("discord_valk_msg", "Valkyrja: Messages received");
-		public readonly Counter Commands = Metrics.CreateCounter("discord_valk_cmd", "Valkyrja: Messages received");
+		public readonly Counter Commands = Metrics.CreateCounter("discord_valk_cmd", "Valkyrja: Commands executed");
 
 		public Monitoring(DbConfig config, int shardId)
 		{
