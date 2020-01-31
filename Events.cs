@@ -412,6 +412,8 @@ namespace Valkyrja.entities
 			if( this.MessageUpdated == null )
 				return Task.CompletedTask;
 
+			this.Client.Monitoring.Messages.Inc();
+
 			IMessage msg = null;
 			if( channel is SocketGuildChannel guildChannel && guildChannel.Guild.CurrentUser.GuildPermissions.ReadMessageHistory )
 				msg = originalMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
