@@ -11,9 +11,9 @@ namespace Valkyrja.entities
 		public readonly Counter Error500s = Metrics.CreateCounter("discord_valk_500", "Valkyrja: Discord server error 500s");
 		public readonly Counter Messages = Metrics.CreateCounter("discord_valk_msg", "Valkyrja: Messages received");
 		public readonly Counter Commands = Metrics.CreateCounter("discord_valk_cmd", "Valkyrja: Commands executed");
-		public readonly Counter AntispamDeletes = Metrics.CreateCounter("discord_valk_cmd", "Valkyrja: Commands executed");
-		public readonly Counter Mutes = Metrics.CreateCounter("discord_valk_cmd", "Valkyrja: Commands executed");
-		public readonly Counter Bans = Metrics.CreateCounter("discord_valk_cmd", "Valkyrja: Commands executed");
+		public readonly Counter AntispamDeletes = Metrics.CreateCounter("discord_valk_del", "Valkyrja: Messages deleted by Antispam");
+		public readonly Counter Mutes = Metrics.CreateCounter("discord_valk_mute", "Valkyrja: Mutes issued");
+		public readonly Counter Bans = Metrics.CreateCounter("discord_valk_ban", "Valkyrja: Bans issued");
 
 		public Monitoring(DbConfig config, int shardId)
 		{
