@@ -1043,7 +1043,7 @@ namespace Valkyrja.core
 				string response = "";
 				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
 				StringBuilder responseBuilder = new StringBuilder();
-				foreach( Command cmd in this.Commands.Values )
+				foreach( Command cmd in this.Commands.Values.OrderBy(c => c.RequiredPermissions) )
 				{
 					if( cmd.IsAlias || cmd.IsCoreCommand || cmd.RequiredPermissions == PermissionType.OwnerOnly )
 						continue;
