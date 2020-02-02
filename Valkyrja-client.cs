@@ -76,6 +76,7 @@ namespace Valkyrja.core
 		private DateTime LastMessageAverageTime = DateTime.UtcNow;
 		private int MessagesThisMinute = 0;
 
+		public ConcurrentDictionary<guid, List<guid>> ClearedMessageIDs = new ConcurrentDictionary<guid, List<guid>>();
 		public List<guid> AntispamMessageIDs = new List<guid>();
 
 
