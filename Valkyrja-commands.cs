@@ -1033,6 +1033,58 @@ namespace Valkyrja.core
 			};
 			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
+// !listPermissions
+			newCommand = new Command("listPermissions");
+			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
+			newCommand.Description = "List permissions of all the commands.";
+			newCommand.RequiredPermissions = PermissionType.ServerOwner;
+			newCommand.OnExecute += async e => {
+				string response = "";
+				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				StringBuilder responseBuilder = new StringBuilder();
+				foreach( Command cmd in this.Commands.Values )
+				{
+					if( cmd.IsAlias || cmd.IsCoreCommand || cmd.RequiredPermissions == PermissionType.OwnerOnly )
+						continue;
+
+					CommandOptions options = dbContext.GetOrAddCommandOptions(e.Server, cmd.Id);
+					responseBuilder.Append($"`{cmd.Id}`: `{options.PermissionOverrides.ToString()}`");
+					if( options.PermissionOverrides == PermissionOverrides.Default )
+					{
+						PermissionOverrides permissions = PermissionOverrides.Default;
+						switch(cmd.RequiredPermissions)
+						{
+							case PermissionType.ServerOwner:
+								permissions = PermissionOverrides.ServerOwner;
+								break;
+							case PermissionType.ServerOwner | PermissionType.Admin:
+								permissions = PermissionOverrides.Admins;
+								break;
+							case PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator:
+								permissions = PermissionOverrides.Moderators;
+								break;
+							case PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator | PermissionType.SubModerator:
+								permissions = PermissionOverrides.SubModerators;
+								break;
+							case PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator | PermissionType.SubModerator | PermissionType.Member:
+								permissions = PermissionOverrides.Members;
+								break;
+							default:
+								permissions = PermissionOverrides.Everyone;
+								break;
+						}
+						responseBuilder.AppendLine($" -> `{permissions.ToString()}`");
+					}
+					else
+						responseBuilder.AppendLine();
+				}
+				response = responseBuilder.ToString();
+				dbContext.Dispose();
+				await e.SendReplySafe(response);
+			};
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
+
 // !permissions
 			newCommand = new Command("permissions");
 			newCommand.Type = CommandType.Standard;
