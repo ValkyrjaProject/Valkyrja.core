@@ -790,53 +790,65 @@ namespace Valkyrja.core
 				List<string> includedCommandIds = new List<string>();
 				int count = 0;
 
-				void AddCustomAlias(string commandId)
+				async Task Append(string newString)
 				{
+					if( !isSpecific && commandStrings.ToString().Length >= GlobalConfig.MessageCharacterLimit )
+					{
+						await e.Message.Author.SendMessageSafe(commandStrings.ToString());
+						commandStrings.Clear();
+					}
+
+					commandStrings.AppendLine(newString);
+				}
+
+				async Task  AddCustomAlias(string commandId)
+				{
+					string newString = "";
 					List<CustomAlias> aliases = e.Server.CustomAliases.Values.Where(a => a.CommandId == commandId).ToList();
 					int aliasCount = aliases.Count;
 					if( aliasCount > 0 )
 					{
-						commandStrings.Append(aliasCount == 1 ? " **-** Custom Alias: " : " **-** Custom Aliases: ");
+						newString = aliasCount == 1 ? " **-** Custom Alias: " : " **-** Custom Aliases: ";
 						for( int i = 0; i < aliasCount; i++ )
-							commandStrings.Append((i == 0 ? "`" : i == aliasCount - 1 ? " and `" : ", `") +
-							                      prefix + aliases[i].Alias + "`");
+							newString += $"{(i == 0 ? "`" : i == aliasCount - 1 ? " and `" : ", `")}{prefix}{aliases[i].Alias}`";
+
+						await Append(newString);
 					}
-					commandStrings.AppendLine();
 				}
 
-				void AddCommand(Command cmd)
+				async Task  AddCommand(Command cmd)
 				{
 					if( includedCommandIds.Contains(cmd.Id) )
 						return;
 					includedCommandIds.Add(cmd.Id);
 
-					commandStrings.AppendLine($"\n```diff\n{(cmd.CanExecute(this, e.Server, e.Channel, e.Message.Author as SocketGuildUser) ? "+" : "-")}" +
-					                          $"  {prefix}{cmd.Id}```" +
-					                          $" **-** {cmd.Description}");
+					string newString = $"\n```diff\n{(cmd.CanExecute(this, e.Server, e.Channel, e.Message.Author as SocketGuildUser) ? "+" : "-")}" +
+					                   $"  {prefix}{cmd.Id}```" +
+					                   $" **-** {cmd.Description}";
 					if( cmd.Aliases != null && cmd.Aliases.Any() )
 					{
 						int aliasCount = cmd.Aliases.Count;
-						commandStrings.Append(aliasCount == 1 ? " **-** Alias: " : " **-** Aliases: ");
+						newString += aliasCount == 1 ? "\n **-** Alias: " : "\n **-** Aliases: ";
 						for( int i = 0; i < aliasCount; i++ )
-							commandStrings.Append((i == 0 ? "`" : i == aliasCount - 1 ? " and `" : ", `") +
-							                      prefix + cmd.Aliases[i] + "`");
-						commandStrings.AppendLine();
+							newString += $"{(i == 0 ? "`" : i == aliasCount - 1 ? " and `" : ", `")}{prefix}{cmd.Aliases[i]}`";
 					}
 
-					AddCustomAlias(cmd.Id);
+					await Append(newString);
+					await AddCustomAlias(cmd.Id);
 				}
 
-				void AddCustomCommand(CustomCommand cmd)
+				async Task  AddCustomCommand(CustomCommand cmd)
 				{
 					if( includedCommandIds.Contains(cmd.CommandId) )
 						return;
 					includedCommandIds.Add(cmd.CommandId);
 
-					commandStrings.AppendLine($"\n```diff\n{(cmd.CanExecute(this, e.Server, e.Channel, e.Message.Author as SocketGuildUser) ? "+" : "-")}" +
-					                          $"  {prefix}{cmd.CommandId}```" +
-					                          $" **-** {cmd.Description}");
+					string newString = $"\n```diff\n{(cmd.CanExecute(this, e.Server, e.Channel, e.Message.Author as SocketGuildUser) ? "+" : "-")}" +
+					                   $"  {prefix}{cmd.CommandId}```" +
+					                   $" **-** {cmd.Description}";
 
-					AddCustomAlias(cmd.CommandId);
+					await Append(newString);
+					await AddCustomAlias(cmd.CommandId);
 				}
 
 				if( isSpecific )
@@ -862,7 +874,7 @@ namespace Valkyrja.core
 							if( ++count > 5 )
 								break;
 
-							AddCommand(cmd);
+							await AddCommand(cmd);
 						}
 					}
 
@@ -873,7 +885,7 @@ namespace Valkyrja.core
 							if( ++count > 5 )
 								break;
 
-							AddCustomCommand(cmd);
+							await AddCustomCommand(cmd);
 						}
 					}
 
@@ -885,10 +897,10 @@ namespace Valkyrja.core
 								break;
 
 							if( e.Server.Commands.ContainsKey(alias.CommandId.ToLower()) )
-								AddCommand(e.Server.Commands[alias.CommandId.ToLower()]);
+								await AddCommand(e.Server.Commands[alias.CommandId.ToLower()]);
 							else if( e.Server.CustomCommands.ContainsKey(alias.CommandId.ToLower()) )
 							{
-								AddCustomCommand(e.Server.CustomCommands[alias.CommandId.ToLower()]);
+								await AddCustomCommand(e.Server.CustomCommands[alias.CommandId.ToLower()]);
 							}
 						}
 					}
@@ -907,7 +919,7 @@ namespace Valkyrja.core
 				{
 					foreach( CustomCommand cmd in e.Server.CustomCommands.Values )
 					{
-						AddCustomCommand(cmd);
+						await AddCustomCommand(cmd);
 					}
 
 					response.AppendLine("I've PMed you the Custom Commands for this server.");

@@ -329,13 +329,10 @@ namespace Valkyrja.entities
 			string logMsg = "HttpException - further logging disabled";
 			if( (int)exception.HttpCode >= 500 )
 				logMsg = "DiscordPoop";
-			else
+			else if( ++this.HttpExceptionCount > 3 )
 			{
-				if( ++this.HttpExceptionCount > 3 )
-				{
-					logMsg = null;
-					await this.Guild.Owner.SendMessageAsync($"Received error code `{(int)exception.HttpCode}`\n{helptext}\n\nPlease fix my permissions and channel access on your Discord Server `{this.Guild.Name}`.\n\nIf you are unsure what's going on, consult our support team at {GlobalConfig.DiscordInvite}");
-				}
+				logMsg = null;
+				await this.Guild.Owner.SendMessageAsync($"Received error code `{(int)exception.HttpCode}`\n{helptext}\n\nPlease fix my permissions and channel access on your Discord Server `{this.Guild.Name}`.\n\nIf you are unsure what's going on, consult our support team at {GlobalConfig.DiscordInvite}");
 			}
 
 			if( !string.IsNullOrEmpty(logMsg) )
