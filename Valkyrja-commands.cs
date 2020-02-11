@@ -794,7 +794,7 @@ namespace Valkyrja.core
 				async Task Append(string newString)
 				{
 					string pm = commandStrings.ToString();
-					if( !isSpecific && pm.Length >= GlobalConfig.MessageCharacterLimit )
+					if( !isSpecific && pm.Length + newString.Length >= GlobalConfig.MessageCharacterLimit )
 					{
 						await e.Message.Author.SendMessageAsync(pm);
 						commandStrings.Clear();
