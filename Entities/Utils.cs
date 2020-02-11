@@ -269,7 +269,7 @@ namespace Valkyrja.entities
 		public static async Task SendMessageSafe(this ISocketMessageChannel self, string message, Embed embed = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed), message);
 		//public static async Task SendMessageSafe(this IDMChannel self, string message, Embed embed = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed), message); // I don't think that we will ever need this one.
 
-		public static async Task SendMessageSafe(Func<string, Task> sendMessage, string message)
+		private static async Task SendMessageSafe(Func<string, Task> sendMessage, string message)
 		{
 			string safetyCopy = "";
 			string newChunk = "";

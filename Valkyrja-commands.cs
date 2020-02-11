@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Discord;
 using Valkyrja.entities;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
@@ -792,9 +793,10 @@ namespace Valkyrja.core
 
 				async Task Append(string newString)
 				{
-					if( !isSpecific && commandStrings.ToString().Length >= GlobalConfig.MessageCharacterLimit )
+					string pm = commandStrings.ToString();
+					if( !isSpecific && pm.Length >= GlobalConfig.MessageCharacterLimit )
 					{
-						await e.Message.Author.SendMessageSafe(commandStrings.ToString());
+						await e.Message.Author.SendMessageAsync(pm);
 						commandStrings.Clear();
 					}
 
@@ -844,8 +846,9 @@ namespace Valkyrja.core
 					includedCommandIds.Add(cmd.CommandId);
 
 					string newString = $"\n```diff\n{(cmd.CanExecute(this, e.Server, e.Channel, e.Message.Author as SocketGuildUser) ? "+" : "-")}" +
-					                   $"  {prefix}{cmd.CommandId}```" +
-					                   $" **-** {cmd.Description}";
+					                   $"  {prefix}{cmd.CommandId}```";
+					if( !string.IsNullOrWhiteSpace(cmd.Description) )
+						newString += $"\n **-** {cmd.Description}";
 
 					await Append(newString);
 					await AddCustomAlias(cmd.CommandId);
