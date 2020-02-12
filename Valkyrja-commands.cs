@@ -1346,6 +1346,47 @@ namespace Valkyrja.core
 			};
 			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
+// !cmdChannelWhitelistAllCC
+			newCommand = new Command("cmdChannelWhitelistAllCC");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Allow all custom commands to be ran only in certain channels. Use with `add` or `remove`, and `ChannelID` parameters.";
+			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
+			newCommand.OnExecute += async e => {
+				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
+				    (e.MessageArgs[0].ToLower() != "add" && e.MessageArgs[0].ToLower() != "remove") ||
+				    !guid.TryParse(e.MessageArgs[1].Trim('<', '#', '>'), out guid channelId) || e.Server.Guild.GetChannel(channelId) == null )
+				{
+					await e.SendReplySafe("Invalid parameters...\n" + e.Command.Description);
+					return;
+				}
+
+				string responseString = "Success! \\o/";
+				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				foreach( CustomCommand cmd in e.Server.CustomCommands.Values )
+				{
+					CommandChannelOptions commandOptions = dbContext.GetOrAddCommandChannelOptions(e.Server.Id, channelId, cmd.CommandId);
+
+					switch( e.MessageArgs[1].ToLower() )
+					{
+						case "add":
+							commandOptions.Whitelisted = true;
+							dbContext.SaveChanges();
+							break;
+						case "remove":
+							commandOptions.Whitelisted = false;
+							dbContext.SaveChanges();
+							break;
+						default:
+							responseString = "Invalid parameters...\n" + e.Command.Description;
+							break;
+					}
+				}
+
+				dbContext.Dispose();
+				await e.SendReplySafe(responseString);
+			};
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
+
 // !cmdChannelBlacklist
 			newCommand = new Command("cmdChannelBlacklist");
 			newCommand.Type = CommandType.Standard;
@@ -1396,6 +1437,47 @@ namespace Valkyrja.core
 			};
 			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
+// !cmdChannelBlacklistAllCC
+			newCommand = new Command("cmdChannelBlacklistAllCC");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Block all custom commands from certain channels. Use with `add` or `remove`, and `ChannelID` parameters.";
+			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
+			newCommand.OnExecute += async e => {
+				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
+				    (e.MessageArgs[0].ToLower() != "add" && e.MessageArgs[0].ToLower() != "remove") ||
+				    !guid.TryParse(e.MessageArgs[1].Trim('<', '#', '>'), out guid channelId) || e.Server.Guild.GetChannel(channelId) == null )
+				{
+					await e.SendReplySafe("Invalid parameters...\n" + e.Command.Description);
+					return;
+				}
+
+				string responseString = "Success! \\o/";
+				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				foreach( CustomCommand cmd in e.Server.CustomCommands.Values )
+				{
+					CommandChannelOptions commandOptions = dbContext.GetOrAddCommandChannelOptions(e.Server.Id, channelId, cmd.CommandId);
+
+					switch( e.MessageArgs[1].ToLower() )
+					{
+						case "add":
+							commandOptions.Blacklisted = true;
+							dbContext.SaveChanges();
+							break;
+						case "remove":
+							commandOptions.Blacklisted = false;
+							dbContext.SaveChanges();
+							break;
+						default:
+							responseString = "Invalid parameters...\n" + e.Command.Description;
+							break;
+					}
+				}
+
+				dbContext.Dispose();
+				await e.SendReplySafe(responseString);
+			};
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
+
 // !cmdResetRestrictions
 			newCommand = new Command("cmdResetRestrictions");
 			newCommand.Type = CommandType.Standard;
@@ -1418,6 +1500,26 @@ namespace Valkyrja.core
 				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
 				await dbContext.CommandChannelOptions.Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId)
 					.ForEachAsync(c => c.Blacklisted = c.Whitelisted = false);
+
+				dbContext.SaveChanges();
+				dbContext.Dispose();
+
+				await e.SendReplySafe("As you wish my thane.");
+			};
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
+
+// !cmdResetRestrictionsAllCC
+			newCommand = new Command("cmdResetRestrictionsAllCC");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Reset restrictions placed on all custom commands by the _cmdChannelWhitelist_ and _cmdChannelBlacklist_ commands.";
+			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
+			newCommand.OnExecute += async e => {
+				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				foreach( CustomCommand cmd in e.Server.CustomCommands.Values )
+				{
+					await dbContext.CommandChannelOptions.Where(c => c.ServerId == e.Server.Id && c.CommandId == cmd.CommandId)
+						.ForEachAsync(c => c.Blacklisted = c.Whitelisted = false);
+				}
 
 				dbContext.SaveChanges();
 				dbContext.Dispose();
