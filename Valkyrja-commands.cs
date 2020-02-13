@@ -1366,7 +1366,7 @@ namespace Valkyrja.core
 				{
 					CommandChannelOptions commandOptions = dbContext.GetOrAddCommandChannelOptions(e.Server.Id, channelId, cmd.CommandId);
 
-					switch( e.MessageArgs[1].ToLower() )
+					switch( e.MessageArgs[0].ToLower() )
 					{
 						case "add":
 							commandOptions.Whitelisted = true;
@@ -1457,7 +1457,7 @@ namespace Valkyrja.core
 				{
 					CommandChannelOptions commandOptions = dbContext.GetOrAddCommandChannelOptions(e.Server.Id, channelId, cmd.CommandId);
 
-					switch( e.MessageArgs[1].ToLower() )
+					switch( e.MessageArgs[0].ToLower() )
 					{
 						case "add":
 							commandOptions.Blacklisted = true;
