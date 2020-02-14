@@ -324,7 +324,7 @@ namespace Valkyrja.entities
 			return role;
 		}
 
-		public async Task HandleHttpException(HttpException exception, string helptext = "")
+		public async Task<bool> HandleHttpException(HttpException exception, string helptext = "")
 		{
 			string logMsg = "HttpException - further logging disabled";
 			if( (int)exception.HttpCode >= 500 )
@@ -337,6 +337,8 @@ namespace Valkyrja.entities
 
 			if( !string.IsNullOrEmpty(logMsg) )
 				await this.Client.LogException(exception, logMsg, this.Id);
+
+			return this.HttpExceptionCount > 3;
 		}
 	}
 }
