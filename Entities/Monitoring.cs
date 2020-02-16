@@ -15,6 +15,7 @@ namespace Valkyrja.entities
 		public readonly Counter MsgsDeleted = Metrics.CreateCounter("discord_valk_del", "Valkyrja: Messages deleted");
 		public readonly Counter Mutes = Metrics.CreateCounter("discord_valk_mute", "Valkyrja: Mutes issued");
 		public readonly Counter Bans = Metrics.CreateCounter("discord_valk_ban", "Valkyrja: Bans issued");
+		public readonly Gauge Uptime = Metrics.CreateGauge("discord_valk_uptime", "Valkyrja: Uptime in seconds");
 
 		public Monitoring(DbConfig config, int shardId)
 		{
