@@ -501,7 +501,7 @@ namespace Valkyrja.core
 					if( this.GlobalConfig.LogDebug )
 						Console.WriteLine("ValkyrjaClient: Update loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 
-					this.Monitoring.Uptime.Set((DateTime.UtcNow - this.TimeStarted).Seconds);
+					this.Monitoring.Uptime.Set((DateTime.UtcNow - this.TimeStarted).TotalSeconds);
 					await Update();
 				}
 				catch(Exception exception)
