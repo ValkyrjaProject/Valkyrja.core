@@ -114,6 +114,11 @@ namespace Valkyrja.core
 				this.Monitoring.Error500s.Inc();
 			}
 
+			if( (exception is WebSocketClosedException websocketException) )
+			{
+				data += $"\nCloseCode:{websocketException.CloseCode}\nReason:{websocketException.Reason}\nTarget:{websocketException.TargetSite}";
+			}
+
 			Console.WriteLine(exception.Message);
 			Console.WriteLine(exception.StackTrace);
 			Console.WriteLine($"{data} | ServerId:{serverId}");
