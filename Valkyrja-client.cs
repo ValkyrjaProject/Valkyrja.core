@@ -317,10 +317,10 @@ namespace Valkyrja.core
 			Console.WriteLine("ValkyrjaClient: Disconnected.");
 			this.IsConnected = false;
 			this.Monitoring.Disconnects.Inc();
+			this.Monitoring.Disconnects.Publish();
 			this.CurrentShard.Disconnects++;
 
-			if( exception.Message != "WebSocket connection was closed" ) //hack to not spam my logs
-				await LogException(exception, "--D.NET Client Disconnected");
+			await LogException(exception, "--D.NET Client Disconnected");
 
 			try
 			{

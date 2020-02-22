@@ -123,6 +123,9 @@ namespace Valkyrja.core
 			Console.WriteLine(exception.StackTrace);
 			Console.WriteLine($"{data} | ServerId:{serverId}");
 
+			if( exception.Message.Contains("WebSocket connection was closed") ) //hack to not spam my logs
+				return;
+
 			ExceptionEntry exceptionEntry = new ExceptionEntry(){
 				Type = exception.GetType().ToString(),
 				Message = exception.Message,
