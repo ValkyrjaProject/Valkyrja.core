@@ -68,9 +68,9 @@ namespace Valkyrja.core
 		public bool IsTrialServer(guid id)
 		{
 			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
-			Int64 joinedCount = dbContext.ServerStats.FirstOrDefault(s => s.ServerId == id)?.JoinedCount ?? 1;
+			bool isTrial = dbContext.ServerStats.Any(s => (s.ServerId == id || s.OwnerId == id) && s.JoinedCount < this.GlobalConfig.VipTrialJoins && (!this.Servers.ContainsKey(id) || this.Servers[s.ServerId] == null || this.Servers[s.ServerId].Guild.CurrentUser == null || this.Servers[s.ServerId].Guild.CurrentUser.JoinedAt == null || DateTime.UtcNow - this.Servers[s.ServerId].Guild.CurrentUser.JoinedAt.Value.ToUniversalTime() < TimeSpan.FromHours(this.GlobalConfig.VipTrialHours)));
 			dbContext.Dispose();
-			return joinedCount <= this.GlobalConfig.VipTrialJoins;
+			return isTrial;
 		}
 
 

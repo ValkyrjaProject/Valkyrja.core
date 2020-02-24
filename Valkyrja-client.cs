@@ -602,7 +602,7 @@ namespace Valkyrja.core
 					stats.JoinedCount = 1;
 				}
 
-				if( stats.JoinedTime != joinedAt )
+				if( stats.JoinedTime + TimeSpan.FromDays(1) < joinedAt )
 				{
 					stats.JoinedTime = joinedAt;
 					stats.JoinedCount++;
@@ -961,8 +961,7 @@ namespace Valkyrja.core
 						lock(this.DbLock)
 							stats = this.ServerDb.ServerStats.FirstOrDefault(s => s.ServerId == pair.Value.Id);
 						bool joinedCountExceeded = stats != null && stats.JoinedCount > this.GlobalConfig.VipTrialJoins;
-						bool trialTimeExceeded = pair.Value.Guild.CurrentUser?.JoinedAt != null &&
-						                         DateTime.UtcNow - pair.Value.Guild.CurrentUser.JoinedAt.Value.ToUniversalTime() > TimeSpan.FromHours(this.GlobalConfig.VipTrialHours);
+						bool trialTimeExceeded = pair.Value.Guild.CurrentUser?.JoinedAt != null && DateTime.UtcNow - pair.Value.Guild.CurrentUser.JoinedAt.Value.ToUniversalTime() > TimeSpan.FromHours(this.GlobalConfig.VipTrialHours);
 
 						//Not Partnered /trial servers
 						if( !(IsPartner(pair.Value.Id) || IsSubscriber(pair.Value.Guild.OwnerId)) &&
