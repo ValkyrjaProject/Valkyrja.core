@@ -199,6 +199,9 @@ namespace Valkyrja.entities
 		[Column("alert_channelid")]
 		public guid AlertChannelId{ get; set; } = 0;
 
+		[Column("alert_whitelistid")]
+		public guid AlertWhitelistId{ get; set; } = 0;
+
 		[Column("log_channelid")]
 		public guid LogChannelId{ get; set; } = 0;
 
