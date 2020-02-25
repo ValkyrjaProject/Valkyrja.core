@@ -790,13 +790,21 @@ namespace Valkyrja.core
 				string prefix = e.Server.Config.CommandPrefix;
 				List<string> includedCommandIds = new List<string>();
 				int count = 0;
+				bool cantPm = false;
 
 				async Task Append(string newString)
 				{
 					string pm = commandStrings.ToString();
 					if( !isSpecific && pm.Length + newString.Length >= GlobalConfig.MessageCharacterLimit )
 					{
-						await e.Message.Author.SendMessageAsync(pm);
+						try
+						{
+							await e.Message.Author.SendMessageAsync(pm);
+						}
+						catch( Exception )
+						{
+							cantPm = true;
+						}
 						commandStrings.Clear();
 					}
 
@@ -925,9 +933,19 @@ namespace Valkyrja.core
 						await AddCustomCommand(cmd);
 					}
 
-					response.AppendLine("I've PMed you the Custom Commands for this server.");
-					await e.Message.Author.SendMessageSafe(commandStrings.ToString());
+					try
+					{
+						await e.Message.Author.SendMessageSafe(commandStrings.ToString());
+						response.AppendLine("I've PMed you the Custom Commands for this server.");
+					}
+					catch( Exception )
+					{
+						cantPm = true;
+					}
 				}
+
+				if( cantPm )
+					response.AppendLine("And I was unable to PM you the Custom Commands for this server. (Fix your privacy settings or unblock me.)");
 
 				await e.SendReplySafe(response.ToString());
 			};
