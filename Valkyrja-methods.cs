@@ -106,9 +106,6 @@ namespace Valkyrja.core
 
 		public async Task LogException(Exception exception, string data, guid serverId = 0)
 		{
-			if( exception is RateLimitedException )
-				return;
-
 			if( (exception is HttpException httpException && (int)httpException.HttpCode >= 500) || data.Contains("Error handling Dispatch") )
 			{
 				this.Monitoring.Error500s.Inc();
@@ -123,7 +120,7 @@ namespace Valkyrja.core
 			Console.WriteLine(exception.StackTrace);
 			Console.WriteLine($"{data} | ServerId:{serverId}");
 
-			if( exception.Message.Contains("WebSocket connection was closed") ) //hack to not spam my logs
+			if( exception is RateLimitedException || exception.Message.Contains("WebSocket connection was closed") ) //hack to not spam my logs
 				return;
 
 			ExceptionEntry exceptionEntry = new ExceptionEntry(){
