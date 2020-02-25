@@ -598,11 +598,11 @@ namespace Valkyrja.core
 
 				if( stats.JoinedTimeFirst == DateTime.MaxValue ) //This is the first time that we joined the server.
 				{
-					stats.JoinedTimeFirst = joinedAt;
+					stats.JoinedTimeFirst = stats.JoinedTime = joinedAt;
 					stats.JoinedCount = 1;
 				}
 
-				if( stats.JoinedTime + TimeSpan.FromDays(1) < joinedAt )
+				if( stats.JoinedTime == DateTime.MaxValue || stats.JoinedTime == DateTime.MinValue || stats.JoinedTime + TimeSpan.FromDays(1) < joinedAt )
 				{
 					stats.JoinedTime = joinedAt;
 					stats.JoinedCount++;
