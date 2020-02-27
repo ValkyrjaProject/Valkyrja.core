@@ -121,6 +121,7 @@ namespace Valkyrja.entities
 					UserId = userId
 				};
 				this.UserDatabase.Add(userData);
+				SaveChanges();
 			}
 
 			return userData;

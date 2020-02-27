@@ -212,6 +212,7 @@ namespace Valkyrja.core
 					};
 
 					dbContext.UserDatabase.Add(newUserData); //No need to save this here.
+					dbContext.SaveChanges();
 					found.Add(newUserData);
 				}
 			}
