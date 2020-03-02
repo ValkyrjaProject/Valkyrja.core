@@ -58,6 +58,9 @@ namespace Valkyrja.entities
 		[Column("antispam_norole")]
 		public bool AntispamNoRole{ get; set; } = false;
 
+		[Column("antispam_norole_recent")]
+		public bool AntispamNoRoleRecent{ get; set; } = false;
+
 		[Column("antispam_norole_minutes")]
 		public Int64 AntispamNoRoleMinutes{ get; set; } = 7;
 
