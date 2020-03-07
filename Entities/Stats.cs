@@ -78,8 +78,47 @@ namespace Valkyrja.entities
 	}
 
 	[Table("stats_total")]
-	public class StatsTotal: StatsDaily
+	public class StatsTotal
 	{
+		[Required]
+		[Column("serverid")]
+		[DatabaseGenerated(DatabaseGeneratedOption.None)]
+		public guid ServerId{ get; set; } = 0;
+
+		[Column("datetime")]
+		[DatabaseGenerated(DatabaseGeneratedOption.None)]
+		public DateTime DateTime{ get; set; } = DateTime.MinValue;
+
+		[Column("user_joined")]
+		public Int64 UserJoined{ get; set; } = 0;
+
+		[Column("user_left")]
+		public Int64 UserLeft{ get; set; } = 0;
+
+		[Column("user_verified")]
+		public Int64 UserVerified{ get; set; } = 0;
+
+		[Column("user_banned_valk")]
+		public Int64 UserBannedByValk{ get; set; } = 0;
+
+		[Column("user_kicked_valk")]
+		public Int64 UserKickedByValk{ get; set; } = 0;
+
+		[Column("user_kicked_discord")]
+		public Int64 UserKickedByDiscord{ get; set; } = 0;
+
+		public StatsTotal() { }
+
+		public void Add(StatsTotal stats)
+		{
+			this.UserJoined += stats.UserJoined;
+			this.UserLeft += stats.UserLeft;
+			this.UserVerified += stats.UserVerified;
+			this.UserBannedByValk += stats.UserBannedByValk;
+			this.UserKickedByValk += stats.UserKickedByValk;
+			this.UserKickedByDiscord += stats.UserKickedByDiscord;
+		}
+
 		public void Add(StatsDaily stats)
 		{
 			this.UserJoined += stats.UserJoined;
