@@ -106,7 +106,7 @@ namespace Valkyrja.entities
 				.HasKey(p => new{p.ServerId, p.UserId, p.Option});
 
 			modelBuilder.Entity<StatsDaily>()
-				.HasKey(p => p.ServerId);
+				.HasKey(p => new{p.ServerId, p.DateTime});
 
 			modelBuilder.Entity<StatsTotal>()
 				.HasKey(p => new{p.ServerId, p.DateTime});
