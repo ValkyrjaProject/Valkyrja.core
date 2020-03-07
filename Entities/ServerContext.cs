@@ -30,6 +30,9 @@ namespace Valkyrja.entities
 		public DbSet<ProfileOption> ProfileOptions;
 		public DbSet<UserProfileOption> UserProfileOptions;
 
+		public DbSet<StatsDaily> StatsDaily;
+		public DbSet<StatsTotal> StatsTotal;
+
 		public ServerContext(DbContextOptions<ServerContext> options) : base(options)
 		{
 			this.ServerConfigurations = new InternalDbSet<ServerConfig>(this);
@@ -48,6 +51,8 @@ namespace Valkyrja.entities
 			this.Quotes = new InternalDbSet<Quote>(this);
 			this.ProfileOptions = new InternalDbSet<ProfileOption>(this);
 			this.UserProfileOptions = new InternalDbSet<UserProfileOption>(this);
+			this.StatsDaily = new InternalDbSet<StatsDaily>(this);
+			this.StatsTotal = new InternalDbSet<StatsTotal>(this);
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -99,6 +104,12 @@ namespace Valkyrja.entities
 
 			modelBuilder.Entity<UserProfileOption>()
 				.HasKey(p => new{p.ServerId, p.UserId, p.Option});
+
+			modelBuilder.Entity<StatsDaily>()
+				.HasKey(p => p.ServerId);
+
+			modelBuilder.Entity<StatsTotal>()
+				.HasKey(p => new{p.ServerId, p.DateTime});
 		}
 
 		public static ServerContext Create(string connectionString)

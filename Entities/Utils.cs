@@ -67,6 +67,22 @@ namespace Valkyrja.entities
 
 	public static class Extensions
 	{
+		public static string GetSpaces(this string self, uint totalWidth)
+		{
+			string spaces = "";
+			for( int i = self.Length; i <= totalWidth; i++ )
+				spaces += " ";
+			return spaces;
+		}
+		public static string PrependSpaces(this string self, uint totalWidth)
+		{
+			return self.GetSpaces(totalWidth) + self;
+		}
+		public static string AppendSpaces(this string self, uint totalWidth)
+		{
+			return self + self.GetSpaces(totalWidth);
+		}
+
 		public static string ToMentions(this guid[] self)
 		{
 			if( self == null || !self.Any() )

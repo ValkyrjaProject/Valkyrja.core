@@ -304,8 +304,14 @@ namespace Valkyrja.entities
 		[Column("welcome_roleid")]
 		public guid WelcomeRoleId{ get; set; } = 0;
 
+		[Column("stats")]
+		public bool StatsEnabled{ get; set; } = false;
+
 		[Column("verify")]
-		public bool VerificationEnabled{ get; set; } = false;
+		public bool CodeVerificationEnabled{ get; set; } = false;
+
+		[Column("captcha")]
+		public bool CaptchaVerificationEnabled{ get; set; } = false;
 
 		[Column("verify_on_welcome")]
 		public bool VerifyOnWelcome{ get; set; } = false;
@@ -317,7 +323,7 @@ namespace Valkyrja.entities
 		public Int64 VerifyKarma{ get; set; } = 3;
 
 		[Column("verify_message", TypeName = "text")]
-		public string VerifyMessage{ get; set; } = "**1.** Be respectful to others, do not start huge drama and arguments.\n" +
+		public string CodeVerifyMessage{ get; set; } = "**1.** Be respectful to others, do not start huge drama and arguments.\n" +
 			                "**2.** Hate speech, \"doxxing,\" or leaking personal information will not be tolerated. Free speech isn't free of consequences.\n" +
 			                "**3.** Sexual harassment, even slightly suggesting anything gender biased is inappropriate. Yes, suggesting that women should be in the kitchen is sexual harassment. And we are not a dating service either.\n" +
 			                "**4.** Homophobic language or racial slurs are immature and you should not use them.\n" +

@@ -59,8 +59,8 @@ namespace Valkyrja.core
 		{
 			Command newCommand = null;
 
-// !stats
-			newCommand = new Command("stats");
+// !commandStats
+			newCommand = new Command("commandStats");
 			newCommand.Type = CommandType.LargeOperation;
 			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Display all teh command numbers.";
@@ -71,15 +71,6 @@ namespace Valkyrja.core
 
 				try
 				{
-
-					string GetSpaces(string txt)
-					{
-						string spaces = "";
-						for( int i = txt.Length; i <= 21; i++ )
-							spaces += " ";
-						return spaces;
-					}
-
 					Dictionary<string, int> count = new Dictionary<string, int>();
 
 					ServerContext serverContext = ServerContext.Create(this.DbConnectionString);
@@ -121,7 +112,7 @@ namespace Valkyrja.core
 					foreach( KeyValuePair<string, int> pair in count.OrderByDescending(p => p.Value) )
 					{
 						total += pair.Value;
-						string newMessage = $"[{GetSpaces(pair.Key)}{pair.Key} ][ {pair.Value}{GetSpaces(pair.Value.ToString())}]\n";
+						string newMessage = $"[{pair.Key.PrependSpaces(21)} ][ {pair.Value.ToString().AppendSpaces(21)}]\n";
 						if( message.Length + newMessage.Length >= GlobalConfig.MessageCharacterLimit )
 						{
 							message.Append("```");
