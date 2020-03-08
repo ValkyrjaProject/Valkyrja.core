@@ -266,6 +266,40 @@ namespace Valkyrja.core
 			};
 			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
+// !getReactionRoles
+			newCommand = new Command("getReactionRoles");
+			newCommand.Type = CommandType.Standard;
+			newCommand.IsCoreCommand = true;
+			newCommand.IsSupportCommand = true;
+			newCommand.Description = "Get configuration for emoji reaction assigned roles on the current server, or optional serverId.";
+			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
+			newCommand.OnExecute += async e => {
+				guid serverId = e.Server.Id;
+				if( e.MessageArgs.Length > 0 && !guid.TryParse(e.MessageArgs[0], out serverId) )
+				{
+					await e.SendReplySafe("Invalid ServerId.");
+					return;
+				}
+
+				List<ReactionAssignedRole> roles = this.ServerDb.ReactionAssignedRoles.Where(s => s.ServerId == serverId).ToList();
+				if( !roles.Any() )
+				{
+					await e.SendReplySafe("Roles not found.");
+					return;
+				}
+
+				StringBuilder response = new StringBuilder();
+				response.AppendLine($"```md\n[{"MessageId".PrependSpaces(20)} ]({"RoleId".PrependSpaces(20)} )| Emoji");
+				foreach( ReactionAssignedRole role in roles )
+				{
+					response.AppendLine($"[{role.MessageId.ToString().PrependSpaces(20)} ]({role.RoleId.ToString().PrependSpaces(20)} )| {role.Emoji}");
+				}
+				response.AppendLine($"```");
+
+				await e.SendReplySafe(response.ToString());
+			};
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
+
 // !getProperty
 			newCommand = new Command("getProperty");
 			newCommand.Type = CommandType.Standard;
