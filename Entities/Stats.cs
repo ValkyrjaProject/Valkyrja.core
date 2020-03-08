@@ -47,6 +47,7 @@ namespace Valkyrja.entities
 		public StatsDaily(guid serverid)
 		{
 			this.ServerId = serverid;
+			this.DateTime = DateTime.UtcNow;
 		}
 
 		public StatsTotal CreateTotal()
