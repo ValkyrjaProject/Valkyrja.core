@@ -275,7 +275,7 @@ namespace Valkyrja.core
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				guid serverId = e.Server.Id;
-				if( e.MessageArgs.Length > 0 && !guid.TryParse(e.MessageArgs[0], out serverId) )
+				if( e.MessageArgs != null && e.MessageArgs.Length > 0 && !guid.TryParse(e.MessageArgs[0], out serverId) )
 				{
 					await e.SendReplySafe("Invalid ServerId.");
 					return;
