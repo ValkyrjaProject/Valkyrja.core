@@ -299,8 +299,8 @@ namespace Valkyrja.core
 
 			string changelog = File.ReadAllText(Path.Combine("updates", "changelog"));
 			int start = changelog.IndexOf("**Valkyrja");
-			int valkEnd = changelog.Substring(start+1).IndexOf("**Valkyrja");
-			int bwEnd = changelog.Substring(start+1).IndexOf("**Valkyrja");
+			int valkEnd = changelog.Substring(start+1).IndexOf("**Valkyrja") + 1;
+			int bwEnd = changelog.Substring(start+1).IndexOf("**Valkyrja") + 1;
 			int end = valkEnd > start ? valkEnd : bwEnd;
 			int hLength = valkEnd > start ? "**Valkyrja".Length : "**Valkyrja".Length;
 
