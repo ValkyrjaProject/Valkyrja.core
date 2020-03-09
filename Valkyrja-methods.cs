@@ -261,7 +261,7 @@ namespace Valkyrja.core
 			return mentionedUsers;
 		}
 
-		public List<guid> GetMentionedUserIds(CommandArguments e) //todo - Move this elsewhere...
+		public List<guid> GetMentionedUserIds(CommandArguments e, bool endOnFailure = true) //todo - Move this elsewhere...
 		{
 			List<guid> mentionedIds = new List<guid>();
 
@@ -275,7 +275,8 @@ namespace Valkyrja.core
 				{
 					guid id;
 					if( !guid.TryParse(e.MessageArgs[i].Trim('<','@','!','>'), out id) || id < int.MaxValue )
-						break;
+						if( endOnFailure ) break;
+						else continue;
 					if( mentionedIds.Contains(id) )
 					{
 						//This code is necessary to be able to further parse arguments by some commands (e.g. ban reason)
