@@ -313,6 +313,13 @@ namespace Valkyrja.entities
 		[Column("captcha")]
 		public bool CaptchaVerificationEnabled{ get; set; } = false;
 
+		[Column("verify_accountage")]
+		public bool VerifyAccountAge{ get; set; } = false;
+
+
+		[Column("verify_accountage_hours")]
+		public Int64 VerifyAccountAgeDays{ get; set; } = 14;
+
 		[Column("verify_on_welcome")]
 		public bool VerifyOnWelcome{ get; set; } = false;
 
