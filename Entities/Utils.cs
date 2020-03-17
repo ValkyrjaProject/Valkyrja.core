@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Net;
 using Discord.WebSocket;
 
 using guid = System.UInt64;
@@ -39,6 +40,17 @@ namespace Valkyrja.entities
 		public static string GetTimestamp(DateTimeOffset time)
 		{
 			return time.ToUniversalTime().ToString("yyyy-MM-dd_HH:mm:ss") + " UTC";
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static string HandleHttpException(HttpException exception)
+		{
+			if( exception.HttpCode == System.Net.HttpStatusCode.Forbidden || (exception.DiscordCode.HasValue && exception.DiscordCode.Value == 50013) || exception.Message.Contains("Missing Access") || exception.Message.Contains("Missing Permissions") )
+				return "Something went wrong, I may not have server permissions to do that.\n(Hint: <http://i.imgur.com/T8MPvME.png>)";
+			if( exception.HttpCode == System.Net.HttpStatusCode.NotFound || exception.Message.Contains("NotFound") )
+				return "Not found.";
+
+			return "<:DiscordPoop:356545886454677506>";
 		}
 	}
 
