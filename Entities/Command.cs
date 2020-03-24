@@ -150,7 +150,14 @@ namespace Valkyrja.entities
 					if( !e.Message.Deleted )
 						await e.Message.DeleteAsync();
 				}
-				catch(Exception) { }
+				catch( HttpException exception )
+				{
+					await e.Server.HandleHttpException(exception, $"Failed to delete the command message in <#{e.Channel.Id}>");
+				}
+				catch( Exception exception )
+				{
+					await e.Client.LogException(exception, e);
+				}
 			}
 
 			try
@@ -158,16 +165,16 @@ namespace Valkyrja.entities
 				e.Client.Monitoring.Commands.Inc();
 				await e.Client.LogMessage(LogType.Command, e.Channel, e.Message);
 
-				if (this.SendTyping)
+				if( this.SendTyping )
 					await e.Channel.TriggerTypingAsync();
 
-				if (!string.IsNullOrWhiteSpace(e.TrimmedMessage) && e.TrimmedMessage == "help")
+				if( !string.IsNullOrWhiteSpace(e.TrimmedMessage) && e.TrimmedMessage == "help" )
 				{
 					await e.SendReplySafe(e.Command.Description);
 					return true;
 				}
 
-				if (this.Type == CommandType.Standard)
+				if( this.Type == CommandType.Standard )
 				{
 					Task task = this.OnExecute(e);
 					/*if( await Task.WhenAny(task, Task.Delay(GlobalConfig.CommandExecutionTimeout)) == task ) //todo
@@ -186,14 +193,15 @@ namespace Valkyrja.entities
 					await operation.Execute();
 				}
 			}
-			catch (HttpException exception)
+			catch( HttpException exception )
 			{
-				await e.Server.HandleHttpException(exception, $"This happened in <#{e.Channel.Id}> when executing `{e.CommandId}`");
+				await e.Server.HandleHttpException(exception, $"This happened in <#{e.Channel.Id}> when executing command `{e.CommandId}`");
 			}
-			catch(Exception exception)
+			catch( Exception exception )
 			{
 				await e.Client.LogException(exception, e);
 			}
+
 			return true;
 		}
 	}
