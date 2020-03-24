@@ -64,12 +64,27 @@ namespace Valkyrja.entities
 				this.Commands = new Dictionary<string, Command>(allCommands);
 			}
 
+			DateTime lastTouched = this.Config.LastTouched;
 			this.Config = dbContext.ServerConfigurations.FirstOrDefault(c => c.ServerId == this.Id);
 			if( this.Config == null )
 			{
 				this.Config = new ServerConfig(){ServerId = this.Id, Name = this.Guild.Name};
 				dbContext.ServerConfigurations.Add(this.Config);
 				dbContext.SaveChanges();
+			}
+
+			if( this.Config.NotificationChannelId > 0 && this.Config.LastTouched - lastTouched < TimeSpan.FromSeconds(1f / this.Client.GlobalConfig.TargetFps) )
+			{
+				try
+				{
+					SocketTextChannel channel = this.Guild.GetTextChannel(this.Config.NotificationChannelId);
+					if( channel != null )
+						await channel.SendMessageSafe($"`{Utils.GetTimestamp()}` Configuration reloaded.");
+				}
+				catch( Exception exception )
+				{
+					await this.Client.LogException(exception, "Server.ReloadConfig - failed to send notification", this.Id);
+				}
 			}
 
 			this.CustomCommands?.Clear();
@@ -326,19 +341,37 @@ namespace Valkyrja.entities
 
 		public async Task<bool> HandleHttpException(HttpException exception, string helptext = "")
 		{
-			string logMsg = "HttpException - further logging disabled";
-			if( (int)exception.HttpCode >= 500 )
-				logMsg = "DiscordPoop";
-			else if( exception.Message.Contains("50007") )
-				logMsg = "Failed to PM";
-			else if( ++this.HttpExceptionCount > 3 )
+			try
 			{
-				logMsg = null;
-				await this.Guild.Owner.SendMessageAsync($"Received error code `{(int)exception.HttpCode}`\n{helptext}\n\nPlease fix my permissions and channel access on your Discord Server `{this.Guild.Name}`.\n\nIf you are unsure what's going on, consult our support team at {GlobalConfig.DiscordInvite}");
-			}
+				string logMsg = "HttpException - further logging disabled";
+				if( (int)exception.HttpCode >= 500 )
+					logMsg = "DiscordPoop";
+				else if( exception.Message.Contains("50007") )
+					logMsg = "Failed to PM";
+				else if( ++this.HttpExceptionCount > 3 )
+				{
+					logMsg = null;
+					string msg = $"Received error code `{(int)exception.HttpCode}`\n{helptext}\n\nPlease fix my permissions and channel access on your Discord Server `{this.Guild.Name}`.\n\nIf you are unsure what's going on, consult our support team at {GlobalConfig.DiscordInvite}";
+					SocketTextChannel channel = null;
+					if( this.Config.NotificationChannelId > 0 && (channel = this.Guild.GetTextChannel(this.Config.NotificationChannelId)) != null )
+					{
+						await channel.SendMessageSafe(msg);
+					}
+					else
+						await this.Guild.Owner.SendMessageSafe(msg);
+				}
 
-			if( !string.IsNullOrEmpty(logMsg) )
-				await this.Client.LogException(exception, logMsg, this.Id);
+				if( !string.IsNullOrEmpty(logMsg) )
+					await this.Client.LogException(exception, logMsg, this.Id);
+			}
+			catch( Exception e )
+			{
+				if( e is HttpException ex && (int)ex.HttpCode >= 500 )
+				{
+					//DiscordPoop
+				}
+				await this.Client.LogException(e, "Server.HandleHttpException", this.Id);
+			}
 
 			return this.HttpExceptionCount > 3;
 		}

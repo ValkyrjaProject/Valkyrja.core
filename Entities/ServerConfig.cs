@@ -383,6 +383,12 @@ namespace Valkyrja.entities
 		[Column("memo_enabled")]
 		public bool MemoEnabled{ get; set; } = false;
 
+		[Column("notification_channelid")]
+		public guid NotificationChannelId{ get; set; } = 0;
+
+		[Column("last_touched")]
+		public DateTime LastTouched{ get; set; } = DateTime.MinValue;
+
 
 		public string GetPropertyValue(string propertyName)
 		{
