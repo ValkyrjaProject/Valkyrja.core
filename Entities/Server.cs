@@ -64,7 +64,7 @@ namespace Valkyrja.entities
 				this.Commands = new Dictionary<string, Command>(allCommands);
 			}
 
-			DateTime lastTouched = this.Config.LastTouched;
+			DateTime lastTouched = this.Config?.LastTouched ?? DateTime.MinValue;
 			this.Config = dbContext.ServerConfigurations.FirstOrDefault(c => c.ServerId == this.Id);
 			if( this.Config == null )
 			{
