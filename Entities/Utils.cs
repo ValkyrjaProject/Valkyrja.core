@@ -35,13 +35,13 @@ namespace Valkyrja.entities
 				}
 
 				if( dayMatch.Success )
-					result += TimeSpan.FromHours(int.Parse(dayMatch.Value.Trim('d').Trim('D')));
+					result += TimeSpan.FromDays(int.Parse(dayMatch.Value.Trim('d').Trim('D')));
 				if( hourMatch.Success )
 					result += TimeSpan.FromHours(int.Parse(hourMatch.Value.Trim('h').Trim('H')));
 				if( minuteMatch.Success )
-					result += TimeSpan.FromHours(int.Parse(minuteMatch.Value.Trim('m').Trim('M')));
+					result += TimeSpan.FromMinutes(int.Parse(minuteMatch.Value.Trim('m').Trim('M')));
 				if( secondMatch.Success )
-					result += TimeSpan.FromHours(int.Parse(secondMatch.Value.Trim('s').Trim('S')));
+					result += TimeSpan.FromSeconds(int.Parse(secondMatch.Value.Trim('s').Trim('S')));
 
 				return result;
 			}
@@ -112,7 +112,7 @@ namespace Valkyrja.entities
 
 	public static class Extensions
 	{
-		public static string ToString(this TimeSpan self)
+		public static string ToFancyString(this TimeSpan self)
 		{
 			StringBuilder stringBuilder = new StringBuilder();
 			bool continued = false;
