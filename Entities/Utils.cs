@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Net;
@@ -17,6 +18,38 @@ namespace Valkyrja.entities
 	public class Utils
 	{
 		public static Random Random{ get; set; } = new Random();
+
+		public static TimeSpan? GetTimespanFromString(string input)
+		{
+			try
+			{
+				TimeSpan result = TimeSpan.Zero;
+				Match dayMatch = Regex.Match(input, "\\d+d", RegexOptions.IgnoreCase);
+				Match hourMatch = Regex.Match(input, "\\d+h", RegexOptions.IgnoreCase);
+				Match minuteMatch = Regex.Match(input, "\\d+m", RegexOptions.IgnoreCase);
+				Match secondMatch = Regex.Match(input, "\\d+s", RegexOptions.IgnoreCase);
+
+				if( !dayMatch.Success && !hourMatch.Success && !minuteMatch.Success && !secondMatch.Success )
+				{
+					return null;
+				}
+
+				if( dayMatch.Success )
+					result += TimeSpan.FromHours(int.Parse(dayMatch.Value.Trim('d').Trim('D')));
+				if( hourMatch.Success )
+					result += TimeSpan.FromHours(int.Parse(hourMatch.Value.Trim('h').Trim('H')));
+				if( minuteMatch.Success )
+					result += TimeSpan.FromHours(int.Parse(minuteMatch.Value.Trim('m').Trim('M')));
+				if( secondMatch.Success )
+					result += TimeSpan.FromHours(int.Parse(secondMatch.Value.Trim('s').Trim('S')));
+
+				return result;
+			}
+			catch( Exception )
+			{
+				return null;
+			}
+		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static DateTime GetTimeFromId(guid id)
@@ -79,6 +112,39 @@ namespace Valkyrja.entities
 
 	public static class Extensions
 	{
+		public static string ToString(this TimeSpan self)
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+			bool continued = false;
+			if( self.Days > 0 )
+			{
+				stringBuilder.Append(self.Days == 1 ? " day" : $" `{self.Days}` days");
+				continued = true;
+			}
+			if( self.Hours > 0 )
+			{
+				if( continued )
+					stringBuilder.Append(self.Minutes + self.Seconds > 0 ? ", " : " and");
+				stringBuilder.Append(self.Hours == 1 ? " hour" : $" `{self.Hours}` hours");
+				continued = true;
+			}
+			if( self.Minutes > 0 )
+			{
+				if( continued )
+					stringBuilder.Append(self.Seconds > 0 ? ", " : " and");
+				stringBuilder.Append(self.Minutes == 1 ? " minute" : $" `{self.Minutes}` minutes");
+				continued = true;
+			}
+			if( self.Seconds > 0 )
+			{
+				if( continued )
+					stringBuilder.Append(" and");
+				stringBuilder.Append(self.Seconds == 1 ? " second" : $" `{self.Seconds}` seconds");
+			}
+			stringBuilder.Append(".");
+			return stringBuilder.ToString();
+		}
+
 		public static string GetSpaces(this string self, uint totalWidth)
 		{
 			string spaces = "";
