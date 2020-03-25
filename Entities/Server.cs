@@ -73,7 +73,7 @@ namespace Valkyrja.entities
 				dbContext.SaveChanges();
 			}
 
-			if( this.Config.NotificationChannelId > 0 && Math.Abs((this.Config.LastTouched - lastTouched).TotalSeconds) > 1f )
+			if( this.Config.NotificationChannelId > 0 && lastTouched != DateTime.MinValue && Math.Abs((this.Config.LastTouched - lastTouched).TotalSeconds) > 1f )
 			{
 				try
 				{
