@@ -438,7 +438,7 @@ namespace Valkyrja.entities
 			}
 			catch( HttpException e )
 			{
-				this.Client.Servers[c.Guild.Id].HandleHttpException(e).GetAwaiter().GetResult();
+				this.Client.Servers[c.Guild.Id].HandleHttpException(e, $"I couldn't read messages in <#{c.Id}>, please ensure that I have `ReadMessageHistory`!").GetAwaiter().GetResult();
 			}
 			catch( Exception e )
 			{
@@ -467,7 +467,7 @@ namespace Valkyrja.entities
 			}
 			catch( HttpException e )
 			{
-				this.Client.Servers[c.Guild.Id].HandleHttpException(e).GetAwaiter().GetResult();
+				this.Client.Servers[c.Guild.Id].HandleHttpException(e, $"I couldn't read messages in <#{c.Id}>, please ensure that I have `ReadMessageHistory`!").GetAwaiter().GetResult();
 			}
 			catch( Exception e )
 			{
@@ -495,7 +495,7 @@ namespace Valkyrja.entities
 			}
 			catch( HttpException e )
 			{
-				this.Client.Servers[c.Guild.Id].HandleHttpException(e).GetAwaiter().GetResult();
+				this.Client.Servers[c.Guild.Id].HandleHttpException(e, $"I couldn't read messages in <#{c.Id}>, please ensure that I have `ReadMessageHistory`!").GetAwaiter().GetResult();
 			}
 			catch( Exception e )
 			{
@@ -523,7 +523,7 @@ namespace Valkyrja.entities
 			}
 			catch( HttpException e )
 			{
-				this.Client.Servers[c.Guild.Id].HandleHttpException(e).GetAwaiter().GetResult();
+				this.Client.Servers[c.Guild.Id].HandleHttpException(e, $"I couldn't read messages in <#{c.Id}>, please ensure that I have `ReadMessageHistory`!").GetAwaiter().GetResult();
 			}
 			catch( Exception e )
 			{
