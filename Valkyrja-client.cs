@@ -65,11 +65,12 @@ namespace Valkyrja.core
 
 		public readonly ConcurrentDictionary<guid, Server> Servers = new ConcurrentDictionary<guid, Server>();
 		public readonly Dictionary<string, Command> Commands = new Dictionary<string, Command>();
-		public Dictionary<guid, Subscriber> Subscribers = new Dictionary<guid, Subscriber>();
-		public Dictionary<guid, PartneredServer> PartneredServers = new Dictionary<guid, PartneredServer>();
+		private Dictionary<guid, int> FailedPmCount = new Dictionary<guid, int>();
+		private Dictionary<guid, Subscriber> Subscribers = new Dictionary<guid, Subscriber>();
+		private Dictionary<guid, PartneredServer> PartneredServers = new Dictionary<guid, PartneredServer>();
 		public List<Operation> CurrentOperations{ get; set; } = new List<Operation>();
 		public Object OperationsLock{ get; set; } = new Object();
-		public Object DbLock{ get; set; } = new Object();
+		private Object DbLock{ get; set; } = new Object();
 
 		private bool ValidSubscribers = false;
 		private readonly List<guid> LeaveNotifiedOwners = new List<guid>();

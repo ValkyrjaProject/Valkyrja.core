@@ -358,7 +358,7 @@ namespace Valkyrja.entities
 						await channel.SendMessageSafe(msg);
 					}
 					else
-						await this.Guild.Owner.SendMessageSafe(msg);
+						await this.Client.SendPmSafe(this.Guild.Owner, msg);
 				}
 
 				if( !string.IsNullOrEmpty(logMsg) )

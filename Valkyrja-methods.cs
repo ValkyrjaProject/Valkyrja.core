@@ -311,5 +311,22 @@ namespace Valkyrja.core
 			return "There is an error in the data so I have failed to retrieve the patchnotes. Sorry mastah!";
 		}
 
+		public async Task<bool> SendPmSafe(SocketUser user, string message)
+		{
+			if( this.FailedPmCount.ContainsKey(user.Id) && this.FailedPmCount[user.Id] >= 3 )
+				return false;
+			try
+			{
+				await user.SendMessageSafe(message);
+			}
+			catch( HttpException e ) when( (e.DiscordCode.HasValue && e.DiscordCode == 50007) || e.Message.Contains("50007") )
+			{
+				if( !this.FailedPmCount.ContainsKey(user.Id) )
+					this.FailedPmCount.Add(user.Id, 0);
+				this.FailedPmCount[user.Id]++;
+			}
+
+			return true;
+		}
 	}
 }
