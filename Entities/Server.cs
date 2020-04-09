@@ -346,6 +346,8 @@ namespace Valkyrja.entities
 				string logMsg = "HttpException - further logging disabled";
 				if( (int)exception.HttpCode >= 500 )
 					logMsg = "DiscordPoop";
+				if( (int)exception.HttpCode == 404 )
+					logMsg = "";
 				else if( exception.Message.Contains("50007") )
 					logMsg = "Failed to PM";
 				else if( ++this.HttpExceptionCount > 3 )
