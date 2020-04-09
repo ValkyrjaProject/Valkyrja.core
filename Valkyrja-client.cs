@@ -321,7 +321,8 @@ namespace Valkyrja.core
 			this.Monitoring.Disconnects.Publish();
 			this.CurrentShard.Disconnects++;
 
-			await LogException(exception, "--D.NET Client Disconnected");
+			if( exception.Message != "Server requested a reconnect" )
+				await LogException(exception, "--D.NET Client Disconnected");
 
 			try
 			{
