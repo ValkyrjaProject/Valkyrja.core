@@ -354,7 +354,7 @@ namespace Valkyrja.core
 
 				if( !(message.Channel is SocketTextChannel channel) )
 				{
-					await LogMessage(LogType.Pm, null, message);
+					//await LogMessage(LogType.Pm, null, message);
 					return;
 				}
 
