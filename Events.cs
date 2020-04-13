@@ -246,16 +246,23 @@ namespace Valkyrja.entities
 		{
 			if( logMessage.Exception != null )
 			{
-				if( this.Exception != null &&
-				    logMessage.Exception.Message != "WebSocket connection was closed" &&
-				    logMessage.Exception.Message != "Server missed last heartbeat" ) //hack to not spam my logs with your d.net magicalshit please!
+				if( this.Exception != null )
 				{
-					ExceptionEntry exceptionEntry = new ExceptionEntry();
-					exceptionEntry.Message = logMessage.Exception.Message;
-					exceptionEntry.Stack = logMessage.Exception.StackTrace;
-					exceptionEntry.Data = "D.NET Message: " + logMessage.Message + "\n--Source: " + logMessage.Source;
+					if( logMessage.Exception.Message != "Server requested a reconnect" &&
+					    logMessage.Exception.Message != "Server missed last heartbeat" &&
+					    logMessage.Exception.Message != "WebSocket connection was closed" )
+					{
+						ExceptionEntry exceptionEntry = new ExceptionEntry();
+						exceptionEntry.Message = logMessage.Exception.Message;
+						exceptionEntry.Stack = logMessage.Exception.StackTrace;
+						exceptionEntry.Data = "D.NET Message: " + logMessage.Message + "\n--Source: " + logMessage.Source;
 
-					Task.Run(async () => await this.Exception(exceptionEntry));
+						Task.Run(async () => await this.Exception(exceptionEntry));
+					}
+					else
+					{
+						this.Client.Monitoring?.Disconnects.Inc();
+					}
 				}
 
 				return Task.CompletedTask;
