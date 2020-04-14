@@ -76,6 +76,9 @@ namespace Valkyrja.core
 		private readonly List<guid> LeaveNotifiedOwners = new List<guid>();
 		private DateTime LastMessageAverageTime = DateTime.UtcNow;
 		private int MessagesThisMinute = 0;
+		private int MessagesCounter = 0;
+		private int Disconnects = 0;
+		public int OperationsRan{ get; set; } = 0;
 
 		public ConcurrentDictionary<guid, List<guid>> ClearedMessageIDs = new ConcurrentDictionary<guid, List<guid>>();
 		public List<guid> AntispamMessageIDs = new List<guid>();
@@ -319,9 +322,12 @@ namespace Valkyrja.core
 			this.IsConnected = false;
 			this.Monitoring.Disconnects.Inc();
 			this.Monitoring.Disconnects.Publish();
-			this.CurrentShard.Disconnects++;
+			this.Disconnects++;
 
-			await LogException(exception, "--D.NET Client Disconnected");
+			if( exception.Message != "Server requested a reconnect" &&
+			    exception.Message != "Server missed last heartbeat" &&
+			    exception.Message != "WebSocket connection was closed" )
+				await LogException(exception, "--D.NET Client Disconnected");
 
 			try
 			{
@@ -349,7 +355,7 @@ namespace Valkyrja.core
 				if( this.GlobalConfig.LogDebug )
 					Console.WriteLine("ValkyrjaClient: MessageReceived on thread " + Thread.CurrentThread.ManagedThreadId);
 
-				this.CurrentShard.MessagesTotal++;
+				this.MessagesCounter++;
 				this.MessagesThisMinute++;
 
 				if( !(message.Channel is SocketTextChannel channel) )
@@ -566,6 +572,13 @@ namespace Valkyrja.core
 				this.MessagesThisMinute = 0;
 				this.LastMessageAverageTime = DateTime.UtcNow;
 			}
+
+			this.CurrentShard.MessagesTotal += this.MessagesCounter;
+			this.MessagesCounter = 0;
+			this.CurrentShard.OperationsRan += this.OperationsRan;
+			this.OperationsRan = 0;
+			this.CurrentShard.Disconnects += this.Disconnects;
+			this.Disconnects = 0;
 
 			this.CurrentShard.TimeStarted = this.TimeStarted;
 			this.CurrentShard.OperationsActive = this.CurrentOperations.Count;

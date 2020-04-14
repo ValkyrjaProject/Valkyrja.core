@@ -15,6 +15,7 @@ namespace Valkyrja.entities
 		Monitoring Monitoring{ get; set; }
 		List<Operation> CurrentOperations{ get; set; }
 		Object OperationsLock{ get; set; }
+		int OperationsRan{ get; set; }
 
 		Task SendRawMessageToChannel(SocketTextChannel channel, string message);
 		bool IsGlobalAdmin(guid id);

@@ -93,7 +93,7 @@ namespace Valkyrja.entities
 		/// Returns true if it was canceled, false otherwise. </summary>
 		public async Task<bool> Await(Func<Task> onAwaitStarted)
 		{
-			this.CommandArgs.Client.CurrentShard.OperationsRan++;
+			this.CommandArgs.Client.OperationsRan++;
 
 			Operation alreadyInQueue = null;
 			lock(this.CommandArgs.Client.OperationsLock)
