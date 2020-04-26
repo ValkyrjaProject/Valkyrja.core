@@ -9,29 +9,19 @@ namespace Valkyrja.entities
 {
 	public class GlobalContext: DbContext
 	{
-		public DbSet<GlobalConfig> GlobalConfigs;
-		public DbSet<SupportTeamMember> SupportTeam;
-		public DbSet<Subscriber> Subscribers;
-		public DbSet<PartneredServer> PartneredServers;
-		public DbSet<BlacklistEntry> Blacklist;
-		public DbSet<LogEntry> Log;
-		public DbSet<ExceptionEntry> Exceptions;
-		public DbSet<Shard> Shards;
-		public DbSet<Localisation> Localisations;
-		public DbSet<AntispamUrl> AntispamUrls;
+		public DbSet<GlobalConfig> GlobalConfigs{ get; set; }
+		public DbSet<SupportTeamMember> SupportTeam{ get; set; }
+		public DbSet<Subscriber> Subscribers{ get; set; }
+		public DbSet<PartneredServer> PartneredServers{ get; set; }
+		public DbSet<BlacklistEntry> Blacklist{ get; set; }
+		public DbSet<LogEntry> Log{ get; set; }
+		public DbSet<ExceptionEntry> Exceptions{ get; set; }
+		public DbSet<Shard> Shards{ get; set; }
+		public DbSet<Localisation> Localisations{ get; set; }
+		public DbSet<AntispamUrl> AntispamUrls{ get; set; }
 
-		public GlobalContext(DbContextOptions<GlobalContext> options) : base(options)
+		private GlobalContext(DbContextOptions<GlobalContext> options) : base(options)
 		{
-			this.GlobalConfigs = new InternalDbSet<GlobalConfig>(this);
-			this.SupportTeam = new InternalDbSet<SupportTeamMember>(this);
-			this.Subscribers = new InternalDbSet<Subscriber>(this);
-			this.PartneredServers = new InternalDbSet<PartneredServer>(this);
-			this.Blacklist = new InternalDbSet<BlacklistEntry>(this);
-			this.Log = new InternalDbSet<LogEntry>(this);
-			this.Exceptions = new InternalDbSet<ExceptionEntry>(this);
-			this.Shards = new InternalDbSet<Shard>(this);
-			this.Localisations = new InternalDbSet<Localisation>(this);
-			this.AntispamUrls = new InternalDbSet<AntispamUrl>(this);
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)

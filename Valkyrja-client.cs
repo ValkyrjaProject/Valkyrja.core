@@ -241,7 +241,7 @@ namespace Valkyrja.core
 					Environment.Exit(0);
 				}
 
-				this.SupportTeam = this.GlobalDb.SupportTeam.Select(u => u.UserId).ToList();
+				this.SupportTeam = this.GlobalDb.SupportTeam.AsEnumerable().Select(u => u.UserId).ToList();
 			}
 
 			Console.WriteLine("ValkyrjaClient: Configuration loaded.");

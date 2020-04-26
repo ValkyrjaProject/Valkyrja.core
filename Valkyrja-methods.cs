@@ -145,7 +145,7 @@ namespace Valkyrja.core
 			if( !mentionedUserIds.Any() )
 				return new List<UserData>();
 
-			List<UserData> found = dbContext.UserDatabase.Where(u => u.ServerId == e.Server.Id && mentionedUserIds.Contains(u.UserId)).ToList();
+			List<UserData> found = dbContext.UserDatabase.AsQueryable().Where(u => u.ServerId == e.Server.Id && mentionedUserIds.Contains(u.UserId)).ToList();
 			if( found.Count < mentionedUserIds.Count )
 			{
 				for( int i = 0; i < mentionedUserIds.Count; i++ )

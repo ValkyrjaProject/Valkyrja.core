@@ -78,13 +78,13 @@ namespace Valkyrja.entities
 				whoisString.AppendLine($"<@{this.UserId}>: `{this.UserId}`\n" +
 				                       $"    Account created at: `{Utils.GetTimestamp(Utils.GetTimeFromId(this.UserId))}`");
 
-			List<string> foundUsernames = dbContext.Usernames
+			List<string> foundUsernames = dbContext.Usernames.AsQueryable()
 				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
 				.Select(u => u.Name.Replace('`', '\'')).ToList();
 			whoisString.Append($"    **{foundUsernames.Count}** known username{(foundUsernames.Count > 1 ? "s" : "")}: ");
 			whoisString.AppendLine(foundUsernames.ToNames());
 
-			List<string> foundNicknames = dbContext.Nicknames
+			List<string> foundNicknames = dbContext.Nicknames.AsQueryable()
 				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
 				.Select(u => u.Name.Replace('`', '\'')).ToList();
 			whoisString.Append($"    **{foundNicknames.Count}** known nickname{(foundNicknames.Count > 1 ? "s" : "")}: ");
@@ -121,7 +121,7 @@ namespace Valkyrja.entities
 			if( this.BannedUntil > DateTime.UtcNow )
 				whoisString.AppendLine("    Banned until: " + Utils.GetTimestamp(this.BannedUntil));
 
-			List<string> foundUsernames = dbContext.Usernames
+			List<string> foundUsernames = dbContext.Usernames.AsQueryable()
 				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
 				.Select(u => u.Name.Replace('`', '\'')).ToList();
 			whoisString.Append($"    **{foundUsernames.Count}** known username{(foundUsernames.Count > 1 ? "s" : "")}: ");
@@ -130,7 +130,7 @@ namespace Valkyrja.entities
 				whoisString.Append($" (to see them all use `names <userid or mention>`)");
 			whoisString.AppendLine();
 
-			List<string> foundNicknames = dbContext.Nicknames
+			List<string> foundNicknames = dbContext.Nicknames.AsQueryable()
 				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
 				.Select(u => u.Name.Replace('`', '\'')).ToList();
 			whoisString.Append($"    **{foundNicknames.Count}** known nickname{(foundNicknames.Count > 1 ? "s" : "")}: ");

@@ -10,7 +10,8 @@
     <PackageReference Include="Discord.Net.Core" Version="2.3.0-dev-dev" />
     <PackageReference Include="Discord.Net.Rest" Version="2.3.0-dev-dev" />
     <PackageReference Include="Discord.Net.WebSocket" Version="2.3.0-dev-dev" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.1.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.3" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="3.1.1" />
     <PackageReference Include="prometheus-net" Version="3.4.0" />
   </ItemGroup>
 </Project>

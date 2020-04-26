@@ -10,6 +10,7 @@ using Discord;
 using Valkyrja.entities;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using guid = System.UInt64;
 
 namespace Valkyrja.core
@@ -78,7 +79,7 @@ namespace Valkyrja.core
 					serverContext.Dispose();
 
 					GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-					IEnumerable<LogEntry> logs = dbContext.Log.Where(l => l.Type == LogType.Command);
+					IEnumerable<LogEntry> logs = dbContext.Log.AsQueryable().Where(l => l.Type == LogType.Command);
 					foreach( LogEntry log in logs )
 					{
 						if( !configCache.ContainsKey(log.ServerId) )
@@ -200,7 +201,7 @@ namespace Valkyrja.core
 
 				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
 				StringBuilder response = new StringBuilder();
-				IEnumerable<ServerStats> foundServers = dbContext.ServerStats.Where(s =>
+				IEnumerable<ServerStats> foundServers = dbContext.ServerStats.AsQueryable().Where(s =>
 					s.UserCount > min && s.UserCount < max ).OrderByDescending(s => s.UserCount);
 				if( !foundServers.Any() )
 				{
@@ -239,17 +240,21 @@ namespace Valkyrja.core
 
 				guid id;
 				guid.TryParse(e.TrimmedMessage, out id);
+				string expression = e.TrimmedMessage.ToLower();
+				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
 				StringBuilder response = new StringBuilder();
 				IEnumerable<ServerStats> foundServers = null;
-				if( !(foundServers = ServerContext.Create(this.DbConnectionString).ServerStats.Where(s =>
+				if( !(foundServers = dbContext.ServerStats.AsQueryable().Where(s =>
 					    s.ServerId == id || s.OwnerId == id ||
-					    s.ServerName.ToLower().Contains($"{e.TrimmedMessage.ToLower()}") ||
-					    s.OwnerName.ToLower().Contains($"{e.TrimmedMessage.ToLower()}")
+					    s.ServerName.ToLower().Contains(expression) ||
+					    s.OwnerName.ToLower().Contains(expression)
 				    )).Any() )
 				{
+					dbContext.Dispose();
 					await e.SendReplySafe("Server not found.");
 					return;
 				}
+				dbContext.Dispose();
 
 				if( foundServers.Count() > 5 )
 				{
@@ -281,7 +286,7 @@ namespace Valkyrja.core
 					return;
 				}
 
-				List<ReactionAssignedRole> roles = this.ServerDb.ReactionAssignedRoles.Where(s => s.ServerId == serverId).ToList();
+				List<ReactionAssignedRole> roles = this.ServerDb.ReactionAssignedRoles.AsQueryable().Where(s => s.ServerId == serverId).ToList();
 				if( !roles.Any() )
 				{
 					await e.SendReplySafe("Roles not found.");
@@ -472,7 +477,7 @@ namespace Valkyrja.core
 					n = 5;
 
 				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-				foreach( ExceptionEntry exception in dbContext.Exceptions.Skip(Math.Max(0, dbContext.Exceptions.Count() - n)) )
+				foreach( ExceptionEntry exception in dbContext.Exceptions.AsQueryable().Skip(Math.Max(0, dbContext.Exceptions.Count() - n)) )
 				{
 					response.AppendLine(exception.GetMessage());
 				}
@@ -1226,8 +1231,8 @@ namespace Valkyrja.core
 					else if( options.DeleteRequest )
 						responseBuilder.Append("\n+ This command will attempt to delete the message that issued the command.");
 
-					IEnumerable<CommandChannelOptions> channelBlacklist = dbContext.CommandChannelOptions.Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId && c.Blacklisted);
-					IEnumerable<CommandChannelOptions> channelWhitelist = dbContext.CommandChannelOptions.Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId && c.Whitelisted);
+					IEnumerable<CommandChannelOptions> channelBlacklist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId && c.Blacklisted);
+					IEnumerable<CommandChannelOptions> channelWhitelist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId && c.Whitelisted);
 					if( channelBlacklist.Any() )
 					{
 						responseBuilder.Append("\n+ This command can not be invoked in any of the following channels:");
@@ -1541,7 +1546,7 @@ namespace Valkyrja.core
 				}
 
 				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
-				await dbContext.CommandChannelOptions.Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId)
+				await dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId)
 					.ForEachAsync(c => c.Blacklisted = c.Whitelisted = false);
 
 				dbContext.SaveChanges();
@@ -1560,7 +1565,7 @@ namespace Valkyrja.core
 				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
 				foreach( CustomCommand cmd in e.Server.CustomCommands.Values )
 				{
-					await dbContext.CommandChannelOptions.Where(c => c.ServerId == e.Server.Id && c.CommandId == cmd.CommandId)
+					await dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == e.Server.Id && c.CommandId == cmd.CommandId)
 						.ForEachAsync(c => c.Blacklisted = c.Whitelisted = false);
 				}
 

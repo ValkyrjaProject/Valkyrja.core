@@ -10,52 +10,33 @@ namespace Valkyrja.entities
 {
 	public class ServerContext: DbContext
 	{
-		public DbSet<ServerConfig> ServerConfigurations;
-		public DbSet<ServerStats> ServerStats;
-		public DbSet<ChannelConfig> Channels;
-		public DbSet<RoleConfig> Roles;
-		public DbSet<ReactionAssignedRole> ReactionAssignedRoles;
-		public DbSet<RoleGroupConfig> PublicRoleGroups;
+		public DbSet<ServerConfig> ServerConfigurations{ get; set; }
+		public DbSet<ServerStats> ServerStats{ get; set; }
+		public DbSet<ChannelConfig> Channels{ get; set; }
+		public DbSet<RoleConfig> Roles{ get; set; }
+		public DbSet<ReactionAssignedRole> ReactionAssignedRoles{ get; set; }
+		public DbSet<RoleGroupConfig> PublicRoleGroups{ get; set; }
 
-		public DbSet<CommandOptions> CommandOptions;
-		public DbSet<CommandChannelOptions> CommandChannelOptions;
-		public DbSet<CustomCommand> CustomCommands;
-		public DbSet<CustomAlias> CustomAliases;
+		public DbSet<CommandOptions> CommandOptions{ get; set; }
+		public DbSet<CommandChannelOptions> CommandChannelOptions{ get; set; }
+		public DbSet<CustomCommand> CustomCommands{ get; set; }
+		public DbSet<CustomAlias> CustomAliases{ get; set; }
 
-		public DbSet<UserData> UserDatabase;
-		public DbSet<Username> Usernames;
-		public DbSet<Nickname> Nicknames;
+		public DbSet<UserData> UserDatabase{ get; set; }
+		public DbSet<Username> Usernames{ get; set; }
+		public DbSet<Nickname> Nicknames{ get; set; }
 
-		public DbSet<Quote> Quotes;
-		public DbSet<ProfileOption> ProfileOptions;
-		public DbSet<UserProfileOption> UserProfileOptions;
+		public DbSet<Quote> Quotes{ get; set; }
+		public DbSet<ProfileOption> ProfileOptions{ get; set; }
+		public DbSet<UserProfileOption> UserProfileOptions{ get; set; }
 
-		public DbSet<StatsDaily> StatsDaily;
-		public DbSet<StatsTotal> StatsTotal;
+		public DbSet<StatsDaily> StatsDaily{ get; set; }
+		public DbSet<StatsTotal> StatsTotal{ get; set; }
 
-		public DbSet<VerificationData> Verification;
+		public DbSet<VerificationData> Verification{ get; set; }
 
-		public ServerContext(DbContextOptions<ServerContext> options) : base(options)
+		private ServerContext(DbContextOptions<ServerContext> options) : base(options)
 		{
-			this.ServerConfigurations = new InternalDbSet<ServerConfig>(this);
-			this.ServerStats = new InternalDbSet<ServerStats>(this);
-			this.Channels = new InternalDbSet<ChannelConfig>(this);
-			this.Roles = new InternalDbSet<RoleConfig>(this);
-			this.ReactionAssignedRoles = new InternalDbSet<ReactionAssignedRole>(this);
-			this.PublicRoleGroups = new InternalDbSet<RoleGroupConfig>(this);
-			this.CommandOptions = new InternalDbSet<CommandOptions>(this);
-			this.CommandChannelOptions = new InternalDbSet<CommandChannelOptions>(this);
-			this.CustomCommands = new InternalDbSet<CustomCommand>(this);
-			this.CustomAliases = new InternalDbSet<CustomAlias>(this);
-			this.UserDatabase = new InternalDbSet<UserData>(this);
-			this.Usernames = new InternalDbSet<Username>(this);
-			this.Nicknames = new InternalDbSet<Nickname>(this);
-			this.Quotes = new InternalDbSet<Quote>(this);
-			this.ProfileOptions = new InternalDbSet<ProfileOption>(this);
-			this.UserProfileOptions = new InternalDbSet<UserProfileOption>(this);
-			this.StatsDaily = new InternalDbSet<StatsDaily>(this);
-			this.StatsTotal = new InternalDbSet<StatsTotal>(this);
-			this.Verification = new InternalDbSet<VerificationData>(this);
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)

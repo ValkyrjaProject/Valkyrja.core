@@ -91,16 +91,16 @@ namespace Valkyrja.entities
 			this.CustomAliases?.Clear();
 			this.Roles?.Clear();
 
-			this.CustomCommands = dbContext.CustomCommands.Where(c => c.ServerId == this.Id).ToDictionary(c => c.CommandId.ToLower());
-			this.CustomAliases = dbContext.CustomAliases.Where(c => c.ServerId == this.Id).ToDictionary(c => c.Alias.ToLower());
-			this.Roles = dbContext.Roles.Where(c => c.ServerId == this.Id).ToDictionary(c => c.RoleId);
+			this.CustomCommands = dbContext.CustomCommands.AsQueryable().Where(c => c.ServerId == this.Id).ToDictionary(c => c.CommandId.ToLower());
+			this.CustomAliases = dbContext.CustomAliases.AsQueryable().Where(c => c.ServerId == this.Id).ToDictionary(c => c.Alias.ToLower());
+			this.Roles = dbContext.Roles.AsQueryable().Where(c => c.ServerId == this.Id).ToDictionary(c => c.RoleId);
 			lock(this.ReactionRolesLock)
 			{
 				this.ReactionAssignedRoles?.Clear();
-				this.ReactionAssignedRoles = dbContext.ReactionAssignedRoles.Where(c => c.ServerId == this.Id).ToList();
+				this.ReactionAssignedRoles = dbContext.ReactionAssignedRoles.AsQueryable().Where(c => c.ServerId == this.Id).ToList();
 			}
 
-			List<ChannelConfig> channels = dbContext.Channels.Where(c => c.ServerId == this.Id).ToList();
+			List<ChannelConfig> channels = dbContext.Channels.AsQueryable().Where(c => c.ServerId == this.Id).ToList();
 			this.IgnoredChannels = channels.Where(c => c.Ignored).Select(c => c.ChannelId).ToList();
 
 			if( !string.IsNullOrWhiteSpace(this.Config.LogAlertRegex) && this.Config.AlertChannelId != 0 )
@@ -166,7 +166,7 @@ namespace Valkyrja.entities
 				return this.CachedCommandChannelOptions;
 
 			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
-			this.CachedCommandChannelOptions = dbContext.CommandChannelOptions.Where(c => c.ServerId == this.Id && c.CommandId == commandString)?.ToList();
+			this.CachedCommandChannelOptions = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == this.Id && c.CommandId == commandString)?.ToList();
 			dbContext.Dispose();
 			return this.CachedCommandChannelOptions;
 		}
