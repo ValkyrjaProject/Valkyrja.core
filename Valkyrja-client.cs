@@ -324,9 +324,9 @@ namespace Valkyrja.core
 			this.Monitoring.Disconnects.Publish();
 			this.Disconnects++;
 
-			if( exception.Message != "Server requested a reconnect" &&
+			/*if( exception.Message != "Server requested a reconnect" &&
 			    exception.Message != "Server missed last heartbeat" &&
-			    exception.Message != "WebSocket connection was closed" )
+			    exception.Message != "WebSocket connection was closed" )*/
 				await LogException(exception, "--D.NET Client Disconnected");
 
 			try
