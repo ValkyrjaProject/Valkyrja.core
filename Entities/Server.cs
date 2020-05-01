@@ -65,7 +65,7 @@ namespace Valkyrja.entities
 			}
 
 			DateTime lastTouched = this.Config?.LastTouched ?? DateTime.MinValue;
-			this.Config = dbContext.ServerConfigurations.FirstOrDefault(c => c.ServerId == this.Id);
+			this.Config = dbContext.ServerConfigurations.AsQueryable().FirstOrDefault(c => c.ServerId == this.Id);
 			if( this.Config == null )
 			{
 				this.Config = new ServerConfig(){ServerId = this.Id, Name = this.Guild.Name};
@@ -152,7 +152,7 @@ namespace Valkyrja.entities
 				return this.CachedCommandOptions;
 
 			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
-			this.CachedCommandOptions = dbContext.CommandOptions.FirstOrDefault(c => c.ServerId == this.Id && c.CommandId == commandString);
+			this.CachedCommandOptions = dbContext.CommandOptions.AsQueryable().FirstOrDefault(c => c.ServerId == this.Id && c.CommandId == commandString);
 			dbContext.Dispose();
 			return this.CachedCommandOptions;
 		}

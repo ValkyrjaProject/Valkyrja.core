@@ -104,7 +104,7 @@ namespace Valkyrja.core
 			if( this.CurrentShard != null )
 			{
 				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-				Shard shard = dbContext.Shards.FirstOrDefault(s => s.Id == this.CurrentShard.Id);
+				Shard shard = dbContext.Shards.AsQueryable().FirstOrDefault(s => s.Id == this.CurrentShard.Id);
 				if( shard != null )
 				{
 					shard.IsTaken = false;
@@ -564,7 +564,7 @@ namespace Valkyrja.core
 		private void UpdateShardStats()
 		{
 			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-			this.CurrentShard = dbContext.Shards.FirstOrDefault(s => s.Id == this.CurrentShard.Id);
+			this.CurrentShard = dbContext.Shards.AsQueryable().FirstOrDefault(s => s.Id == this.CurrentShard.Id);
 
 			if( DateTime.UtcNow - this.LastMessageAverageTime > TimeSpan.FromMinutes(1) )
 			{
@@ -636,12 +636,12 @@ namespace Valkyrja.core
 
 					try
 					{
-						dbContext.ServerConfigurations.First(s => s.ServerId == pair.Value.Id).InviteUrl =
+						dbContext.ServerConfigurations.AsQueryable().First(s => s.ServerId == pair.Value.Id).InviteUrl =
 							(await pair.Value.Guild.DefaultChannel.CreateInviteAsync(0)).Url;
 					}
 					catch( Exception )
 					{
-						dbContext.ServerConfigurations.First(s => s.ServerId == pair.Value.Id).InviteUrl = "NoPermission";
+						dbContext.ServerConfigurations.AsQueryable().First(s => s.ServerId == pair.Value.Id).InviteUrl = "NoPermission";
 					}
 
 					dbContext.SaveChanges();
@@ -666,12 +666,14 @@ namespace Valkyrja.core
 			this.ValidSubscribers = false;
 
 			this.Subscribers?.Clear();
-			this.Subscribers = dbContext.Subscribers.ToDictionary(s => s.UserId);
+			this.Subscribers = dbContext.Subscribers.AsEnumerable().ToDictionary(s => s.UserId);
 
 			this.PartneredServers?.Clear();
-			this.PartneredServers = dbContext.PartneredServers.ToDictionary(s => s.ServerId);
+			this.PartneredServers = dbContext.PartneredServers.AsEnumerable().ToDictionary(s => s.ServerId);
 
 			this.ValidSubscribers = this.Subscribers.Any() && this.PartneredServers.Any();
+
+			dbContext.Dispose();
 			return Task.CompletedTask;
 		}
 
@@ -1094,7 +1096,7 @@ namespace Valkyrja.core
 				saveAndDispose = true;
 			}
 
-			if( !dbContext.Usernames.Any(u => u.ServerId == user.Guild.Id && u.UserId == user.Id && u.Name == user.Username) )
+			if( !dbContext.Usernames.AsQueryable().Any(u => u.ServerId == user.Guild.Id && u.UserId == user.Id && u.Name == user.Username) )
 			{
 				dbContext.Usernames.Add(new Username(){
 					ServerId = user.Guild.Id,
@@ -1104,7 +1106,7 @@ namespace Valkyrja.core
 
 				if( saveAndDispose ) //Update the latest username only when the user joined the server or changed username.
 				{
-					UserData userData = dbContext.UserDatabase.FirstOrDefault(u => u.ServerId == user.Guild.Id && u.UserId == user.Id);
+					UserData userData = dbContext.UserDatabase.AsQueryable().FirstOrDefault(u => u.ServerId == user.Guild.Id && u.UserId == user.Id);
 					if( userData == null )
 					{
 						userData = new UserData(){
@@ -1119,7 +1121,7 @@ namespace Valkyrja.core
 			}
 
 			if( !string.IsNullOrEmpty(user.Nickname) &&
-			    !dbContext.Nicknames.Any(u => u.ServerId == user.Guild.Id && u.UserId == user.Id && u.Name == user.Nickname) )
+			    !dbContext.Nicknames.AsQueryable().Any(u => u.ServerId == user.Guild.Id && u.UserId == user.Id && u.Name == user.Nickname) )
 			{
 				dbContext.Nicknames.Add(new Nickname(){
 					ServerId = user.Guild.Id,

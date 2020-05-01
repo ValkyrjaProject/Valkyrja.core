@@ -111,7 +111,7 @@ namespace Valkyrja.entities
 
 		public UserData GetOrAddUser(guid serverId, guid userId)
 		{
-			UserData userData = this.UserDatabase.FirstOrDefault(u => u.ServerId == serverId && u.UserId == userId);
+			UserData userData = this.UserDatabase.AsQueryable().FirstOrDefault(u => u.ServerId == serverId && u.UserId == userId);
 			if( userData == null )
 			{
 				userData = new UserData(){
@@ -127,7 +127,7 @@ namespace Valkyrja.entities
 
 		public RoleConfig GetOrAddRole(guid serverId, guid roleId)
 		{
-			RoleConfig roleConfig = this.Roles.FirstOrDefault(u => u.ServerId == serverId && u.RoleId == roleId);
+			RoleConfig roleConfig = this.Roles.AsQueryable().FirstOrDefault(u => u.ServerId == serverId && u.RoleId == roleId);
 			if( roleConfig == null )
 			{
 				roleConfig = new RoleConfig(){
@@ -142,7 +142,7 @@ namespace Valkyrja.entities
 
 		public CommandOptions GetOrAddCommandOptions(Server server, string commandId)
 		{
-			CommandOptions options = this.CommandOptions.FirstOrDefault(c => c.ServerId == server.Id && c.CommandId == commandId);
+			CommandOptions options = this.CommandOptions.AsQueryable().FirstOrDefault(c => c.ServerId == server.Id && c.CommandId == commandId);
 			if( options == null )
 			{
 				options = new CommandOptions(){
@@ -157,7 +157,7 @@ namespace Valkyrja.entities
 
 		public CommandChannelOptions GetOrAddCommandChannelOptions(guid serverId, guid channelId, string commandId)
 		{
-			CommandChannelOptions options = this.CommandChannelOptions.FirstOrDefault(c => c.ServerId == serverId && c.CommandId == commandId && c.ChannelId == channelId);
+			CommandChannelOptions options = this.CommandChannelOptions.AsQueryable().FirstOrDefault(c => c.ServerId == serverId && c.CommandId == commandId && c.ChannelId == channelId);
 			if( options == null )
 			{
 				options = new CommandChannelOptions{

@@ -148,7 +148,7 @@ namespace Valkyrja.core
 				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
 				Shard globalCount = new Shard();
 				bool longStats = e.TrimmedMessage == "long";
-				foreach( Shard shard in dbContext.Shards )
+				foreach( Shard shard in dbContext.Shards.AsEnumerable() )
 				{
 					globalCount.ServerCount += shard.ServerCount;
 					globalCount.UserCount += shard.UserCount;
@@ -358,7 +358,7 @@ namespace Valkyrja.core
 				ServerConfig config = null;
 				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
 				if( !guid.TryParse(e.MessageArgs[0], out serverId) ||
-				    (config = dbContext.ServerConfigurations.FirstOrDefault(s => s.ServerId == serverId)) == null )
+				    (config = dbContext.ServerConfigurations.AsQueryable().FirstOrDefault(s => s.ServerId == serverId)) == null )
 				{
 					await e.SendReplySafe("Server not found in the database. Use with three parameters: serverid, the exact property name, and the new value.");
 					return;
@@ -438,7 +438,7 @@ namespace Valkyrja.core
 
 				string response = "Server not found.";
 				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
-				ServerConfig foundServer = dbContext.ServerConfigurations.FirstOrDefault(s => s.ServerId == id);
+				ServerConfig foundServer = dbContext.ServerConfigurations.AsQueryable().FirstOrDefault(s => s.ServerId == id);
 				if( foundServer != null )
 				{
 					response = "Done.";
@@ -500,7 +500,7 @@ namespace Valkyrja.core
 				string responseString = "I couldn't find that exception.";
 				ExceptionEntry exception = null;
 				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-				if( !string.IsNullOrEmpty(e.TrimmedMessage) && int.TryParse(e.TrimmedMessage, out int id) && (exception = dbContext.Exceptions.FirstOrDefault(ex => ex.Id == id)) != null )
+				if( !string.IsNullOrEmpty(e.TrimmedMessage) && int.TryParse(e.TrimmedMessage, out int id) && (exception = dbContext.Exceptions.AsQueryable().FirstOrDefault(ex => ex.Id == id)) != null )
 					responseString = exception.GetStack();
 
 				dbContext.Dispose();
@@ -534,7 +534,7 @@ namespace Valkyrja.core
 				switch(e.MessageArgs[0])
 				{
 					case "add":
-						if( dbContext.Blacklist.Any(b => b.Id == id) )
+						if( dbContext.Blacklist.AsQueryable().Any(b => b.Id == id) )
 						{
 							responseString = "That ID is already blacklisted.";
 							break;
@@ -547,7 +547,7 @@ namespace Valkyrja.core
 								$"All of `{server.OwnerName}`'s servers are now blacklisted.";
 						break;
 					case "remove":
-						BlacklistEntry entry = dbContext.Blacklist.FirstOrDefault(b => b.Id == id);
+						BlacklistEntry entry = dbContext.Blacklist.AsQueryable().FirstOrDefault(b => b.Id == id);
 						if( entry == null )
 						{
 							responseString = "That ID was not blacklisted.";
@@ -592,7 +592,7 @@ namespace Valkyrja.core
 				}
 
 				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-				Subscriber subscriber = dbContext.Subscribers.FirstOrDefault(s => s.UserId == id);
+				Subscriber subscriber = dbContext.Subscribers.AsQueryable().FirstOrDefault(s => s.UserId == id);
 				switch(e.MessageArgs[0]) //Nope - mentioned users above mean that there is a parameter.
 				{
 					case "add":
@@ -663,7 +663,7 @@ namespace Valkyrja.core
 				}
 
 				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-				PartneredServer partner = dbContext.PartneredServers.FirstOrDefault(s => s.ServerId == id);
+				PartneredServer partner = dbContext.PartneredServers.AsQueryable().FirstOrDefault(s => s.ServerId == id);
 				switch(e.MessageArgs[0]) //Nope - mentioned users above mean that there is a parameter.
 				{
 					case "add":
