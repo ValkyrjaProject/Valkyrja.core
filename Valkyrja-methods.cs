@@ -68,7 +68,7 @@ namespace Valkyrja.core
 		public bool IsTrialServer(guid id)
 		{
 			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
-			bool isTrial = dbContext.ServerStats.AsQueryable().Any(s => (s.ServerId == id || s.OwnerId == id) && s.JoinedCount < this.GlobalConfig.VipTrialJoins && (!this.Servers.ContainsKey(id) || this.Servers[s.ServerId] == null || this.Servers[s.ServerId].Guild.CurrentUser == null || this.Servers[s.ServerId].Guild.CurrentUser.JoinedAt == null || DateTime.UtcNow - this.Servers[s.ServerId].Guild.CurrentUser.JoinedAt.Value.ToUniversalTime() < TimeSpan.FromHours(this.GlobalConfig.VipTrialHours)));
+			bool isTrial = dbContext.ServerStats.AsQueryable().Where(s => s.ServerId == id || s.OwnerId == id).AsEnumerable().Any(s => s.JoinedCount < this.GlobalConfig.VipTrialJoins && (!this.Servers.ContainsKey(id) || this.Servers[s.ServerId] == null || this.Servers[s.ServerId].Guild.CurrentUser == null || this.Servers[s.ServerId].Guild.CurrentUser.JoinedAt == null || DateTime.UtcNow - this.Servers[s.ServerId].Guild.CurrentUser.JoinedAt.Value.ToUniversalTime() < TimeSpan.FromHours(this.GlobalConfig.VipTrialHours)));
 			dbContext.Dispose();
 			return isTrial;
 		}
@@ -145,7 +145,7 @@ namespace Valkyrja.core
 			if( !mentionedUserIds.Any() )
 				return new List<UserData>();
 
-			List<UserData> found = dbContext.UserDatabase.AsQueryable().Where(u => u.ServerId == e.Server.Id && mentionedUserIds.Contains(u.UserId)).ToList();
+			List<UserData> found = dbContext.UserDatabase.AsQueryable().Where(u => u.ServerId == e.Server.Id).AsEnumerable().Where(u => mentionedUserIds.Contains(u.UserId)).ToList();
 			if( found.Count < mentionedUserIds.Count )
 			{
 				for( int i = 0; i < mentionedUserIds.Count; i++ )

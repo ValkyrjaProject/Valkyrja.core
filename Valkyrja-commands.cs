@@ -202,7 +202,7 @@ namespace Valkyrja.core
 				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
 				StringBuilder response = new StringBuilder();
 				IEnumerable<ServerStats> foundServers = dbContext.ServerStats.AsQueryable().Where(s =>
-					s.UserCount > min && s.UserCount < max ).OrderByDescending(s => s.UserCount);
+					s.UserCount > min && s.UserCount < max ).AsEnumerable().OrderByDescending(s => s.UserCount);
 				if( !foundServers.Any() )
 				{
 					await e.SendReplySafe("There aren't any servers matching your query.");
@@ -238,13 +238,13 @@ namespace Valkyrja.core
 					return;
 				}
 
-				guid id;
-				guid.TryParse(e.TrimmedMessage, out id);
+				if( !guid.TryParse(e.TrimmedMessage, out guid id) )
+					id = 0;
 				string expression = e.TrimmedMessage.ToLower();
 				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
 				StringBuilder response = new StringBuilder();
 				IEnumerable<ServerStats> foundServers = null;
-				if( !(foundServers = dbContext.ServerStats.AsQueryable().Where(s =>
+				if( !(foundServers = dbContext.ServerStats.AsEnumerable().Where(s =>
 					    s.ServerId == id || s.OwnerId == id ||
 					    s.ServerName.ToLower().Contains(expression) ||
 					    s.OwnerName.ToLower().Contains(expression)

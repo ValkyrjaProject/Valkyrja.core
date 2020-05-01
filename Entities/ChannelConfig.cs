@@ -26,6 +26,9 @@ namespace Valkyrja.entities
 		[Column("temporary")]
 		public bool Temporary{ get; set; } = false;
 
+		[Column("muted")]
+		public bool Muted{ get; set; } = false;
+
 		[Column("muted_until")]
 		public DateTime MutedUntil{ get; set; } = DateTime.MinValue;
 	}

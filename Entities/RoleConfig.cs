@@ -35,8 +35,11 @@ namespace Valkyrja.entities
 		[Column("level")]
 		public Int64 ExpLevel{ get; set; } = 0;
 
-		[Column("delete_at_time")]
-		public DateTime DeleteAtTime{ get; set; } = DateTime.MinValue;
+		//[Column("temporary")]
+		//public bool Temporary{ get; set; } = false;
+
+		//[Column("delete_at_time")]
+		//public DateTime DeleteAtTime{ get; set; } = DateTime.MinValue;
 	}
 
 	[Table("role_groups")]

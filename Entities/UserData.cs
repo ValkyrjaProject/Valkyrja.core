@@ -43,8 +43,14 @@ namespace Valkyrja.entities
 		[Column("last_thanks_time")]
 		public DateTime LastThanksTime{ get; set; } = DateTime.MinValue;
 
+		[Column("banned")]
+		public bool Banned{ get; set; } = false;
+
 		[Column("banned_until")]
 		public DateTime BannedUntil{ get; set; } = DateTime.MinValue;
+
+		[Column("muted")]
+		public bool Muted{ get; set; } = false;
 
 		[Column("muted_until")]
 		public DateTime MutedUntil{ get; set; } = DateTime.MinValue;
@@ -79,13 +85,13 @@ namespace Valkyrja.entities
 				                       $"    Account created at: `{Utils.GetTimestamp(Utils.GetTimeFromId(this.UserId))}`");
 
 			List<string> foundUsernames = dbContext.Usernames.AsQueryable()
-				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
+				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId).AsEnumerable()
 				.Select(u => u.Name.Replace('`', '\'')).ToList();
 			whoisString.Append($"    **{foundUsernames.Count}** known username{(foundUsernames.Count > 1 ? "s" : "")}: ");
 			whoisString.AppendLine(foundUsernames.ToNames());
 
 			List<string> foundNicknames = dbContext.Nicknames.AsQueryable()
-				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
+				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId).AsEnumerable()
 				.Select(u => u.Name.Replace('`', '\'')).ToList();
 			whoisString.Append($"    **{foundNicknames.Count}** known nickname{(foundNicknames.Count > 1 ? "s" : "")}: ");
 			whoisString.AppendLine(foundNicknames.ToNames());
@@ -122,7 +128,7 @@ namespace Valkyrja.entities
 				whoisString.AppendLine("    Banned until: " + Utils.GetTimestamp(this.BannedUntil));
 
 			List<string> foundUsernames = dbContext.Usernames.AsQueryable()
-				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
+				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId).AsEnumerable()
 				.Select(u => u.Name.Replace('`', '\'')).ToList();
 			whoisString.Append($"    **{foundUsernames.Count}** known username{(foundUsernames.Count > 1 ? "s" : "")}: ");
 			whoisString.Append(foundUsernames.Take(5).ToNames());
@@ -131,7 +137,7 @@ namespace Valkyrja.entities
 			whoisString.AppendLine();
 
 			List<string> foundNicknames = dbContext.Nicknames.AsQueryable()
-				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId)
+				.Where(u => u.ServerId == this.ServerId && u.UserId == this.UserId).AsEnumerable()
 				.Select(u => u.Name.Replace('`', '\'')).ToList();
 			whoisString.Append($"    **{foundNicknames.Count}** known nickname{(foundNicknames.Count > 1 ? "s" : "")}: ");
 			whoisString.Append(foundNicknames.Skip(foundNicknames.Count < 5 ? 0 : foundNicknames.Count-5).ToNames());
