@@ -254,7 +254,6 @@ namespace Valkyrja.core
 					await e.SendReplySafe("Server not found.");
 					return;
 				}
-				dbContext.Dispose();
 
 				if( foundServers.Count() > 5 )
 				{
@@ -267,6 +266,7 @@ namespace Valkyrja.core
 					response.AppendLine();
 				}
 
+				dbContext.Dispose();
 				await e.SendReplySafe(response.ToString());
 			};
 			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
