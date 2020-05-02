@@ -14,7 +14,7 @@ using guid = System.UInt64;
 
 namespace Valkyrja.core
 {
-	public partial class ValkyrjaClient : IValkyrjaClient, IDisposable
+	public partial class ValkyrjaClient: IValkyrjaClient, IDisposable
 	{
 		public readonly DbConfig DbConfig;
 		public Monitoring Monitoring{ get; set; }
@@ -111,6 +111,7 @@ namespace Valkyrja.core
 					shard.IsConnecting = false;
 					dbContext.SaveChanges();
 				}
+
 				dbContext.Dispose();
 			}
 
@@ -127,7 +128,7 @@ namespace Valkyrja.core
 		{
 			LoadConfig();
 
-			lock(this.DbLock)
+			lock( this.DbLock )
 			{
 				if( (this.DbConfig.ForceShardId == 0 && this.GlobalConfig.TotalShards > this.GlobalDb.Shards.Count()) ||
 				    this.DbConfig.ForceShardId > this.GlobalDb.Shards.Count() + 1 ) //they start at 1...
@@ -145,7 +146,7 @@ namespace Valkyrja.core
 			{
 				Shard GetShard()
 				{
-					lock(this.DbLock)
+					lock( this.DbLock )
 						this.CurrentShard = this.GlobalDb.Shards.FirstOrDefault(s => s.IsTaken == false);
 					return this.CurrentShard;
 				}
@@ -157,16 +158,17 @@ namespace Valkyrja.core
 				}
 
 				this.CurrentShard.IsTaken = true;
-				lock(this.DbLock)
+				lock( this.DbLock )
 					this.GlobalDb.SaveChanges();
 			}
+
 			Console.WriteLine($"ValkyrjaClient: Shard {this.CurrentShard.Id - 1} taken.");
 
 			this.CurrentShard.ResetStats(this.TimeStarted);
 
 			DiscordSocketConfig config = new DiscordSocketConfig();
-			config.ShardId = (int) this.CurrentShard.Id - 1; //Shard's start at one in the database.
-			config.TotalShards = (int) this.GlobalConfig.TotalShards;
+			config.ShardId = (int)this.CurrentShard.Id - 1; //Shard's start at one in the database.
+			config.TotalShards = (int)this.GlobalConfig.TotalShards;
 			config.LogLevel = this.GlobalConfig.LogDebug ? LogSeverity.Debug : LogSeverity.Warning;
 			config.DefaultRetryMode = RetryMode.Retry502 & RetryMode.RetryRatelimit & RetryMode.RetryTimeouts;
 			config.AlwaysDownloadUsers = this.DbConfig.DownloadUsers;
@@ -214,7 +216,7 @@ namespace Valkyrja.core
 		{
 			Console.WriteLine("ValkyrjaClient: Loading configuration...");
 
-			lock(this.DbLock)
+			lock( this.DbLock )
 			{
 				bool save = false;
 				if( !this.GlobalDb.GlobalConfigs.Any() )
@@ -222,6 +224,7 @@ namespace Valkyrja.core
 					this.GlobalDb.GlobalConfigs.Add(new GlobalConfig());
 					save = true;
 				}
+
 				if( !this.GlobalDb.Shards.Any() )
 				{
 					this.GlobalDb.Shards.Add(new Shard(){Id = 0});
@@ -255,7 +258,7 @@ namespace Valkyrja.core
 			{
 				bool IsAnyShardConnecting()
 				{
-					lock(this.DbLock)
+					lock( this.DbLock )
 						return this.GlobalDb.Shards.Any(s => s.IsConnecting);
 				}
 
@@ -270,7 +273,7 @@ namespace Valkyrja.core
 				}
 
 				this.CurrentShard.IsConnecting = true;
-				lock(this.DbLock)
+				lock( this.DbLock )
 					this.GlobalDb.SaveChanges();
 				if( awaited )
 					await Task.Delay(5000); //Ensure sufficient delay between connecting shards.
@@ -288,14 +291,14 @@ namespace Valkyrja.core
 				if( this.DbConfig.UseShardLock )
 				{
 					this.CurrentShard.IsConnecting = false;
-					lock(this.DbLock)
+					lock( this.DbLock )
 						this.GlobalDb.SaveChanges();
 				}
 
 				this.TimeConnected = DateTime.Now;
 				await this.DiscordClient.SetGameAsync(GameStatusConnecting);
 			}
-			catch(Exception e)
+			catch( Exception e )
 			{
 				await LogException(e, "--OnConnected");
 			}
@@ -327,14 +330,14 @@ namespace Valkyrja.core
 			/*if( exception.Message != "Server requested a reconnect" &&
 			    exception.Message != "Server missed last heartbeat" &&
 			    exception.Message != "WebSocket connection was closed" )*/
-				await LogException(exception, "--D.NET Client Disconnected");
+			await LogException(exception, "--D.NET Client Disconnected");
 
 			try
 			{
 				if( this.Events.Disconnected != null )
 					await this.Events.Disconnected(exception);
 			}
-			catch(Exception e)
+			catch( Exception e )
 			{
 				await LogException(e, "--Events.Disconnected");
 			}
@@ -349,794 +352,796 @@ namespace Valkyrja.core
 		}
 
 // Message events
-private async Task OnMessageReceived(SocketMessage message)
-{
-if( !this.IsConnected )
-	return;
-
-try
-{
-	if( this.GlobalConfig.LogDebug )
-		Console.WriteLine("ValkyrjaClient: MessageReceived on thread " + Thread.CurrentThread.ManagedThreadId);
-
-	this.MessagesCounter++;
-	this.MessagesThisMinute++;
-
-	if( !(message.Channel is SocketTextChannel channel) )
-	{
-		//await LogMessage(LogType.Pm, null, message);
-		return;
-	}
-
-	Server server;
-	if( !this.Servers.ContainsKey(channel.Guild.Id) || (server = this.Servers[channel.Guild.Id]) == null )
-		return;
-	if( server.Config.IgnoreBots && message.Author.IsBot || server.Config.IgnoreEveryone && this.RegexEveryone.IsMatch(message.Content) )
-		return;
-
-	bool commandExecuted = false;
-	string prefix;
-	if( message.Author.Id != this.DiscordClient.CurrentUser.Id &&
-		((!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) && message.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
-	     (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) && message.Content.StartsWith(prefix = server.Config.CommandPrefixAlt))) )
-		commandExecuted = await HandleCommand(server, channel, message, prefix);
-
-	if( !commandExecuted && message.MentionedUsers.Any(u => u.Id == this.DiscordClient.CurrentUser.Id) )
-		await HandleMentionResponse(server, channel, message);
-}
-catch(Exception exception)
-{
-	await LogException(exception, "--OnMessageReceived");
-}
-}
-
-private async Task OnMessageUpdated(SocketMessage originalMessage, SocketMessage updatedMessage, ISocketMessageChannel iChannel)
-{
-if( !this.IsConnected || originalMessage.Content == updatedMessage.Content )
-	return;
-
-try
-{
-	Server server;
-	if( !(iChannel is SocketTextChannel channel) || updatedMessage?.Author == null || !this.Servers.ContainsKey(channel.Guild.Id) || (server = this.Servers[channel.Guild.Id]) == null || server.Config == null)
-		return;
-	if( server.Config.IgnoreBots && updatedMessage.Author.IsBot || server.Config.IgnoreEveryone && this.RegexEveryone.IsMatch(updatedMessage.Content) )
-		return;
-
-	bool commandExecuted = false;
-	if( server.Config.ExecuteOnEdit )
-	{
-		string prefix;
-		if( updatedMessage.Author.Id != this.DiscordClient.CurrentUser.Id &&
-		    ((!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) && updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
-		     (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) && updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefixAlt))) )
-			commandExecuted = await HandleCommand(server, channel, updatedMessage, prefix);
-	}
-}
-catch(Exception exception)
-{
-	await LogException(exception, "--OnMessageUpdated");
-}
-}
-
-private Task Log(ExceptionEntry exceptionEntry)
-{
-try
-{
-	GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-	dbContext.Exceptions.Add(exceptionEntry);
-	dbContext.SaveChanges();
-	dbContext.Dispose();
-}
-catch(Exception exception)
-{
-	Console.WriteLine(exception.Message);
-	Console.WriteLine(exception.StackTrace);
-	Console.WriteLine($"--Failed to log exceptionEntry: {exceptionEntry.Message}");
-	Console.WriteLine($"--Failed to log exceptionEntry: {exceptionEntry.Data} | ServerId:{exceptionEntry.ServerId}");
-	if( exception.InnerException != null && exception.Message != exception.InnerException.Message )
-	{
-		Console.WriteLine(exception.InnerException.Message);
-		Console.WriteLine(exception.InnerException.StackTrace);
-		Console.WriteLine($"--Failed to log exceptionEntry: {exceptionEntry.Message}");
-		Console.WriteLine($"--Failed to log exceptionEntry: {exceptionEntry.Data} | ServerId:{exceptionEntry.ServerId}");
-	}
-}
-
-return Task.CompletedTask;
-}
-
-private Task Log(LogEntry logEntry)
-{
-GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-dbContext.Log.Add(logEntry);
-dbContext.SaveChanges();
-dbContext.Dispose();
-
-return Task.CompletedTask;
-}
-
-//Update
-private async Task MainUpdate()
-{
-if( this.GlobalConfig.LogDebug )
-	Console.WriteLine("ValkyrjaClient: MainUpdate started.");
-
-while( !this.MainUpdateCancel.IsCancellationRequested )
-{
-	if( this.GlobalConfig.LogDebug )
-		Console.WriteLine("ValkyrjaClient: MainUpdate loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
-
-	DateTime frameTime = DateTime.UtcNow;
-
-	if( !this.IsInitialized )
-	{
-		if( this.GlobalConfig.LogDebug )
-			Console.WriteLine("ValkyrjaClient: Initialized.");
-		try
+		private async Task OnMessageReceived(SocketMessage message)
 		{
-			this.IsInitialized = true;
-			await this.Events.Initialize();
-		}
-		catch(Exception exception)
-		{
-			await LogException(exception, "--Events.Initialize");
-		}
-	}
+			if( !this.IsConnected )
+				return;
 
-	if( this.DiscordClient.ConnectionState != ConnectionState.Connected ||
-	    this.DiscordClient.LoginState != LoginState.LoggedIn ||
-	    DateTime.Now - this.TimeConnected < TimeSpan.FromSeconds(this.GlobalConfig.InitialUpdateDelay) )
-	{
-		await Task.Delay(10000);
-		continue;
-	}
-
-	if( !this.IsConnected )
-	{
-		try
-		{
-			this.IsConnected = true;
-			await this.Events.Connected();
-		}
-		catch(Exception exception)
-		{
-			await LogException(exception, "--Events.Connected");
-		}
-
-		continue; //Don't run update in the same loop as init.
-	}
-
-	try
-	{
-		if( this.GlobalConfig.LogDebug )
-			Console.WriteLine("ValkyrjaClient: Update loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
-
-		this.Monitoring.Uptime.Set((DateTime.UtcNow - this.TimeStarted).TotalSeconds);
-		await Update();
-	}
-	catch(Exception exception)
-	{
-		await LogException(exception, "--Update");
-	}
-
-	TimeSpan deltaTime = DateTime.UtcNow - frameTime;
-	if( this.GlobalConfig.LogDebug )
-		Console.WriteLine($"ValkyrjaClient: MainUpdate loop took: {deltaTime.TotalMilliseconds} ms");
-	await Task.Delay(TimeSpan.FromMilliseconds(Math.Max(this.GlobalConfig.TotalShards * 1000, (TimeSpan.FromSeconds(1f / this.GlobalConfig.TargetFps) - deltaTime).TotalMilliseconds)));
-}
-}
-
-private async Task Update()
-{
-if( this.GlobalConfig.LogDebug )
-	Console.WriteLine("ValkyrjaClient: UpdateSubscriptions loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
-await UpdateSubscriptions();
-
-if( (this.GlobalConfig.EnforceRequirements || this.GlobalConfig.MinMembers > 0) && this.ValidSubscribers )
-{
-	if( this.GlobalConfig.LogDebug )
-		Console.WriteLine("ValkyrjaClient: BailBadServers loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
-	await BailBadServers();
-}
-
-if( this.GlobalConfig.LogDebug )
-	Console.WriteLine("ValkyrjaClient: UpdateShardStats loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
-UpdateShardStats();
-
-if( this.GlobalConfig.LogDebug )
-	Console.WriteLine("ValkyrjaClient: UpdateServerStats loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
-await UpdateServerStats();
-
-if( this.GlobalConfig.LogDebug )
-	Console.WriteLine("ValkyrjaClient: UpdateServerConfigs loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
-await UpdateServerConfigs();
-
-if( this.GlobalConfig.LogDebug )
-	Console.WriteLine("ValkyrjaClient: UpdateModules loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
-await UpdateModules();
-
-lock(this.DbLock)
-{
-	if( this.GlobalConfig.LogDebug )
-		Console.WriteLine("ValkyrjaClient: SaveDatabase loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
-	this.GlobalDb.SaveChanges();
-	this.ServerDb.SaveChanges();
-}
-}
-
-private void UpdateShardStats()
-{
-GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-this.CurrentShard = dbContext.Shards.AsQueryable().FirstOrDefault(s => s.Id == this.CurrentShard.Id);
-
-if( DateTime.UtcNow - this.LastMessageAverageTime > TimeSpan.FromMinutes(1) )
-{
-	this.CurrentShard.MessagesPerMinute = this.MessagesThisMinute;
-	this.MessagesThisMinute = 0;
-	this.LastMessageAverageTime = DateTime.UtcNow;
-}
-
-this.CurrentShard.MessagesTotal += this.MessagesCounter;
-this.MessagesCounter = 0;
-this.CurrentShard.OperationsRan += this.OperationsRan;
-this.OperationsRan = 0;
-this.CurrentShard.Disconnects += this.Disconnects;
-this.Disconnects = 0;
-
-this.CurrentShard.TimeStarted = this.TimeStarted;
-this.CurrentShard.OperationsActive = this.CurrentOperations.Count;
-this.CurrentShard.ThreadsActive = Process.GetCurrentProcess().Threads.Count;
-this.CurrentShard.MemoryUsed = GC.GetTotalMemory(false) / 1000000;
-this.CurrentShard.ServerCount = this.Servers.Count;
-this.CurrentShard.UserCount = this.DiscordClient.Guilds.Sum(s => s.MemberCount);
-
-dbContext.SaveChanges();
-dbContext.Dispose();
-}
-
-private async Task UpdateServerStats()
-{
-foreach( KeyValuePair<guid, Server> pair in this.Servers )
-{
-	ServerStats stats = null;
-	lock(this.DbLock)
-	if( (stats = this.ServerDb.ServerStats.FirstOrDefault(s => s.ServerId == pair.Key)) == null &&
-	    (stats = this.ServerDb.ServerStats.Local.FirstOrDefault(s => s.ServerId == pair.Key)) == null)
-	{
-		stats = new ServerStats();
-		stats.ServerId = pair.Value.Id;
-		this.ServerDb.ServerStats.Add(stats);
-	}
-
-	DateTime joinedAt = DateTime.UtcNow;
-	if( pair.Value.Guild.CurrentUser?.JoinedAt != null )
-		joinedAt = pair.Value.Guild.CurrentUser.JoinedAt.Value.UtcDateTime;
-		//Although D.NET lists this as nullable, D.API always provides the value. It is safe to assume that it's always there.
-
-	if( stats.JoinedTimeFirst == DateTime.MaxValue ) //This is the first time that we joined the server.
-	{
-		stats.JoinedTimeFirst = stats.JoinedTime = joinedAt;
-		stats.JoinedCount = 1;
-	}
-
-	if( stats.JoinedTime == DateTime.MaxValue || stats.JoinedTime == DateTime.MinValue || stats.JoinedTime + TimeSpan.FromDays(1) < joinedAt )
-	{
-		stats.JoinedTime = joinedAt;
-		stats.JoinedCount++;
-	}
-
-	stats.ShardId = this.CurrentShard.Id - 1;
-	stats.ServerName = pair.Value.Guild.Name;
-	stats.OwnerId = pair.Value.Guild.OwnerId;
-	if( pair.Value.Guild.Owner != null )
-		stats.OwnerName = pair.Value.Guild.Owner.GetUsername();
-	stats.IsDiscordPartner = pair.Value.Guild.VoiceRegionId.StartsWith("vip");
-	stats.UserCount = pair.Value.Guild.MemberCount;
-
-	if( string.IsNullOrEmpty(pair.Value.Config.InviteUrl) )
-	{
-		ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
-
-		try
-		{
-			dbContext.ServerConfigurations.AsQueryable().First(s => s.ServerId == pair.Value.Id).InviteUrl =
-				(await pair.Value.Guild.DefaultChannel.CreateInviteAsync(0)).Url;
-		}
-		catch( Exception )
-		{
-			dbContext.ServerConfigurations.AsQueryable().First(s => s.ServerId == pair.Value.Id).InviteUrl = "NoPermission";
-		}
-
-		dbContext.SaveChanges();
-		dbContext.Dispose();
-	}
-}
-}
-
-private async Task UpdateServerConfigs()
-{
-ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
-foreach( KeyValuePair<guid, Server> pair in this.Servers )
-{
-	await pair.Value.ReloadConfig(this, dbContext, this.Commands);
-}
-dbContext.Dispose();
-}
-
-private Task UpdateSubscriptions()
-{
-GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-this.ValidSubscribers = false;
-
-this.Subscribers?.Clear();
-this.Subscribers = dbContext.Subscribers.AsEnumerable().ToDictionary(s => s.UserId);
-
-this.PartneredServers?.Clear();
-this.PartneredServers = dbContext.PartneredServers.AsEnumerable().ToDictionary(s => s.ServerId);
-
-this.ValidSubscribers = this.Subscribers.Any() && this.PartneredServers.Any();
-
-dbContext.Dispose();
-return Task.CompletedTask;
-}
-
-//Modules
-private async Task InitModules()
-{
-List<Command> newCommands;
-foreach( IModule module in this.Modules )
-{
-	try
-	{
-		module.HandleException += async (e, d, id) =>
-			await LogException(e, "--Module." + module.ToString() + " | " + d, id);
-		newCommands = module.Init(this);
-
-		foreach( Command cmd in newCommands )
-		{
-			string cmdLowercase = cmd.Id.ToLower();
-			if( this.Commands.ContainsKey(cmdLowercase) )
+			try
 			{
-				this.Commands[cmdLowercase] = cmd;
-				continue;
+				if( this.GlobalConfig.LogDebug )
+					Console.WriteLine("ValkyrjaClient: MessageReceived on thread " + Thread.CurrentThread.ManagedThreadId);
+
+				this.MessagesCounter++;
+				this.MessagesThisMinute++;
+
+				if( !(message.Channel is SocketTextChannel channel) )
+				{
+					//await LogMessage(LogType.Pm, null, message);
+					return;
+				}
+
+				Server server;
+				if( !this.Servers.ContainsKey(channel.Guild.Id) || (server = this.Servers[channel.Guild.Id]) == null )
+					return;
+				if( server.Config.IgnoreBots && message.Author.IsBot || server.Config.IgnoreEveryone && this.RegexEveryone.IsMatch(message.Content) )
+					return;
+
+				bool commandExecuted = false;
+				string prefix;
+				if( message.Author.Id != this.DiscordClient.CurrentUser.Id &&
+				    ((!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) && message.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
+				     (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) && message.Content.StartsWith(prefix = server.Config.CommandPrefixAlt))) )
+					commandExecuted = await HandleCommand(server, channel, message, prefix);
+
+				if( !commandExecuted && message.MentionedUsers.Any(u => u.Id == this.DiscordClient.CurrentUser.Id) )
+					await HandleMentionResponse(server, channel, message);
+			}
+			catch( Exception exception )
+			{
+				await LogException(exception, "--OnMessageReceived");
+			}
+		}
+
+		private async Task OnMessageUpdated(SocketMessage originalMessage, SocketMessage updatedMessage, ISocketMessageChannel iChannel)
+		{
+			if( !this.IsConnected || originalMessage.Content == updatedMessage.Content )
+				return;
+
+			try
+			{
+				Server server;
+				if( !(iChannel is SocketTextChannel channel) || updatedMessage?.Author == null || !this.Servers.ContainsKey(channel.Guild.Id) || (server = this.Servers[channel.Guild.Id]) == null || server.Config == null )
+					return;
+				if( server.Config.IgnoreBots && updatedMessage.Author.IsBot || server.Config.IgnoreEveryone && this.RegexEveryone.IsMatch(updatedMessage.Content) )
+					return;
+
+				bool commandExecuted = false;
+				if( server.Config.ExecuteOnEdit )
+				{
+					string prefix;
+					if( updatedMessage.Author.Id != this.DiscordClient.CurrentUser.Id &&
+					    ((!string.IsNullOrWhiteSpace(server.Config.CommandPrefix) && updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefix)) ||
+					     (!string.IsNullOrWhiteSpace(server.Config.CommandPrefixAlt) && updatedMessage.Content.StartsWith(prefix = server.Config.CommandPrefixAlt))) )
+						commandExecuted = await HandleCommand(server, channel, updatedMessage, prefix);
+				}
+			}
+			catch( Exception exception )
+			{
+				await LogException(exception, "--OnMessageUpdated");
+			}
+		}
+
+		private Task Log(ExceptionEntry exceptionEntry)
+		{
+			try
+			{
+				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+				dbContext.Exceptions.Add(exceptionEntry);
+				dbContext.SaveChanges();
+				dbContext.Dispose();
+			}
+			catch( Exception exception )
+			{
+				Console.WriteLine(exception.Message);
+				Console.WriteLine(exception.StackTrace);
+				Console.WriteLine($"--Failed to log exceptionEntry: {exceptionEntry.Message}");
+				Console.WriteLine($"--Failed to log exceptionEntry: {exceptionEntry.Data} | ServerId:{exceptionEntry.ServerId}");
+				if( exception.InnerException != null && exception.Message != exception.InnerException.Message )
+				{
+					Console.WriteLine(exception.InnerException.Message);
+					Console.WriteLine(exception.InnerException.StackTrace);
+					Console.WriteLine($"--Failed to log exceptionEntry: {exceptionEntry.Message}");
+					Console.WriteLine($"--Failed to log exceptionEntry: {exceptionEntry.Data} | ServerId:{exceptionEntry.ServerId}");
+				}
 			}
 
-			this.Commands.Add(cmdLowercase, cmd);
+			return Task.CompletedTask;
 		}
-	}
-	catch(Exception exception)
-	{
-		await LogException(exception, "--ModuleInit." + module.ToString());
-	}
-}
-}
 
-private async Task UpdateModules()
-{
-IEnumerable<IModule> modules = this.Modules.Where(m => m.DoUpdate);
-foreach( IModule module in modules )
-{
-	if( this.GlobalConfig.LogDebug )
-		Console.WriteLine($"ValkyrjaClient: ModuleUpdate.{module.ToString()} triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+		private Task Log(LogEntry logEntry)
+		{
+			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+			dbContext.Log.Add(logEntry);
+			dbContext.SaveChanges();
+			dbContext.Dispose();
 
-	DateTime frameTime = DateTime.UtcNow;
+			return Task.CompletedTask;
+		}
 
-	if( this.DiscordClient.ConnectionState != ConnectionState.Connected ||
-		this.DiscordClient.LoginState != LoginState.LoggedIn )
-		break;
+//Update
+		private async Task MainUpdate()
+		{
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine("ValkyrjaClient: MainUpdate started.");
 
-	try
-	{
-		await module.Update(this);
-	}
-	catch(Exception exception)
-	{
-		await LogException(exception, "--ModuleUpdate." + module.ToString());
-	}
+			while( !this.MainUpdateCancel.IsCancellationRequested )
+			{
+				if( this.GlobalConfig.LogDebug )
+					Console.WriteLine("ValkyrjaClient: MainUpdate loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 
-	if( this.GlobalConfig.LogDebug )
-		Console.WriteLine($"ValkyrjaClient: ModuleUpdate.{module.ToString()} took: {(DateTime.UtcNow - frameTime).TotalMilliseconds} ms");
-}
-}
+				DateTime frameTime = DateTime.UtcNow;
+
+				if( !this.IsInitialized )
+				{
+					if( this.GlobalConfig.LogDebug )
+						Console.WriteLine("ValkyrjaClient: Initialized.");
+					try
+					{
+						this.IsInitialized = true;
+						await this.Events.Initialize();
+					}
+					catch( Exception exception )
+					{
+						await LogException(exception, "--Events.Initialize");
+					}
+				}
+
+				if( this.DiscordClient.ConnectionState != ConnectionState.Connected ||
+				    this.DiscordClient.LoginState != LoginState.LoggedIn ||
+				    DateTime.Now - this.TimeConnected < TimeSpan.FromSeconds(this.GlobalConfig.InitialUpdateDelay) )
+				{
+					await Task.Delay(10000);
+					continue;
+				}
+
+				if( !this.IsConnected )
+				{
+					try
+					{
+						this.IsConnected = true;
+						await this.Events.Connected();
+					}
+					catch( Exception exception )
+					{
+						await LogException(exception, "--Events.Connected");
+					}
+
+					continue; //Don't run update in the same loop as init.
+				}
+
+				try
+				{
+					if( this.GlobalConfig.LogDebug )
+						Console.WriteLine("ValkyrjaClient: Update loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+
+					this.Monitoring.Uptime.Set((DateTime.UtcNow - this.TimeStarted).TotalSeconds);
+					await Update();
+				}
+				catch( Exception exception )
+				{
+					await LogException(exception, "--Update");
+				}
+
+				TimeSpan deltaTime = DateTime.UtcNow - frameTime;
+				if( this.GlobalConfig.LogDebug )
+					Console.WriteLine($"ValkyrjaClient: MainUpdate loop took: {deltaTime.TotalMilliseconds} ms");
+				await Task.Delay(TimeSpan.FromMilliseconds(Math.Max(this.GlobalConfig.TotalShards * 1000, (TimeSpan.FromSeconds(1f / this.GlobalConfig.TargetFps) - deltaTime).TotalMilliseconds)));
+			}
+		}
+
+		private async Task Update()
+		{
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine("ValkyrjaClient: UpdateSubscriptions loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+			await UpdateSubscriptions();
+
+			if( (this.GlobalConfig.EnforceRequirements || this.GlobalConfig.MinMembers > 0) && this.ValidSubscribers )
+			{
+				if( this.GlobalConfig.LogDebug )
+					Console.WriteLine("ValkyrjaClient: BailBadServers loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+				await BailBadServers();
+			}
+
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine("ValkyrjaClient: UpdateShardStats loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+			UpdateShardStats();
+
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine("ValkyrjaClient: UpdateServerStats loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+			await UpdateServerStats();
+
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine("ValkyrjaClient: UpdateServerConfigs loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+			await UpdateServerConfigs();
+
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine("ValkyrjaClient: UpdateModules loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+			await UpdateModules();
+
+			lock( this.DbLock )
+			{
+				if( this.GlobalConfig.LogDebug )
+					Console.WriteLine("ValkyrjaClient: SaveDatabase loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+				this.GlobalDb.SaveChanges();
+				this.ServerDb.SaveChanges();
+			}
+		}
+
+		private void UpdateShardStats()
+		{
+			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+			this.CurrentShard = dbContext.Shards.AsQueryable().FirstOrDefault(s => s.Id == this.CurrentShard.Id);
+
+			if( DateTime.UtcNow - this.LastMessageAverageTime > TimeSpan.FromMinutes(1) )
+			{
+				this.CurrentShard.MessagesPerMinute = this.MessagesThisMinute;
+				this.MessagesThisMinute = 0;
+				this.LastMessageAverageTime = DateTime.UtcNow;
+			}
+
+			this.CurrentShard.MessagesTotal += this.MessagesCounter;
+			this.MessagesCounter = 0;
+			this.CurrentShard.OperationsRan += this.OperationsRan;
+			this.OperationsRan = 0;
+			this.CurrentShard.Disconnects += this.Disconnects;
+			this.Disconnects = 0;
+
+			this.CurrentShard.TimeStarted = this.TimeStarted;
+			this.CurrentShard.OperationsActive = this.CurrentOperations.Count;
+			this.CurrentShard.ThreadsActive = Process.GetCurrentProcess().Threads.Count;
+			this.CurrentShard.MemoryUsed = GC.GetTotalMemory(false) / 1000000;
+			this.CurrentShard.ServerCount = this.Servers.Count;
+			this.CurrentShard.UserCount = this.DiscordClient.Guilds.Sum(s => s.MemberCount);
+
+			dbContext.SaveChanges();
+			dbContext.Dispose();
+		}
+
+		private async Task UpdateServerStats()
+		{
+			foreach( KeyValuePair<guid, Server> pair in this.Servers )
+			{
+				ServerStats stats = null;
+				lock( this.DbLock )
+					if( (stats = this.ServerDb.ServerStats.FirstOrDefault(s => s.ServerId == pair.Key)) == null &&
+					    (stats = this.ServerDb.ServerStats.Local.FirstOrDefault(s => s.ServerId == pair.Key)) == null )
+					{
+						stats = new ServerStats();
+						stats.ServerId = pair.Value.Id;
+						this.ServerDb.ServerStats.Add(stats);
+					}
+
+				DateTime joinedAt = DateTime.UtcNow;
+				if( pair.Value.Guild.CurrentUser?.JoinedAt != null )
+					joinedAt = pair.Value.Guild.CurrentUser.JoinedAt.Value.UtcDateTime;
+				//Although D.NET lists this as nullable, D.API always provides the value. It is safe to assume that it's always there.
+
+				if( stats.JoinedTimeFirst == DateTime.MaxValue ) //This is the first time that we joined the server.
+				{
+					stats.JoinedTimeFirst = stats.JoinedTime = joinedAt;
+					stats.JoinedCount = 1;
+				}
+
+				if( stats.JoinedTime == DateTime.MaxValue || stats.JoinedTime == DateTime.MinValue || stats.JoinedTime + TimeSpan.FromDays(1) < joinedAt )
+				{
+					stats.JoinedTime = joinedAt;
+					stats.JoinedCount++;
+				}
+
+				stats.ShardId = this.CurrentShard.Id - 1;
+				stats.ServerName = pair.Value.Guild.Name;
+				stats.OwnerId = pair.Value.Guild.OwnerId;
+				if( pair.Value.Guild.Owner != null )
+					stats.OwnerName = pair.Value.Guild.Owner.GetUsername();
+				stats.IsDiscordPartner = pair.Value.Guild.VoiceRegionId.StartsWith("vip");
+				stats.UserCount = pair.Value.Guild.MemberCount;
+
+				if( string.IsNullOrEmpty(pair.Value.Config.InviteUrl) )
+				{
+					ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+
+					try
+					{
+						dbContext.ServerConfigurations.AsQueryable().First(s => s.ServerId == pair.Value.Id).InviteUrl =
+							(await pair.Value.Guild.DefaultChannel.CreateInviteAsync(0)).Url;
+					}
+					catch( Exception )
+					{
+						dbContext.ServerConfigurations.AsQueryable().First(s => s.ServerId == pair.Value.Id).InviteUrl = "NoPermission";
+					}
+
+					dbContext.SaveChanges();
+					dbContext.Dispose();
+				}
+			}
+		}
+
+		private async Task UpdateServerConfigs()
+		{
+			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+			foreach( KeyValuePair<guid, Server> pair in this.Servers )
+			{
+				await pair.Value.ReloadConfig(this, dbContext, this.Commands);
+			}
+
+			dbContext.Dispose();
+		}
+
+		private Task UpdateSubscriptions()
+		{
+			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+			this.ValidSubscribers = false;
+
+			this.Subscribers?.Clear();
+			this.Subscribers = dbContext.Subscribers.AsEnumerable().ToDictionary(s => s.UserId);
+
+			this.PartneredServers?.Clear();
+			this.PartneredServers = dbContext.PartneredServers.AsEnumerable().ToDictionary(s => s.ServerId);
+
+			this.ValidSubscribers = this.Subscribers.Any() && this.PartneredServers.Any();
+
+			dbContext.Dispose();
+			return Task.CompletedTask;
+		}
+
+//Modules
+		private async Task InitModules()
+		{
+			List<Command> newCommands;
+			foreach( IModule module in this.Modules )
+			{
+				try
+				{
+					module.HandleException += async (e, d, id) =>
+						await LogException(e, "--Module." + module.ToString() + " | " + d, id);
+					newCommands = module.Init(this);
+
+					foreach( Command cmd in newCommands )
+					{
+						string cmdLowercase = cmd.Id.ToLower();
+						if( this.Commands.ContainsKey(cmdLowercase) )
+						{
+							this.Commands[cmdLowercase] = cmd;
+							continue;
+						}
+
+						this.Commands.Add(cmdLowercase, cmd);
+					}
+				}
+				catch( Exception exception )
+				{
+					await LogException(exception, "--ModuleInit." + module.ToString());
+				}
+			}
+		}
+
+		private async Task UpdateModules()
+		{
+			IEnumerable<IModule> modules = this.Modules.Where(m => m.DoUpdate);
+			foreach( IModule module in modules )
+			{
+				if( this.GlobalConfig.LogDebug )
+					Console.WriteLine($"ValkyrjaClient: ModuleUpdate.{module.ToString()} triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
+
+				DateTime frameTime = DateTime.UtcNow;
+
+				if( this.DiscordClient.ConnectionState != ConnectionState.Connected ||
+				    this.DiscordClient.LoginState != LoginState.LoggedIn )
+					break;
+
+				try
+				{
+					await module.Update(this);
+				}
+				catch( Exception exception )
+				{
+					await LogException(exception, "--ModuleUpdate." + module.ToString());
+				}
+
+				if( this.GlobalConfig.LogDebug )
+					Console.WriteLine($"ValkyrjaClient: ModuleUpdate.{module.ToString()} took: {(DateTime.UtcNow - frameTime).TotalMilliseconds} ms");
+			}
+		}
 
 //Commands
-private void GetCommandAndParams(string message, out string commandString, out string trimmedMessage, out string[] parameters)
-{
-trimmedMessage = "";
-parameters = null;
+		private void GetCommandAndParams(string message, out string commandString, out string trimmedMessage, out string[] parameters)
+		{
+			trimmedMessage = "";
+			parameters = null;
 
-MatchCollection regexMatches = this.RegexCommandParams.Matches(message);
-if( regexMatches.Count == 0 )
-{
-	commandString = message.Trim();
-	return;
-}
+			MatchCollection regexMatches = this.RegexCommandParams.Matches(message);
+			if( regexMatches.Count == 0 )
+			{
+				commandString = message.Trim();
+				return;
+			}
 
-commandString = regexMatches[0].Value;
+			commandString = regexMatches[0].Value;
 
-if( regexMatches.Count > 1 )
-{
-	trimmedMessage = message.Substring(regexMatches[1].Index).Trim('\"', ' ', '\n');
-	Match[] matches = new Match[regexMatches.Count];
-	regexMatches.CopyTo(matches, 0);
-	parameters = matches.Skip(1).Select(p => p.Value).ToArray();
-	for( int i = 0; i < parameters.Length; i++ )
-		parameters[i] = parameters[i].Trim('"');
-}
-}
+			if( regexMatches.Count > 1 )
+			{
+				trimmedMessage = message.Substring(regexMatches[1].Index).Trim('\"', ' ', '\n');
+				Match[] matches = new Match[regexMatches.Count];
+				regexMatches.CopyTo(matches, 0);
+				parameters = matches.Skip(1).Select(p => p.Value).ToArray();
+				for( int i = 0; i < parameters.Length; i++ )
+					parameters[i] = parameters[i].Trim('"');
+			}
+		}
 
-private async Task<bool> HandleCommand(Server server, SocketTextChannel channel, SocketMessage message, string prefix)
-{
-GetCommandAndParams(message.Content.Substring(prefix.Length), out string commandString, out string trimmedMessage, out string[] parameters);
-string originalCommandString = commandString;
+		private async Task<bool> HandleCommand(Server server, SocketTextChannel channel, SocketMessage message, string prefix)
+		{
+			GetCommandAndParams(message.Content.Substring(prefix.Length), out string commandString, out string trimmedMessage, out string[] parameters);
+			string originalCommandString = commandString;
 
-if( this.GlobalConfig.LogDebug )
-	Console.WriteLine($"Command: {commandString} | {trimmedMessage}");
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine($"Command: {commandString} | {trimmedMessage}");
 
-commandString = commandString.ToLower();
+			commandString = commandString.ToLower();
 
-if( server.Commands.ContainsKey(commandString) ||
-    (server.CustomAliases.ContainsKey(commandString) &&
-     server.Commands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId.ToLower())) )
-{
-	Command command = server.Commands[commandString];
-	if( command.IsAlias && !string.IsNullOrEmpty(command.ParentId) ) //Internal, not-custom alias.
-		command = server.Commands[command.ParentId.ToLower()];
+			if( server.Commands.ContainsKey(commandString) ||
+			    (server.CustomAliases.ContainsKey(commandString) &&
+			     server.Commands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId.ToLower())) )
+			{
+				Command command = server.Commands[commandString];
+				if( command.IsAlias && !string.IsNullOrEmpty(command.ParentId) ) //Internal, not-custom alias.
+					command = server.Commands[command.ParentId.ToLower()];
 
-	CommandArguments args = new CommandArguments(this, command, server, channel, message, originalCommandString, trimmedMessage, parameters, server.GetCommandOptions(command.Id));
+				CommandArguments args = new CommandArguments(this, command, server, channel, message, originalCommandString, trimmedMessage, parameters, server.GetCommandOptions(command.Id));
 
-	if( command.CanExecute(this, server, channel, message.Author as SocketGuildUser) )
-		return await command.Execute(args);
-}
-else if( server.CustomCommands.ContainsKey(commandString) ||
-         (server.CustomAliases.ContainsKey(commandString) &&
-          server.CustomCommands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId.ToLower())) )
-{
-	CustomCommand customCommand = server.CustomCommands[commandString];
-	if( customCommand.CanExecute(this, server, channel, message.Author as SocketGuildUser) )
-		return await HandleCustomCommand(server, customCommand, server.GetCommandOptions(customCommand.CommandId), channel, message);
-}
+				if( command.CanExecute(this, server, channel, message.Author as SocketGuildUser) )
+					return await command.Execute(args);
+			}
+			else if( server.CustomCommands.ContainsKey(commandString) ||
+			         (server.CustomAliases.ContainsKey(commandString) &&
+			          server.CustomCommands.ContainsKey(commandString = server.CustomAliases[commandString].CommandId.ToLower())) )
+			{
+				CustomCommand customCommand = server.CustomCommands[commandString];
+				if( customCommand.CanExecute(this, server, channel, message.Author as SocketGuildUser) )
+					return await HandleCustomCommand(server, customCommand, server.GetCommandOptions(customCommand.CommandId), channel, message);
+			}
 
-return false;
-}
+			return false;
+		}
 
-private async Task<bool> HandleCustomCommand(Server server, CustomCommand cmd, CommandOptions commandOptions, SocketTextChannel channel, SocketMessage message)
-{
-try
-{
-	if( commandOptions != null && commandOptions.DeleteRequest &&
-	    channel.Guild.CurrentUser.GuildPermissions.ManageMessages && !message.Deleted )
-		await message.DeleteAsync();
-}catch( Exception ) { }
+		private async Task<bool> HandleCustomCommand(Server server, CustomCommand cmd, CommandOptions commandOptions, SocketTextChannel channel, SocketMessage message)
+		{
+			try
+			{
+				if( commandOptions != null && commandOptions.DeleteRequest &&
+				    channel.Guild.CurrentUser.GuildPermissions.ManageMessages && !message.Deleted )
+					await message.DeleteAsync();
+			}
+			catch( Exception ) { }
 
 //todo - rewrite using string builder...
-string msg = cmd.Response;
+			string msg = cmd.Response;
 
-if( msg.Contains("{sender}") )
-{
-	msg = msg.Replace("{{sender}}", "<@{0}>").Replace("{sender}", "<@{0}>");
-	msg = string.Format(msg, message.Author.Id);
-}
+			if( msg.Contains("{sender}") )
+			{
+				msg = msg.Replace("{{sender}}", "<@{0}>").Replace("{sender}", "<@{0}>");
+				msg = string.Format(msg, message.Author.Id);
+			}
 
-if( msg.Contains("{mentioned}") && message.MentionedUsers != null )
-{
-	string mentions = "";
-	SocketUser[] mentionedUsers = message.MentionedUsers.ToArray();
-	for( int i = 0; i < mentionedUsers.Length; i++ )
-	{
-		if( i != 0 )
-			mentions += (i == mentionedUsers.Length - 1) ? " and " : ", ";
+			if( msg.Contains("{mentioned}") && message.MentionedUsers != null )
+			{
+				string mentions = "";
+				SocketUser[] mentionedUsers = message.MentionedUsers.ToArray();
+				for( int i = 0; i < mentionedUsers.Length; i++ )
+				{
+					if( i != 0 )
+						mentions += (i == mentionedUsers.Length - 1) ? " and " : ", ";
 
-		mentions += "<@" + mentionedUsers[i].Id + ">";
-	}
+					mentions += "<@" + mentionedUsers[i].Id + ">";
+				}
 
-	if( string.IsNullOrEmpty(mentions) )
-	{
-		msg = msg.Replace("{{mentioned}}", "Nobody").Replace("{mentioned}", "Nobody");
-	}
-	else
-	{
-		msg = msg.Replace("{{mentioned}}", "{0}").Replace("{mentioned}", "{0}");
-		msg = string.Format(msg, mentions);
-	}
-}
+				if( string.IsNullOrEmpty(mentions) )
+				{
+					msg = msg.Replace("{{mentioned}}", "Nobody").Replace("{mentioned}", "Nobody");
+				}
+				else
+				{
+					msg = msg.Replace("{{mentioned}}", "{0}").Replace("{mentioned}", "{0}");
+					msg = string.Format(msg, mentions);
+				}
+			}
 
-if( server.Config.IgnoreEveryone )
-	msg = msg.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
+			if( server.Config.IgnoreEveryone )
+				msg = msg.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
 
-Match match = this.RegexCustomCommandPmAll.Match(msg);
-if( match.Success )
-{
+			Match match = this.RegexCustomCommandPmAll.Match(msg);
+			if( match.Success )
+			{
 
-	List<SocketUser> toPm = new List<SocketUser>();
-	string pm = msg;
-	msg = "It is nao sent.";
+				List<SocketUser> toPm = new List<SocketUser>();
+				string pm = msg;
+				msg = "It is nao sent.";
 
-	if( this.RegexCustomCommandPmMentioned.IsMatch(pm) && message.MentionedUsers != null && message.MentionedUsers.Any() )
-		toPm.AddRange(message.MentionedUsers);
-	else
-		toPm.Add(message.Author);
+				if( this.RegexCustomCommandPmMentioned.IsMatch(pm) && message.MentionedUsers != null && message.MentionedUsers.Any() )
+					toPm.AddRange(message.MentionedUsers);
+				else
+					toPm.Add(message.Author);
 
-	pm = pm.Substring(match.Value.Length).Trim();
+				pm = pm.Substring(match.Value.Length).Trim();
 
-	foreach( SocketUser user in toPm )
-	{
-		try
-		{
-			await user.SendMessageSafe(pm);
+				foreach( SocketUser user in toPm )
+				{
+					try
+					{
+						await user.SendMessageSafe(pm);
+					}
+					catch( Exception )
+					{
+						msg = "I'm sorry, I couldn't send the message. Either I'm blocked, or it's _**that** privacy option._";
+						break;
+					}
+				}
+			}
+
+			await SendRawMessageToChannel(channel, msg);
+
+			return true;
 		}
-		catch(Exception)
-		{
-			msg = "I'm sorry, I couldn't send the message. Either I'm blocked, or it's _**that** privacy option._";
-			break;
-		}
-	}
-}
-
-await SendRawMessageToChannel(channel, msg);
-
-return true;
-}
 
 
 // Guild events
-private async Task OnGuildJoined(SocketGuild guild)
-{
-try
-{
-	await OnGuildAvailable(guild);
-
-	string msg = Localisation.SystemStrings.GuildJoined;
-	if( this.GlobalConfig.EnforceRequirements && !IsPartner(guild.Id) && !IsSubscriber(guild.OwnerId) )
-		msg += Localisation.SystemStrings.GuildJoinedTrial;
-
-	try
-	{
-		await guild.Owner.SendMessageSafe(msg);
-	}
-	catch(Exception) { }
-}
-catch(Exception exception)
-{
-	await LogException(exception, "--OnGuildJoined", guild.Id);
-}
-}
-
-private Task OnGuildUpdated(SocketGuild originalGuild, SocketGuild updatedGuild)
-{
-if( !this.Servers.ContainsKey(originalGuild.Id) )
-	return Task.CompletedTask;
-
-this.Servers[originalGuild.Id].Guild = updatedGuild;
-return Task.CompletedTask;
-}
-
-private async Task OnGuildLeft(SocketGuild guild)
-{
-try
-{
-	if( !this.Servers.ContainsKey(guild.Id) )
-		return;
-
-	for(int i = this.CurrentOperations.Count -1; i >= 0; i--)
-	{
-		if( this.CurrentOperations[i].CommandArgs.Server.Id == guild.Id )
-			this.CurrentOperations[i].Cancel();
-	}
-
-	this.Servers.Remove(guild.Id);
-}
-catch(Exception exception)
-{
-	await LogException(exception, "--OnGuildLeft", guild.Id);
-}
-}
-
-private async Task OnGuildAvailable(SocketGuild guild)
-{
-ServerContext dbContext = null;
-try
-{
-	while( !this.IsInitialized )
-		await Task.Delay(1000);
-
-	Server server;
-	dbContext = ServerContext.Create(this.DbConnectionString);
-	if( this.Servers.ContainsKey(guild.Id) )
-	{
-		server = this.Servers[guild.Id];
-		await server.ReloadConfig(this, dbContext, this.Commands);
-	}
-	else
-	{
-		server = new Server(guild);
-		await server.LoadConfig(this, dbContext, this.Commands);
-		server.Localisation = GlobalContext.Create(this.DbConnectionString).Localisations.FirstOrDefault(l => l.Id == server.Config.LocalisationId);
-		this.Servers.Add(server.Id, server);
-	}
-}
-catch(Exception exception)
-{
-	await LogException(exception, "--OnGuildAvailable", guild.Id);
-}
-finally
-{
-	dbContext?.Dispose();
-}
-}
-
-private async Task BailBadServers()
-{
-try
-{
-	List<Server> serversToLeave = new List<Server>();
-
-	foreach( KeyValuePair<guid, Server> pair in this.Servers )
-	{
-		try
+		private async Task OnGuildJoined(SocketGuild guild)
 		{
-			//Trial count exceeded
-			ServerStats stats;
-			lock(this.DbLock)
-				stats = this.ServerDb.ServerStats.FirstOrDefault(s => s.ServerId == pair.Value.Id);
-			bool joinedCountExceeded = stats != null && stats.JoinedCount > this.GlobalConfig.VipTrialJoins;
-			bool trialTimeExceeded = pair.Value.Guild.CurrentUser?.JoinedAt != null && DateTime.UtcNow - pair.Value.Guild.CurrentUser.JoinedAt.Value.ToUniversalTime() > TimeSpan.FromHours(this.GlobalConfig.VipTrialHours);
-
-			//Not Partnered /trial servers
-			if( !(IsPartner(pair.Value.Id) || IsSubscriber(pair.Value.Guild.OwnerId)) &&
-			    (joinedCountExceeded || trialTimeExceeded) )
+			try
 			{
-				if( serversToLeave.Contains(pair.Value) )
-					continue;
+				await OnGuildAvailable(guild);
 
-				//trial
-				if( this.GlobalConfig.EnforceRequirements )
+				string msg = Localisation.SystemStrings.GuildJoined;
+				if( this.GlobalConfig.EnforceRequirements && !IsPartner(guild.Id) && !IsSubscriber(guild.OwnerId) )
+					msg += Localisation.SystemStrings.GuildJoinedTrial;
+
+				try
 				{
-					serversToLeave.Add(pair.Value);
-					if( !this.LeaveNotifiedOwners.Contains(pair.Value.Guild.OwnerId) )
+					await guild.Owner.SendMessageSafe(msg);
+				}
+				catch( Exception ) { }
+			}
+			catch( Exception exception )
+			{
+				await LogException(exception, "--OnGuildJoined", guild.Id);
+			}
+		}
+
+		private Task OnGuildUpdated(SocketGuild originalGuild, SocketGuild updatedGuild)
+		{
+			if( !this.Servers.ContainsKey(originalGuild.Id) )
+				return Task.CompletedTask;
+
+			this.Servers[originalGuild.Id].Guild = updatedGuild;
+			return Task.CompletedTask;
+		}
+
+		private async Task OnGuildLeft(SocketGuild guild)
+		{
+			try
+			{
+				if( !this.Servers.ContainsKey(guild.Id) )
+					return;
+
+				for( int i = this.CurrentOperations.Count - 1; i >= 0; i-- )
+				{
+					if( this.CurrentOperations[i].CommandArgs.Server.Id == guild.Id )
+						this.CurrentOperations[i].Cancel();
+				}
+
+				this.Servers.Remove(guild.Id);
+			}
+			catch( Exception exception )
+			{
+				await LogException(exception, "--OnGuildLeft", guild.Id);
+			}
+		}
+
+		private async Task OnGuildAvailable(SocketGuild guild)
+		{
+			ServerContext dbContext = null;
+			try
+			{
+				while( !this.IsInitialized )
+					await Task.Delay(1000);
+
+				Server server;
+				dbContext = ServerContext.Create(this.DbConnectionString);
+				if( this.Servers.ContainsKey(guild.Id) )
+				{
+					server = this.Servers[guild.Id];
+					await server.ReloadConfig(this, dbContext, this.Commands);
+				}
+				else
+				{
+					server = new Server(guild);
+					await server.LoadConfig(this, dbContext, this.Commands);
+					server.Localisation = GlobalContext.Create(this.DbConnectionString).Localisations.FirstOrDefault(l => l.Id == server.Config.LocalisationId);
+					this.Servers.Add(server.Id, server);
+				}
+			}
+			catch( Exception exception )
+			{
+				await LogException(exception, "--OnGuildAvailable", guild.Id);
+			}
+			finally
+			{
+				dbContext?.Dispose();
+			}
+		}
+
+		private async Task BailBadServers()
+		{
+			try
+			{
+				List<Server> serversToLeave = new List<Server>();
+
+				foreach( KeyValuePair<guid, Server> pair in this.Servers )
+				{
+					try
 					{
-						this.LeaveNotifiedOwners.Add(pair.Value.Guild.OwnerId);
-						try
+						//Trial count exceeded
+						ServerStats stats;
+						lock( this.DbLock )
+							stats = this.ServerDb.ServerStats.FirstOrDefault(s => s.ServerId == pair.Value.Id);
+						bool joinedCountExceeded = stats != null && stats.JoinedCount > this.GlobalConfig.VipTrialJoins;
+						bool trialTimeExceeded = pair.Value.Guild.CurrentUser?.JoinedAt != null && DateTime.UtcNow - pair.Value.Guild.CurrentUser.JoinedAt.Value.ToUniversalTime() > TimeSpan.FromHours(this.GlobalConfig.VipTrialHours);
+
+						//Not Partnered /trial servers
+						if( !(IsPartner(pair.Value.Id) || IsSubscriber(pair.Value.Guild.OwnerId)) &&
+						    (joinedCountExceeded || trialTimeExceeded) )
 						{
-							await pair.Value.Guild.Owner.SendMessageSafe(Localisation.SystemStrings.VipPmLeaving);
+							if( serversToLeave.Contains(pair.Value) )
+								continue;
+
+							//trial
+							if( this.GlobalConfig.EnforceRequirements )
+							{
+								serversToLeave.Add(pair.Value);
+								if( !this.LeaveNotifiedOwners.Contains(pair.Value.Guild.OwnerId) )
+								{
+									this.LeaveNotifiedOwners.Add(pair.Value.Guild.OwnerId);
+									try
+									{
+										await pair.Value.Guild.Owner.SendMessageSafe(Localisation.SystemStrings.VipPmLeaving);
+									}
+									catch( Exception ) { }
+								}
+							}
+
+							//smol server
+							if( pair.Value.Guild.MemberCount < this.GlobalConfig.MinMembers )
+							{
+								serversToLeave.Add(pair.Value);
+								if( !this.LeaveNotifiedOwners.Contains(pair.Value.Guild.OwnerId) )
+								{
+									this.LeaveNotifiedOwners.Add(pair.Value.Guild.OwnerId);
+									try
+									{
+										await pair.Value.Guild.Owner.SendMessageSafe(Localisation.SystemStrings.SmallPmLeaving);
+									}
+									catch( Exception ) { }
+								}
+							}
+
+							continue;
 						}
-						catch(Exception) { }
+
+						//Blacklisted servers
+						lock( this.DbLock )
+							if( !serversToLeave.Contains(pair.Value) &&
+							    this.GlobalDb.Blacklist.Any(b => b.Id == pair.Value.Id || b.Id == pair.Value.Guild.OwnerId) )
+							{
+								serversToLeave.Add(pair.Value);
+								continue;
+							}
+					}
+					catch( Exception exception )
+					{
+						await LogException(exception, "--BailBadServers", pair.Value.Id);
 					}
 				}
 
-				//smol server
-				if( pair.Value.Guild.MemberCount < this.GlobalConfig.MinMembers )
+				foreach( Server server in serversToLeave )
 				{
-					serversToLeave.Add(pair.Value);
-					if( !this.LeaveNotifiedOwners.Contains(pair.Value.Guild.OwnerId) )
-					{
-						this.LeaveNotifiedOwners.Add(pair.Value.Guild.OwnerId);
-						try
-						{
-							await pair.Value.Guild.Owner.SendMessageSafe(Localisation.SystemStrings.SmallPmLeaving);
-						}
-						catch(Exception) { }
-					}
+					await server.Guild.LeaveAsync();
 				}
-
-				continue;
 			}
-
-			//Blacklisted servers
-			lock(this.DbLock)
-			if( !serversToLeave.Contains(pair.Value) &&
-			    this.GlobalDb.Blacklist.Any(b => b.Id == pair.Value.Id || b.Id == pair.Value.Guild.OwnerId) )
+			catch( Exception exception )
 			{
-				serversToLeave.Add(pair.Value);
-				continue;
+				await LogException(exception, "--BailBadServers");
 			}
 		}
-		catch(Exception exception)
+
+		private Task OnGuildMembersDownloaded(SocketGuild guild)
 		{
-			await LogException(exception, "--BailBadServers", pair.Value.Id);
+			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+
+			foreach( SocketGuildUser user in guild.Users )
+			{
+				UpdateUsernames(user, dbContext);
+			}
+
+			dbContext.SaveChanges();
+			dbContext.Dispose();
+			return Task.CompletedTask;
 		}
-	}
-
-	foreach( Server server in serversToLeave )
-	{
-		await server.Guild.LeaveAsync();
-	}
-}
-catch(Exception exception)
-{
-	await LogException(exception, "--BailBadServers");
-}
-}
-
-private Task OnGuildMembersDownloaded(SocketGuild guild)
-{
-ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
-
-foreach( SocketGuildUser user in guild.Users )
-{
-	UpdateUsernames(user, dbContext);
-}
-
-dbContext.SaveChanges();
-dbContext.Dispose();
-return Task.CompletedTask;
-}
 
 // User events
-private Task OnGuildMemberUpdated(SocketGuildUser originalUser, SocketGuildUser updatedUser)
-{
-UpdateUsernames(updatedUser);
-
-return Task.CompletedTask;
-}
-
-private Task OnUserJoined(SocketGuildUser user)
-{
-UpdateUsernames(user);
-
-return Task.CompletedTask;
-}
-
-private Task OnUserUpdated(SocketUser originalUser, SocketUser updatedUser)
-{
-if( updatedUser is SocketGuildUser )
-{
-	UpdateUsernames(updatedUser as SocketGuildUser);
-}
-
-return Task.CompletedTask;
-}
-
-private void UpdateUsernames(SocketGuildUser user, ServerContext dbContext = null)
-{
-if( !this.GlobalConfig.ModuleUpdateEnabled || !this.Servers.ContainsKey(user.Guild.Id) || !this.Servers[user.Guild.Id].Config.Nicknames )
-	return;
-
-bool saveAndDispose = false;
-if( dbContext == null )
-{
-	dbContext = ServerContext.Create(this.DbConnectionString);
-	saveAndDispose = true;
-}
-
-if( !dbContext.Usernames.AsQueryable().Any(u => u.ServerId == user.Guild.Id && u.UserId == user.Id && u.Name == user.Username) )
-{
-	dbContext.Usernames.Add(new Username(){
-		ServerId = user.Guild.Id,
-		UserId = user.Id,
-		Name = user.Username
-	});
-
-	if( saveAndDispose ) //Update the latest username only when the user joined the server or changed username.
-	{
-		UserData userData = dbContext.UserDatabase.AsQueryable().FirstOrDefault(u => u.ServerId == user.Guild.Id && u.UserId == user.Id);
-		if( userData == null )
+		private Task OnGuildMemberUpdated(SocketGuildUser originalUser, SocketGuildUser updatedUser)
 		{
-			userData = new UserData(){
-				ServerId = user.Guild.Id,
-				UserId = user.Id
-			};
-			dbContext.UserDatabase.Add(userData);
+			UpdateUsernames(updatedUser);
+
+			return Task.CompletedTask;
 		}
 
-		userData.LastUsername = user.Username;
+		private Task OnUserJoined(SocketGuildUser user)
+		{
+			UpdateUsernames(user);
+
+			return Task.CompletedTask;
+		}
+
+		private Task OnUserUpdated(SocketUser originalUser, SocketUser updatedUser)
+		{
+			if( updatedUser is SocketGuildUser )
+			{
+				UpdateUsernames(updatedUser as SocketGuildUser);
+			}
+
+			return Task.CompletedTask;
+		}
+
+		private void UpdateUsernames(SocketGuildUser user, ServerContext dbContext = null)
+		{
+			if( !this.GlobalConfig.ModuleUpdateEnabled || !this.Servers.ContainsKey(user.Guild.Id) || !this.Servers[user.Guild.Id].Config.Nicknames )
+				return;
+
+			bool saveAndDispose = false;
+			if( dbContext == null )
+			{
+				dbContext = ServerContext.Create(this.DbConnectionString);
+				saveAndDispose = true;
+			}
+
+			if( !dbContext.Usernames.AsQueryable().Any(u => u.ServerId == user.Guild.Id && u.UserId == user.Id && u.Name == user.Username) )
+			{
+				dbContext.Usernames.Add(new Username(){
+					ServerId = user.Guild.Id,
+					UserId = user.Id,
+					Name = user.Username
+				});
+
+				if( saveAndDispose ) //Update the latest username only when the user joined the server or changed username.
+				{
+					UserData userData = dbContext.UserDatabase.AsQueryable().FirstOrDefault(u => u.ServerId == user.Guild.Id && u.UserId == user.Id);
+					if( userData == null )
+					{
+						userData = new UserData(){
+							ServerId = user.Guild.Id,
+							UserId = user.Id
+						};
+						dbContext.UserDatabase.Add(userData);
+					}
+
+					userData.LastUsername = user.Username;
+				}
+			}
+
+			if( !string.IsNullOrEmpty(user.Nickname) &&
+			    !dbContext.Nicknames.AsQueryable().Any(u => u.ServerId == user.Guild.Id && u.UserId == user.Id && u.Name == user.Nickname) )
+			{
+				dbContext.Nicknames.Add(new Nickname(){
+					ServerId = user.Guild.Id,
+					UserId = user.Id,
+					Name = user.Nickname
+				});
+			}
+
+			if( !saveAndDispose ) return;
+			dbContext.SaveChanges();
+			dbContext.Dispose();
+		}
 	}
-}
-
-if( !string.IsNullOrEmpty(user.Nickname) &&
-    !dbContext.Nicknames.AsQueryable().Any(u => u.ServerId == user.Guild.Id && u.UserId == user.Id && u.Name == user.Nickname) )
-{
-	dbContext.Nicknames.Add(new Nickname(){
-		ServerId = user.Guild.Id,
-		UserId = user.Id,
-		Name = user.Nickname
-	});
-}
-
-if( !saveAndDispose ) return;
-dbContext.SaveChanges();
-dbContext.Dispose();
-}
-}
 }
