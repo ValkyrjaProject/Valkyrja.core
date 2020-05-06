@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Discord.Net;
 
 namespace Valkyrja.entities
 {
@@ -45,14 +46,18 @@ namespace Valkyrja.entities
 			try
 			{
 				if( await Await(async () => await this.CommandArgs.Client.SendRawMessageToChannel(
-					 this.CommandArgs.Channel,
-					 string.Format(Localisation.SystemStrings.OperationQueuedString, this.CommandArgs.Client.CurrentOperations.Count, this.CommandArgs.Command.Id))) )
+					this.CommandArgs.Channel,
+					string.Format(Localisation.SystemStrings.OperationQueuedString, this.CommandArgs.Client.CurrentOperations.Count, this.CommandArgs.Command.Id))) )
 					return;
 				this.CurrentState = State.Running;
 
 				await this.CommandArgs.Command.OnExecute(this.CommandArgs);
 			}
-			catch(Exception exception)
+			catch( HttpException exception )
+			{
+				await this.CommandArgs.Server.HandleHttpException(exception, $"Failed to execute a command `{this.CommandArgs.CommandId}` in <#{this.CommandArgs.Channel.Id}>");
+			}
+			catch( Exception exception )
 			{
 				await this.CommandArgs.Client.LogException(exception, this.CommandArgs);
 			}
@@ -155,7 +160,7 @@ namespace Valkyrja.entities
 		/// Returns true if the operation was canceled, false otherwise. </summary>
 		public async Task<bool> AwaitConnection()
 		{
-			while( this.CurrentState != State.Canceled && !this.CommandArgs.Client.IsConnected )
+			while( this.CurrentState != State.Canceled && !this.CommandArgs.Client.IsConnected && this.CurrentState != State.Finished )
 				await Task.Delay(1000);
 
 			return this.CurrentState == State.Canceled;

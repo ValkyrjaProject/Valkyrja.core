@@ -135,7 +135,7 @@ namespace Valkyrja.entities
 					}
 					catch( HttpException e )
 					{
-						await HandleHttpException(e, "Couldn't configure channel permissions for the muted role.");
+						await HandleHttpException(e, $"Couldn't configure channel permissions for the muted role for channel <#{channel.Id}>");
 						break;
 					}
 					catch( Exception e )
