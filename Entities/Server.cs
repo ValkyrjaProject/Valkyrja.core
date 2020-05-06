@@ -360,9 +360,8 @@ namespace Valkyrja.entities
 					logMsg = "";
 				else if( exception.Message.Contains("50007") )
 					logMsg = "Failed to PM";
-				else if( ++this.HttpExceptionCount > 3 )
+				else if( this.HttpExceptionCount < 5 )
 				{
-					logMsg = null;
 					string msg = $"Received error code `{(int)exception.HttpCode}`\n{helptext}\n\nPlease fix my permissions and channel access on your Discord Server `{this.Guild.Name}`.\n\nIf you are unsure what's going on, consult our support team at {GlobalConfig.DiscordInvite}";
 					SocketTextChannel channel = null;
 					if( this.Config.NotificationChannelId > 0 && (channel = this.Guild.GetTextChannel(this.Config.NotificationChannelId)) != null )
@@ -371,6 +370,11 @@ namespace Valkyrja.entities
 					}
 					else
 						await this.Client.SendPmSafe(this.Guild.Owner, msg);
+				}
+
+				if( ++this.HttpExceptionCount > 1 )
+				{
+					logMsg = null;
 				}
 
 				if( !string.IsNullOrEmpty(logMsg) )
