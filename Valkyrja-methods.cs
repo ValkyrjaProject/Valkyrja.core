@@ -116,6 +116,11 @@ namespace Valkyrja.core
 				data += $"\nCloseCode:{websocketException.CloseCode}\nReason:{websocketException.Reason}\nTarget:{websocketException.TargetSite}";
 			}
 
+			if( exception.Message == "Server requested a reconnect" ||
+			    exception.Message == "Server missed last heartbeat" ||
+			    exception.Message.Contains("Discord.PermissionTarget") ) //it's a spam
+				return;
+
 			Console.WriteLine(exception.Message);
 			Console.WriteLine(exception.StackTrace);
 			Console.WriteLine($"{data} | ServerId:{serverId}");

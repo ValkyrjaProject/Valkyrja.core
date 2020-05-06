@@ -327,9 +327,6 @@ namespace Valkyrja.core
 			this.Monitoring.Disconnects.Publish();
 			this.Disconnects++;
 
-			/*if( exception.Message != "Server requested a reconnect" &&
-			    exception.Message != "Server missed last heartbeat" &&
-			    exception.Message != "WebSocket connection was closed" )*/
 			await LogException(exception, "--D.NET Client Disconnected");
 
 			try
@@ -813,7 +810,14 @@ namespace Valkyrja.core
 				    channel.Guild.CurrentUser.GuildPermissions.ManageMessages && !message.Deleted )
 					await message.DeleteAsync();
 			}
-			catch( Exception ) { }
+			catch( HttpException exception )
+			{
+				await server.HandleHttpException(exception, $"Failed to delete the command message in <#{channel.Id}>");
+			}
+			catch( Exception exception )
+			{
+				await LogException(exception, "HandleCustomCommand - delete request", server.Id);
+			}
 
 //todo - rewrite using string builder...
 			string msg = cmd.Response;

@@ -129,9 +129,19 @@ namespace Valkyrja.entities
 					    channel.PermissionOverwrites.Any(p => p.TargetId == role.Id))
 						continue;
 
-					try{
+					try
+					{
 						channel.AddPermissionOverwriteAsync(role, new OverwritePermissions(sendMessages: PermValue.Deny, addReactions: PermValue.Deny)).GetAwaiter().GetResult();
-					} catch(Exception) { }
+					}
+					catch( HttpException e )
+					{
+						await HandleHttpException(e, "Couldn't configure channel permissions for the muted role.");
+						break;
+					}
+					catch( Exception e )
+					{
+						await this.Client.LogException(e, "ReloadConfig - muted role channel permissions", this.Id);
+					}
 				}
 			}
 		}
