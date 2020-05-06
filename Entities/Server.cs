@@ -126,7 +126,7 @@ namespace Valkyrja.entities
 				foreach( SocketGuildChannel channel in this.Guild.Channels.Where(c => (c is SocketTextChannel || c is SocketCategoryChannel) && !(c is SocketNewsChannel)) )
 				{
 					if( this.Config.MuteIgnoreChannelId == channel.Id ||
-					    channel.PermissionOverwrites.Any(p => p.TargetId == role.Id))
+					    channel.PermissionOverwrites.Any(p => p.TargetId == role.Id) )
 						continue;
 
 					try
