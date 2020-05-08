@@ -246,9 +246,9 @@ namespace Valkyrja.entities
 		{
 			if( logMessage.Exception != null )
 			{
-				/*if( this.Exception != null && logMessage.Exception.Message != "Server requested a reconnect" &&
+				if( this.Exception != null && logMessage.Exception.Message != "Server requested a reconnect" &&
 				    logMessage.Exception.Message != "Server missed last heartbeat" &&
-				    logMessage.Exception.Message != "WebSocket connection was closed" )*/
+				    logMessage.Exception.Message != "WebSocket connection was closed" )
 				{
 					ExceptionEntry exceptionEntry = new ExceptionEntry();
 					exceptionEntry.Message = logMessage.Exception.Message;
