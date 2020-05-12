@@ -17,7 +17,7 @@ namespace Valkyrja.core
 	{
 		public async Task SendRawMessageToChannel(SocketTextChannel channel, string message)
 		{
-			await LogMessage(LogType.Response, channel, this.GlobalConfig.UserId, message);
+			//await LogMessage(LogType.Response, channel, this.GlobalConfig.UserId, message);
 			await channel.SendMessageSafe(message);
 		}
 
