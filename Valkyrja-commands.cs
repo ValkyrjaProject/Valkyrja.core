@@ -345,7 +345,7 @@ namespace Valkyrja.core
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
 			newCommand.IsSupportCommand = true;
-			newCommand.Description = "Set a server config property referenced by its exact name. Use with serverid, the exact property name, and the new value.";
+			newCommand.Description = "Set a server config property referenced by its exact name. Use with serverid, the exact property name, and the new value (use `i`, `u` and `f` for number type)";
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				if( e.MessageArgs.Length < 3 )
@@ -371,10 +371,12 @@ namespace Valkyrja.core
 				object propertyValue = null;
 				if( bool.TryParse(propertyValueString, out bool boolie) )
 					propertyValue = boolie;
-				else if( int.TryParse(propertyValueString, out int number) )
+				else if( propertyValueString.EndsWith("i") && Int64.TryParse(propertyValueString.TrimEnd('i'), out Int64 number) )
 					propertyValue = number;
-				else if( guid.TryParse(propertyValueString, out guid id) )
+				else if( propertyValueString.EndsWith("u") && UInt64.TryParse(propertyValueString.TrimEnd('u'), out UInt64 id) )
 					propertyValue = id;
+				else if( propertyValueString.EndsWith("f") && float.TryParse(propertyValueString.TrimEnd('f'), out float floatingpoint) )
+					propertyValue = floatingpoint;
 				else propertyValue = propertyValueString;
 
 				propertyValueOld = config.SetPropertyValue(propertyName, propertyValue);
