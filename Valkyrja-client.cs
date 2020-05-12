@@ -175,7 +175,7 @@ namespace Valkyrja.core
 			config.AlwaysDownloadUsers = this.DbConfig.DownloadUsers;
 			config.LargeThreshold = 100;
 			config.HandlerTimeout = null;
-			config.MessageCacheSize = 500;
+			config.MessageCacheSize = this.GlobalConfig.ChannelMessageCacheSize;
 			config.ConnectionTimeout = 300000;
 
 			this.DiscordClient = new DiscordSocketClient(config);

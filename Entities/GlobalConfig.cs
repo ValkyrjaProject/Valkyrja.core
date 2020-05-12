@@ -112,6 +112,9 @@ namespace Valkyrja.entities
 		[Column("target_fps")]
 		public float TargetFps{ get; set; } = 0.05f;
 
+		[Column("message_cache_size")]
+		public int ChannelMessageCacheSize{ get; set; } = 500;
+
 		[Column("operations_max")]
 		public Int64 OperationsMax{ get; set; } = 2;
 
