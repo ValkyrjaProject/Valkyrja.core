@@ -269,7 +269,7 @@ namespace Valkyrja.entities
 			if( this.Server.Config.IgnoreEveryone )
 				message = message.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
 
-			RestUserMessage msg = await this.Channel.SendMessageAsync(message);
+			RestUserMessage msg = await this.Channel.SendMessageAsync(message, allowedMentions: new AllowedMentions(AllowedMentionTypes.Users | AllowedMentionTypes.Everyone));
 
 			if( this.CommandOptions != null && this.CommandOptions.DeleteReply )
 			{
