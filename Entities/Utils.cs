@@ -368,6 +368,8 @@ namespace Valkyrja.entities
 			string safetyCopy = "";
 			string newChunk = "";
 
+			message = Regex.Replace(message, "<&\\d+>", "@role"); //HACK - temporary solution to ensure that we're not pinging roles til D.NET figures their shit out.
+
 			while( message.Length > GlobalConfig.MessageCharacterLimit )
 			{
 				int split = message.Substring(0, GlobalConfig.MessageCharacterLimit).LastIndexOf('\n');
