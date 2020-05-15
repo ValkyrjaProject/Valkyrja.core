@@ -325,7 +325,6 @@ namespace Valkyrja.entities
 		[Column("verify_accountage")]
 		public bool VerifyAccountAge{ get; set; } = false;
 
-
 		[Column("verify_accountage_days")]
 		public Int64 VerifyAccountAgeDays{ get; set; } = 14;
 

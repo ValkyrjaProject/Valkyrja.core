@@ -385,10 +385,10 @@ namespace Valkyrja.entities
 //Message events
 		private Task OnMessageReceived(SocketMessage message)
 		{
+			this.Client.Monitoring.Messages.Inc();
+
 			if( this.PriorityMessageReceived != null && this.PriorityMessageReceived(message).GetAwaiter().GetResult() )
 				return Task.CompletedTask;
-
-			this.Client.Monitoring.Messages.Inc();
 
 			if( this.MessageReceived != null )
 				Task.Run(async () => await TriggerMessageReceivedEvent(message));
