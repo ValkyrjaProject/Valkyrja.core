@@ -252,14 +252,14 @@ namespace Valkyrja.entities
 			this.MessageArgs = messageArgs;
 		}
 
-		public async Task SendReplySafe(string message)
+		public async Task SendReplySafe(string message, AllowedMentions allowedMentions = null)
 		{
 			await this.Client.LogMessage(LogType.Response, this.Channel, this.Client.GlobalConfig.UserId, message);
 
 			if( this.Server.Config.IgnoreEveryone )
 				message = message.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
 
-			await this.Channel.SendMessageSafe(message);
+			await this.Channel.SendMessageSafe(message, allowedMentions: allowedMentions);
 		}
 
 		public async Task SendReplyUnsafe(string message)
