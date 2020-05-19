@@ -27,6 +27,9 @@ namespace Valkyrja.entities
 		[Column("description", TypeName = "text")]
 		public string Description{ get; set; } = "This is custom command on this server.";
 
+		[Column("mentions_enabled")]
+		public bool MentionsEnabled{ get; set; } = false;
+
 		/// <summary> Returns true if the User has permission to execute this command. </summary>
 		/// <param name="commandChannelOptions"> List of all the channel options for specific command. </param>
 		public bool CanExecute(IValkyrjaClient client, Server server, SocketGuildChannel channel,

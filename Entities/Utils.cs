@@ -360,15 +360,14 @@ namespace Valkyrja.entities
 		}
 
 		public static async Task SendMessageSafe(this IUser self, string message, Embed embed = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed), message);
-		public static async Task SendMessageSafe(this ISocketMessageChannel self, string message, Embed embed = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed, allowedMentions: new AllowedMentions(AllowedMentionTypes.Users | AllowedMentionTypes.Everyone)), message);
-		//public static async Task SendMessageSafe(this IDMChannel self, string message, Embed embed = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed), message); // I don't think that we will ever need this one.
+		public static async Task SendMessageSafe(this ISocketMessageChannel self, string message, Embed embed = null, AllowedMentions allowedMentions = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed, allowedMentions: allowedMentions ?? AllowedMentions.Regular), message);
 
 		private static async Task SendMessageSafe(Func<string, Task> sendMessage, string message)
 		{
 			string safetyCopy = "";
 			string newChunk = "";
 
-			message = Regex.Replace(message, "<@&\\d+>", "@role"); //HACK - temporary solution to ensure that we're not pinging roles til D.NET figures their shit out.
+			//message = Regex.Replace(message, "<@&\\d+>", "@role"); //HACK - temporary solution to ensure that we're not pinging roles til D.NET figures their shit out.
 
 			while( message.Length > GlobalConfig.MessageCharacterLimit )
 			{

@@ -861,7 +861,7 @@ namespace Valkyrja.core
 
 				List<SocketUser> toPm = new List<SocketUser>();
 				string pm = msg;
-				msg = "It is nao sent.";
+				msg = "It is nao sent via PM.";
 
 				if( this.RegexCustomCommandPmMentioned.IsMatch(pm) && message.MentionedUsers != null && message.MentionedUsers.Any() )
 					toPm.AddRange(message.MentionedUsers);
@@ -884,7 +884,10 @@ namespace Valkyrja.core
 				}
 			}
 
-			await SendRawMessageToChannel(channel, msg);
+			if( cmd.MentionsEnabled )
+				await channel.SendMessageSafe(msg, allowedMentions: AllowedMentions.All);
+			else
+				await channel.SendMessageSafe(msg);
 
 			return true;
 		}
