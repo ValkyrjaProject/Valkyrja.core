@@ -391,7 +391,7 @@ namespace Valkyrja.entities
 					split = chunk.Substring(0, GlobalConfig.MessageCharacterLimit).LastIndexOf(' ');
 					if( split == -1 || (safetyCopy.Length == (newChunk = chunk.Substring(0, split)).Length && safetyCopy == newChunk) )
 					{
-						await sendMessage("I've encountered an error trying send a single word longer than " + GlobalConfig.MessageCharacterLimit.ToString() + " characters.");
+						await sendMessage("I've encountered an error trying to send a single word longer than " + GlobalConfig.MessageCharacterLimit.ToString() + " characters.");
 						return;
 					}
 
