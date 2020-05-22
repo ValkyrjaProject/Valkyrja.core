@@ -365,7 +365,11 @@ namespace Valkyrja.entities
 		private static async Task SendMessageSafe(Func<string, Task> sendMessage, string message)
 		{
 			if( message == null )
+			{
 				await sendMessage(null);
+				return;
+			}
+
 
 			string safetyCopy = "";
 			string newChunk = "";
