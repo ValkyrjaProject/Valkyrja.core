@@ -270,15 +270,15 @@ namespace Valkyrja.core
 			try
 			{
 				await user.SendMessageSafe(message);
+				return true;
 			}
 			catch( HttpException e ) when( (e.DiscordCode.HasValue && e.DiscordCode == 50007) || e.Message.Contains("50007") )
 			{
 				if( !this.FailedPmCount.ContainsKey(user.Id) )
 					this.FailedPmCount.Add(user.Id, 0);
 				this.FailedPmCount[user.Id]++;
+				return false;
 			}
-
-			return true;
 		}
 	}
 }
