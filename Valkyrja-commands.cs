@@ -812,7 +812,8 @@ namespace Valkyrja.core
 // !help
 			newCommand = new Command("help");
 			newCommand.Type = CommandType.Standard;
-			newCommand.Description = "PMs a list of Custom Commands for the server if used without a parameter. Use with a parameter to search for specific commands.";
+			newCommand.Description = "PMs a list of Custom Commands for the server if used without arguments, or search for specific commands.";
+			newCommand.ManPage = new ManPage("[search expression]", "[search expression] - Optional argument to search for specific commands.");
 			newCommand.RequiredPermissions = PermissionType.Everyone;
 			newCommand.OnExecute += async e => {
 				StringBuilder response = new StringBuilder("Please refer to the website documentation for the full list of features and commands: <https://valkyrja.app/docs>\n\n");
@@ -843,7 +844,7 @@ namespace Valkyrja.core
 					commandStrings.AppendLine(newString);
 				}
 
-				async Task  AddCustomAlias(string commandId)
+				async Task AddCustomAlias(string commandId)
 				{
 					string newString = "";
 					List<CustomAlias> aliases = e.Server.CustomAliases.Values.Where(a => a.CommandId == commandId).ToList();
@@ -858,7 +859,7 @@ namespace Valkyrja.core
 					}
 				}
 
-				async Task  AddCommand(Command cmd)
+				async Task AddCommand(Command cmd)
 				{
 					if( includedCommandIds.Contains(cmd.Id) )
 						return;
@@ -877,6 +878,8 @@ namespace Valkyrja.core
 
 					await Append(newString);
 					await AddCustomAlias(cmd.Id);
+					if( cmd.ManPage != null )
+						newString += $"\n **-** Use `{prefix}man {cmd.Id}` to display full manual page.";
 				}
 
 				async Task  AddCustomCommand(CustomCommand cmd)

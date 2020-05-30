@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using Discord;
 using Discord.Net;
@@ -59,8 +60,11 @@ namespace Valkyrja.entities
 		/// <summary> Use <c>Command.PermissionType</c> to determine who can use this command. Defaults to ServerOwnder + Whitelisted or Everyone </summary>
 		public int RequiredPermissions = PermissionType.Everyone | PermissionType.ServerOwner;
 
-		/// <summary> Description of this command will be used when the user invokes `help` command. </summary>
+		/// <summary> Description of this command will be used when the user invokes the `help` command. </summary>
 		public string Description{ get; set; } = "";
+
+		/// <summary> Detailed manual page of this command will be used when the user invokes the `man` command. </summary>
+		public ManPage ManPage{ get; set; } = null;
 
 		/// <summary> The Code Stuff! </summary>
 		public Func<CommandArguments, Task> OnExecute = null;
@@ -276,6 +280,115 @@ namespace Valkyrja.entities
 				await Task.Delay(3000);
 				await msg.DeleteAsync();
 			}
+		}
+	}
+
+	public class ManPage
+	{
+		private string ArgsList = "";
+		private string ArgumentDescription = "";
+
+		public ManPage(string args, string argumentDescription)
+		{
+			this.ArgsList = args;
+			this.ArgumentDescription = argumentDescription;
+		}
+
+		public Embed ToEmbed(Server server, Command command)
+		{
+			EmbedBuilder embedBuilder = new EmbedBuilder()
+				.WithThumbnailUrl("https://valkyrja.app/img/valkyrja-geared-517p.png")
+				.WithColor(196, 255, 255)
+				.WithTitle($"{server.Config.CommandPrefix}{command.Id} {this.ArgsList}")
+				.WithDescription(command.Description)
+				.AddField("Arguments", this.ArgumentDescription, false);
+
+
+			ServerContext dbContext = ServerContext.Create(server.DbConnectionString);
+			CommandOptions options = dbContext.GetOrAddCommandOptions(server, command.Id);
+			string permissionString = $"`{options.PermissionOverrides.ToString()}`";
+			if( options.PermissionOverrides == PermissionOverrides.Default )
+			{
+				PermissionOverrides permissions = PermissionOverrides.Default;
+				switch(command.RequiredPermissions)
+				{
+					case PermissionType.ServerOwner:
+						permissions = PermissionOverrides.ServerOwner;
+						break;
+					case PermissionType.ServerOwner | PermissionType.Admin:
+						permissions = PermissionOverrides.Admins;
+						break;
+					case PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator:
+						permissions = PermissionOverrides.Moderators;
+						break;
+					case PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator | PermissionType.SubModerator:
+						permissions = PermissionOverrides.SubModerators;
+						break;
+					case PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator | PermissionType.SubModerator | PermissionType.Member:
+						permissions = PermissionOverrides.Members;
+						break;
+					default:
+						permissions = PermissionOverrides.Everyone;
+						break;
+				}
+				permissionString += $" -> `{permissions.ToString()}`";
+			}
+
+
+			string aliases = "";
+			List<CustomAlias> customAliases = server.CustomAliases.Values.Where(a => a.CommandId == command.Id).ToList();
+			int totalAliasCount = command.Aliases.Count + customAliases.Count;
+			if( command.Aliases != null && command.Aliases.Any() )
+			{
+				for( int i = 0; i < command.Aliases.Count; i++ )
+					aliases += $"{(i == 0 ? "`" : i == totalAliasCount - 1 ? " and `" : ", `")}{server.Config.CommandPrefix}{command.Aliases[i]}`";
+			}
+
+			if( customAliases.Any() )
+			{
+				for( int i = 0; i < customAliases.Count; i++ )
+					aliases += $"{(i == 0 ? "`" : i == totalAliasCount - 1 ? " and `" : ", `")}{server.Config.CommandPrefix}{customAliases[i].Alias}`";
+			}
+
+			embedBuilder.AddField("Permissions", permissionString, !string.IsNullOrEmpty(aliases));
+			if( string.IsNullOrEmpty(aliases) )
+				embedBuilder.AddField("Aliases", aliases, true);
+
+
+			IEnumerable<CommandChannelOptions> channelBlacklist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == server.Id && c.CommandId == command.Id && c.Blacklisted);
+			IEnumerable<CommandChannelOptions> channelWhitelist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == server.Id && c.CommandId == command.Id && c.Whitelisted);
+			if( channelBlacklist.Any() )
+			{
+				StringBuilder blacklistBuilder = new StringBuilder();
+				foreach( CommandChannelOptions channelOptions in channelBlacklist )
+				{
+					blacklistBuilder.Append($"<#{channelOptions.ChannelId}> ");
+				}
+
+				embedBuilder.AddField("Channel Blacklist", blacklistBuilder.ToString(), channelWhitelist.Any());
+			}
+			if( channelWhitelist.Any() )
+			{
+				StringBuilder whitelistBuilder = new StringBuilder();
+				foreach( CommandChannelOptions channelOptions in channelWhitelist )
+				{
+					if( channelBlacklist.Any(c => c.ChannelId == channelOptions.ChannelId) )
+						continue;
+					whitelistBuilder.Append($"<#{channelOptions.ChannelId}> ");
+				}
+
+				embedBuilder.AddField("Channel Whitelist", whitelistBuilder.Length == 0 ? " " : whitelistBuilder.ToString(), channelBlacklist.Any());
+			}
+
+
+			if( options.DeleteReply && options.DeleteRequest )
+				embedBuilder.AddField("Delete Flags", "This command will attempt to delete both, the message that issued the command and Valkyrja's response.", false);
+			else if( options.DeleteReply )
+				embedBuilder.AddField("Delete Flags", "This command will attempt to delete Valkyrja's response.", false);
+			else if( options.DeleteRequest )
+				embedBuilder.AddField("Delete Flags", "This command will attempt to delete the message that issued the command.", false);
+
+			return embedBuilder.Build();
 		}
 	}
 

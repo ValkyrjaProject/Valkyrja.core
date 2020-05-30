@@ -21,7 +21,7 @@ namespace Valkyrja.entities
 
 		public SocketGuild Guild;
 
-		private string DbConnectionString;
+		internal string DbConnectionString;
 		public ServerConfig Config;
 		public Localisation Localisation;
 		public Dictionary<string, Command> Commands;
@@ -267,6 +267,17 @@ namespace Valkyrja.entities
 			       ((commandPermissions & PermissionType.SubModerator) > 0 && IsSubModerator(user)) ||
 			       ((commandPermissions & PermissionType.Member) > 0 && IsMember(user));
 
+		}
+
+		public Embed GetManPage(Command command)
+		{
+			if( command.ManPage == null || command.RequiredPermissions == PermissionType.OwnerOnly )
+				return null;
+
+			if( !string.IsNullOrEmpty(command.ParentId) && this.Commands.ContainsKey(command.ParentId) )
+				command = this.Commands[command.ParentId];
+
+			return command.ManPage.ToEmbed(this, command);
 		}
 
 
