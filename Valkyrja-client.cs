@@ -72,6 +72,7 @@ namespace Valkyrja.core
 		public List<Operation> CurrentOperations{ get; set; } = new List<Operation>();
 		public Object OperationsLock{ get; set; } = new Object();
 		private Object DbLock{ get; set; } = new Object();
+		private readonly SemaphoreSlim GuildAvailableLock = new SemaphoreSlim(1, 1);
 
 		private bool ValidSubscribers = false;
 		private readonly List<guid> LeaveNotifiedOwners = new List<guid>();
@@ -954,6 +955,8 @@ namespace Valkyrja.core
 				while( !this.IsInitialized )
 					await Task.Delay(1000);
 
+				this.GuildAvailableLock.Wait();
+
 				Server server;
 				dbContext = ServerContext.Create(this.DbConnectionString);
 				if( this.Servers.ContainsKey(guild.Id) )
@@ -976,6 +979,7 @@ namespace Valkyrja.core
 			finally
 			{
 				dbContext?.Dispose();
+				this.GuildAvailableLock.Release();
 			}
 		}
 
