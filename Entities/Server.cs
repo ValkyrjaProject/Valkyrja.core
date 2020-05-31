@@ -274,9 +274,6 @@ namespace Valkyrja.entities
 			if( command.ManPage == null || command.RequiredPermissions == PermissionType.OwnerOnly )
 				return null;
 
-			if( !string.IsNullOrEmpty(command.ParentId) && this.Commands.ContainsKey(command.ParentId) )
-				command = this.Commands[command.ParentId];
-
 			return command.ManPage.ToEmbed(this, command);
 		}
 

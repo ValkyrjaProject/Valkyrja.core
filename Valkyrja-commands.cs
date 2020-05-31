@@ -809,6 +809,28 @@ namespace Valkyrja.core
 			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 			this.Commands.Add("ping", newCommand.CreateAlias("ping"));
 
+// !man
+			newCommand = new Command("man");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Show detailed manual page for a command.";
+			newCommand.ManPage = new ManPage("<command>", "`<command>` - Command ID for which to display .");
+			newCommand.RequiredPermissions = PermissionType.Everyone;
+			newCommand.OnExecute += async e => {
+				string commandId = e.TrimmedMessage;
+				string response = "I ain't got no real command like that. (This feature isn't a thing for Custom Commands!)";
+				if( string.IsNullOrEmpty(commandId) || (!e.Server.Commands.ContainsKey(commandId) && (!e.Server.CustomAliases.ContainsKey(commandId) || !e.Server.Commands.ContainsKey(commandId = e.Server.CustomAliases[commandId].CommandId))) )
+				{
+					await e.SendReplySafe(response);
+				}
+
+				Command cmd = e.Server.Commands[commandId];
+				if( !string.IsNullOrEmpty(cmd.ParentId) && e.Server.Commands.ContainsKey(cmd.ParentId) )
+					cmd = e.Server.Commands[cmd.ParentId];
+				Embed embed = e.Server.GetManPage(cmd);
+				await e.Channel.SendMessageSafe(null, embed);
+			};
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
+
 // !help
 			newCommand = new Command("help");
 			newCommand.Type = CommandType.Standard;
