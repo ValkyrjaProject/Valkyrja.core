@@ -1188,8 +1188,8 @@ namespace Valkyrja.core
 			newCommand.Description = "Configure permission groups for every command. Use without parameters for help.";
 			newCommand.ManPage = new ManPage("<CommandId> [PermissionGroup]", "`<CommandId>` - name of the command for which you would like to display or change permissions.\n\n" +
 			                                                                  "`[PermissionGroup]` - Optional argument to change the permissions of the CommandId - one of:\n" +
-			                                                                  "    `ServerOwner`, `Admins`, `Moderators`, `SubModerators` or `Members`, which are configured on the website.\n" +
-			                                                                  "    `Everyone`, `Nobody` and `Default` (will set default permissions as seen in the docs.)\n");
+			                                                                  "*    `ServerOwner`, `Admins`, `Moderators`, `SubModerators` or `Members`, which are configured on the website.\n" +
+			                                                                  "*    `Everyone`, `Nobody` and `Default` (will set default permissions as seen in the webdocs.)\n");
 			newCommand.RequiredPermissions = PermissionType.ServerOwner;
 			newCommand.OnExecute += async e => {
 				string response = string.Format(

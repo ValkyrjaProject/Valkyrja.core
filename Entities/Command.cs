@@ -301,7 +301,7 @@ namespace Valkyrja.entities
 			EmbedBuilder embedBuilder = new EmbedBuilder()
 				.WithThumbnailUrl("https://valkyrja.app/img/valkyrja-geared-517p.png")
 				.WithColor(196, 255, 255)
-				.WithTitle($"{server.Config.CommandPrefix}{command.Id} {this.ArgsList}")
+				.WithTitle($"`{server.Config.CommandPrefix}{command.Id} {this.ArgsList}`")
 				.WithDescription(command.Description)
 				.AddField("Arguments", string.IsNullOrEmpty(this.ArgumentDescription) ? "None" : this.ArgumentDescription, false);
 
