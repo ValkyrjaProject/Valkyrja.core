@@ -111,6 +111,7 @@ namespace Valkyrja.entities
 			newCommand.DeleteRequest = this.DeleteRequest;
 			newCommand.IsHidden = this.IsHidden;
 			newCommand.IsCoreCommand = this.IsCoreCommand;
+			newCommand.IsSupportCommand = this.IsSupportCommand;
 			newCommand.IsCustomCommand = this.IsCustomCommand;
 			newCommand.Type = this.Type;
 			newCommand.IsBonusCommand = this.IsBonusCommand;
@@ -118,6 +119,7 @@ namespace Valkyrja.entities
 			newCommand.IsPremiumServerwideCommand = this.IsPremiumServerwideCommand;
 			newCommand.RequiredPermissions = this.RequiredPermissions;
 			newCommand.Description = this.Description;
+			newCommand.ManPage = this.ManPage;
 			newCommand.OnExecute = this.OnExecute;
 			return newCommand;
 		}
