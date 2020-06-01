@@ -713,6 +713,7 @@ namespace Valkyrja.core
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Display info about all queued or running operations on your server.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
 			newCommand.OnExecute += async e => {
 				StringBuilder response = new StringBuilder();
@@ -750,7 +751,8 @@ namespace Valkyrja.core
 			newCommand = new Command("cancel");
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
-			newCommand.Description = "Cancel queued or running operation - use in the same channel, and with the name of the command as parameter. (nuke, archive, etc...)";
+			newCommand.Description = "Cancel queued or running operation - use in the same channel. (nuke, promoteEveryone, etc...)";
+			newCommand.ManPage = new ManPage("<CommandId>", "`<CommandId>` - running operation type command which this will interrupt.");
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
 			newCommand.OnExecute += async e => {
 				string responseString = "Operation not found.";
@@ -770,6 +772,7 @@ namespace Valkyrja.core
 			newCommand = new Command("say");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Make the bot say something!";
+			newCommand.ManPage = new ManPage("<text>", "`<text>` - Text which the bot will repeat.");
 			newCommand.RequiredPermissions = PermissionType.SubModerator;
 			newCommand.DeleteRequest = true;
 			newCommand.IsBonusCommand = true;
@@ -786,6 +789,7 @@ namespace Valkyrja.core
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Display basic server status.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.Everyone;
 			newCommand.OnExecute += async e => {
 				TimeSpan time = DateTime.UtcNow - Utils.GetTimeFromId(e.Message.Id);
@@ -1012,6 +1016,7 @@ namespace Valkyrja.core
 			newCommand = new Command("alias");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Manage command aliases, use without parameters for more details.";
+			newCommand.ManPage = new ManPage("<list|create|delete> [alias] [command]", "`list` - Display the list of custom aliases.\n`create alias command` - Create a new `alias` to the `command`.\n`delete alias` - Delete the `alias`.");
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
 			newCommand.OnExecute += async e => {
 				if(e.MessageArgs == null || e.MessageArgs.Length == 0 || !(
@@ -1128,6 +1133,7 @@ namespace Valkyrja.core
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
 			newCommand.Description = "List permissions of all the commands.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.ServerOwner;
 			newCommand.OnExecute += async e => {
 				string response = "";
@@ -1180,6 +1186,10 @@ namespace Valkyrja.core
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Configure permission groups for every command. Use without parameters for help.";
+			newCommand.ManPage = new ManPage("<CommandId> [PermissionGroup]", "`<CommandId>` - name of the command for which you would like to display or change permissions.\n\n" +
+			                                                                  "`[PermissionGroup]` - Optional argument to change the permissions of the CommandId - one of:\n" +
+			                                                                  "    `ServerOwner`, `Admins`, `Moderators`, `SubModerators` or `Members`, which are configured on the website.\n" +
+			                                                                  "    `Everyone`, `Nobody` and `Default` (will set default permissions as seen in the docs.)\n");
 			newCommand.RequiredPermissions = PermissionType.ServerOwner;
 			newCommand.OnExecute += async e => {
 				string response = string.Format(
@@ -1298,8 +1308,9 @@ namespace Valkyrja.core
 // !deleteRequest
 			newCommand = new Command("deleteRequest");
 			newCommand.Type = CommandType.Standard;
-			newCommand.Description = "Set a command to have the issuing request message deleted automatically. Use with `CommandID` and `true` or `false` parameters.";
+			newCommand.Description = "Set a command to have the issuing request message deleted automatically.";
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
+			newCommand.ManPage = new ManPage("<CommandId> <true|false>", "`<CommandId>` - The command for which to change the delete settings.\n`<true|false>` - True to delete the issuing request message.");
 			newCommand.OnExecute += async e => {
 				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
 				    !bool.TryParse(e.MessageArgs[1], out bool deleteRequest) )
@@ -1336,7 +1347,8 @@ namespace Valkyrja.core
 // !deleteReply
 			newCommand = new Command("deleteReply");
 			newCommand.Type = CommandType.Standard;
-			newCommand.Description = "Set a command to delete bot's replies in a few seconds. _(Only some commands support this!)_ Use with `CommandID` and `true` or `false` parameters.";
+			newCommand.Description = "Set a command to delete bot's replies in a few seconds. _(Only some commands support this, if you find one that doesn't, submit a feature request!)_";
+			newCommand.ManPage = new ManPage("<CommandId> <true|false>", "`<CommandId>` - The command for which to change the delete settings.\n`<true|false>` - True to delete the bots response message.");
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
 			newCommand.OnExecute += async e => {
 				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
@@ -1374,7 +1386,8 @@ namespace Valkyrja.core
 // !cmdChannelWhitelist
 			newCommand = new Command("cmdChannelWhitelist");
 			newCommand.Type = CommandType.Standard;
-			newCommand.Description = "Allow a command to be ran only in certain channels. Use with `CommandID`, `add` or `remove`, and `ChannelID` parameters.";
+			newCommand.Description = "Allow a command to be ran only in certain channels.";
+			newCommand.ManPage = new ManPage("<CommandId> <add|remove> <ChannelId>", "`<CommandId>` - The command for which to change the restriction settings.\n`<add|remove>` - Add or remove to/from the restriction list.\n`<ChannelId>` - Id or mention of the channel in which to allow the execution of the Command");
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
 			newCommand.OnExecute += async e => {
 				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
@@ -1424,7 +1437,8 @@ namespace Valkyrja.core
 // !cmdChannelWhitelistAllCC
 			newCommand = new Command("cmdChannelWhitelistAllCC");
 			newCommand.Type = CommandType.Standard;
-			newCommand.Description = "Allow all custom commands to be ran only in certain channels. Use with `add` or `remove`, and `ChannelID` parameters.";
+			newCommand.Description = "Allow all custom commands to be ran only in certain channels.";
+			newCommand.ManPage = new ManPage("<add|remove> <ChannelId>", "`<add|remove>` - Add or remove to/from the restriction list.\n`<ChannelId>` - Id or mention of the channel in which to allow the execution of the CustomCommands");
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
 			newCommand.OnExecute += async e => {
 				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
@@ -1465,7 +1479,8 @@ namespace Valkyrja.core
 // !cmdChannelBlacklist
 			newCommand = new Command("cmdChannelBlacklist");
 			newCommand.Type = CommandType.Standard;
-			newCommand.Description = "Block a command from certain channels. Use with `CommandID`, `add` or `remove`, and `ChannelID` parameters.";
+			newCommand.Description = "Block a command from certain channels.";
+			newCommand.ManPage = new ManPage("<CommandId> <add|remove> <ChannelId>", "`<CommandId>` - The command for which to change the restriction settings.\n`<add|remove>` - Add or remove to/from the restriction list.\n`<ChannelId>` - Id or mention of the channel in which to deny the execution of the Command");
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
 			newCommand.OnExecute += async e => {
 				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
@@ -1515,7 +1530,8 @@ namespace Valkyrja.core
 // !cmdChannelBlacklistAllCC
 			newCommand = new Command("cmdChannelBlacklistAllCC");
 			newCommand.Type = CommandType.Standard;
-			newCommand.Description = "Block all custom commands from certain channels. Use with `add` or `remove`, and `ChannelID` parameters.";
+			newCommand.Description = "Block all custom commands from certain channels.";
+			newCommand.ManPage = new ManPage("<add|remove> <ChannelId>", "`<add|remove>` - Add or remove to/from the restriction list.\n`<ChannelId>` - Id or mention of the channel in which to deny the execution of the CustomCommands");
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
 			newCommand.OnExecute += async e => {
 				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
@@ -1607,6 +1623,7 @@ namespace Valkyrja.core
 			newCommand = new Command("patchnotes");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "See what new tricks I can do!";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.Everyone;
 			newCommand.OnExecute += async e => {
 				await e.SendReplySafe(GetPatchnotes());
@@ -1618,6 +1635,7 @@ namespace Valkyrja.core
 			newCommand = new Command("command");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				string responseString = "";

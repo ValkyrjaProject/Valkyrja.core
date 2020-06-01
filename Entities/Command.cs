@@ -301,7 +301,7 @@ namespace Valkyrja.entities
 				.WithColor(196, 255, 255)
 				.WithTitle($"{server.Config.CommandPrefix}{command.Id} {this.ArgsList}")
 				.WithDescription(command.Description)
-				.AddField("Arguments", this.ArgumentDescription, false);
+				.AddField("Arguments", string.IsNullOrEmpty(this.ArgumentDescription) ? "None" : this.ArgumentDescription, false);
 
 
 			ServerContext dbContext = ServerContext.Create(server.DbConnectionString);
@@ -337,7 +337,7 @@ namespace Valkyrja.entities
 
 			string aliases = "";
 			List<CustomAlias> customAliases = server.CustomAliases.Values.Where(a => a.CommandId == command.Id).ToList();
-			int totalAliasCount = command.Aliases.Count + customAliases.Count;
+			int totalAliasCount = command.Aliases?.Count ?? 0 + customAliases.Count;
 			if( command.Aliases != null && command.Aliases.Any() )
 			{
 				for( int i = 0; i < command.Aliases.Count; i++ )
