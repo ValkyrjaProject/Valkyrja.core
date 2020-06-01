@@ -353,7 +353,7 @@ namespace Valkyrja.entities
 			}
 
 			embedBuilder.AddField("Permissions", permissionString, !string.IsNullOrEmpty(aliases));
-			if( string.IsNullOrEmpty(aliases) )
+			if( !string.IsNullOrEmpty(aliases) )
 				embedBuilder.AddField("Aliases", aliases, true);
 
 
