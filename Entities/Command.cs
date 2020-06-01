@@ -340,16 +340,17 @@ namespace Valkyrja.entities
 			string aliases = "";
 			List<CustomAlias> customAliases = server.CustomAliases.Values.Where(a => a.CommandId == command.Id).ToList();
 			int totalAliasCount = command.Aliases?.Count ?? 0 + customAliases.Count;
+			int i = 0;
 			if( command.Aliases != null && command.Aliases.Any() )
 			{
-				for( int i = 0; i < command.Aliases.Count; i++ )
+				for( ; i < command.Aliases.Count; i++ )
 					aliases += $"{(i == 0 ? "`" : i == totalAliasCount - 1 ? " and `" : ", `")}{server.Config.CommandPrefix}{command.Aliases[i]}`";
 			}
 
 			if( customAliases.Any() )
 			{
-				for( int i = 0; i < customAliases.Count; i++ )
-					aliases += $"{(i == 0 ? "`" : i == totalAliasCount - 1 ? " and `" : ", `")}{server.Config.CommandPrefix}{customAliases[i].Alias}`";
+				for( int j = command.Aliases?.Count ?? 0; i < totalAliasCount; i++ )
+					aliases += $"{(i-j == 0 && string.IsNullOrEmpty(aliases) ? "`" : i-j == totalAliasCount - 1 ? " and `" : ", `")}{server.Config.CommandPrefix}{customAliases[i-j].Alias}`";
 			}
 
 			embedBuilder.AddField("Permissions", permissionString, !string.IsNullOrEmpty(aliases));
