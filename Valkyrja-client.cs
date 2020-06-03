@@ -968,7 +968,6 @@ namespace Valkyrja.core
 				{
 					server = new Server(guild);
 					await server.LoadConfig(this, dbContext, this.Commands);
-					server.Localisation = GlobalContext.Create(this.DbConnectionString).Localisations.FirstOrDefault(l => l.Id == server.Config.LocalisationId);
 					this.Servers.Add(server.Id, server);
 				}
 			}

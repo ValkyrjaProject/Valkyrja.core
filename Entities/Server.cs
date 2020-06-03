@@ -144,6 +144,15 @@ namespace Valkyrja.entities
 					}
 				}
 			}
+
+			if( this.Config.LocalisationId == 0 )
+			{
+				this.Localisation = new Localisation();
+			}
+			else
+			{
+				this.Localisation = dbContext.Localisations.FirstOrDefault(l => l.Id == this.Id) ?? new Localisation();
+			}
 		}
 
 		public async Task LoadConfig(ValkyrjaClient client, ServerContext dbContext, Dictionary<string, Command> allCommands)

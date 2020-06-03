@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 
 using guid = System.UInt64;
@@ -10,21 +11,9 @@ namespace Valkyrja.entities
 	[Table("localisation")]
 	public class Localisation
 	{
-		[Key]
-		[Required]
-		[Column("id")]
-		[DatabaseGenerated(DatabaseGeneratedOption.None)]
-		public guid Id{ get; set; } = 0;
-
-		[Column("iso", TypeName = "varchar(255)")]
-		public string Iso{ get; set; } = "";
-
-		[Column("string1", TypeName = "text")]
-		public string String1{ get; set; } = "";
-
 		public static class SystemStrings
 		{
-			public const string DiscordShitEmoji = "<:DiscordShit:356545886454677506>";
+			public const string DiscordShitEmoji = "<:DiscordPoop:356545886454677506>";
 
 			public const string SmallPmLeaving = "Hulloh!\n" +
 			                                     "I'm sorry but I can not sit around in empty servers!";
@@ -48,6 +37,52 @@ namespace Valkyrja.entities
 			public const string MentionPrefix = "Try this: `{0}`\n_(Server owner can change it at <https://valkyrja.app/config>!)_";
 
 			public const string MentionPrefixEmpty = "Command prefix is empty on this server, you will not be able to execute any commands. Please configure it at <https://valkyrja.app/config>!";
+		}
+
+
+		[Key]
+		[Required]
+		[Column("id")]
+		[DatabaseGenerated(DatabaseGeneratedOption.None)]
+		public guid Id{ get; set; } = 0;
+
+		[Column("moderation_ban_done", TypeName = "text")]
+		public string moderation_ban_done{ get; set; } = "_\\*fires them railguns at {0}*_  Ò_Ó";
+
+		[Column("moderation_mute_done", TypeName = "text")]
+		public string moderation_mute_done{ get; set; } = "*Silence!!  ò_ó\n...\nI keel u, {0}!!*  Ò_Ó";
+
+		[Column("moderation_kick_done", TypeName = "text")]
+		public string moderation_kick_done{ get; set; } = "I've fired them railguns at {0}.";
+
+
+		static private readonly Regex RngRegex = new Regex("(?<=<\\|>).*?(?=<\\|>)", RegexOptions.Singleline | RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
+		public string GetString(string key, params object[] args)
+		{
+			if( key == "CustomCommands" || key == "Aliases" )
+				return null;
+
+			System.Reflection.PropertyInfo info = GetType().GetProperty(key);
+			object value;
+			if( info == null || (value = info.GetValue(this)) == null )
+				return null;
+
+			string result = value.ToString();
+			MatchCollection matches = RngRegex.Matches(result);
+			if( matches.Count > 1 )
+				result = matches[Utils.Random.Next(0, matches.Count)].Value;
+
+			if( args != null && args.Length > 0 )
+			{
+				for( int i = 0; i < args.Length; i++ )
+				{
+					if( !result.Contains($"{{{i}}}") )
+						return $"Invalid localisation string `{key}`\nArgument `{{{i}}}` is missing, this string requires **{args.Length}** argument{(args.Length == 1 ? "" : "s")}.";
+				}
+
+				result = string.Format(result, args);
+			}
+				return result;
 		}
 	}
 }

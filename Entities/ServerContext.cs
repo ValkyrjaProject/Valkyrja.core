@@ -12,6 +12,7 @@ namespace Valkyrja.entities
 	{
 		public DbSet<ServerConfig> ServerConfigurations{ get; set; }
 		public DbSet<ServerStats> ServerStats{ get; set; }
+		public DbSet<Localisation> Localisations{ get; set; }
 		public DbSet<ChannelConfig> Channels{ get; set; }
 		public DbSet<RoleConfig> Roles{ get; set; }
 		public DbSet<ReactionAssignedRole> ReactionAssignedRoles{ get; set; }
@@ -46,6 +47,9 @@ namespace Valkyrja.entities
 
 			modelBuilder.Entity<ServerStats>()
 				.HasKey(p => p.ServerId);
+
+			modelBuilder.Entity<Localisation>()
+				.HasKey(p => p.Id);
 
 			modelBuilder.Entity<ChannelConfig>()
 				.HasKey(p => p.ChannelId);

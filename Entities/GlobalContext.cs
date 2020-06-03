@@ -17,7 +17,6 @@ namespace Valkyrja.entities
 		public DbSet<LogEntry> Log{ get; set; }
 		public DbSet<ExceptionEntry> Exceptions{ get; set; }
 		public DbSet<Shard> Shards{ get; set; }
-		public DbSet<Localisation> Localisations{ get; set; }
 		public DbSet<AntispamUrl> AntispamUrls{ get; set; }
 
 		private GlobalContext(DbContextOptions<GlobalContext> options) : base(options)
@@ -48,9 +47,6 @@ namespace Valkyrja.entities
 				.HasKey(p => p.Id);
 
 			modelBuilder.Entity<Shard>()
-				.HasKey(p => p.Id);
-
-			modelBuilder.Entity<Localisation>()
 				.HasKey(p => p.Id);
 
 			modelBuilder.Entity<AntispamUrl>()
