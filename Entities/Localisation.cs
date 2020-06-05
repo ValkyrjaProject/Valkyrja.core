@@ -55,6 +55,30 @@ namespace Valkyrja.entities
 		[Column("moderation_kick_done", TypeName = "text")]
 		public string moderation_kick_done{ get; set; } = "I've fired them railguns at {0}.";
 
+		[Column("role_promote_done", TypeName = "text")]
+		public string role_promote_done{ get; set; } = "Done!";
+
+		[Column("role_demote_done", TypeName = "text")]
+		public string role_demote_done{ get; set; } = "Done!";
+
+		[Column("role_join_done", TypeName = "text")]
+		public string role_join_done{ get; set; } = "Done!";
+
+		[Column("role_join_exclusiveremoved", TypeName = "text")]
+		public string role_join_exclusiveremoved{ get; set; } = "\n_(I've removed the other exclusive roles from the same role group.)_";
+
+		[Column("role_leave_done", TypeName = "text")]
+		public string role_leave_done{ get; set; } = "Done!";
+
+		[Column("role_publicroles_print", TypeName = "text")]
+		public string role_publicroles_print{ get; set; } = "You can use `{0}join` and `{0}leave` commands with these Public Roles: ";
+
+		[Column("role_publicroles_group", TypeName = "text")]
+		public string role_publicroles_group{ get; set; } = "\n\n**{0}** - you can join {1} of these:\n";
+
+		[Column("role_memberroles_print", TypeName = "text")]
+		public string role_memberroles_print{ get; set; } = "You can use `{0}promote` and `{0}demote` commands with these Member Roles: {1}";
+
 
 		static internal readonly Regex RngRegex = new Regex("(?<=<\\|>).*?(?=<\\|>)", RegexOptions.Singleline | RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
 		public string GetString(string key, params object[] args)
