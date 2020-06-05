@@ -283,21 +283,11 @@ namespace Valkyrja.entities
 
 			IUserMessage reply = await this.Channel.SendMessageSafe(message, allowedMentions: allowedMentions);
 			this.Server.CommandReplyMsgIds.TryAdd(this.Message.Id, reply.Id);
-		}
-
-		public async Task SendReplyUnsafe(string message)
-		{
-			await this.Client.LogMessage(LogType.Response, this.Channel, this.Client.GlobalConfig.UserId, message);
-
-			if( this.Server.Config.IgnoreEveryone )
-				message = message.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
-
-			RestUserMessage msg = await this.Channel.SendMessageAsync(message, allowedMentions: new AllowedMentions(AllowedMentionTypes.Users | AllowedMentionTypes.Everyone));
 
 			if( this.CommandOptions != null && this.CommandOptions.DeleteReply )
 			{
 				await Task.Delay(3000);
-				await msg.DeleteAsync();
+				await reply.DeleteAsync();
 			}
 		}
 	}
