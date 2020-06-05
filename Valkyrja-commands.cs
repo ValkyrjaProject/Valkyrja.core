@@ -1024,7 +1024,7 @@ namespace Valkyrja.core
 					   (e.MessageArgs.Length == 2 && (e.MessageArgs[0] == "remove" || e.MessageArgs[0] == "delete")) ||
 					   (e.MessageArgs.Length == 3 && (e.MessageArgs[0] == "add" || e.MessageArgs[0] == "create")) ))
 				{
-					await e.Message.Channel.SendMessageSafe(string.Format(
+					await e.SendReplySafe(string.Format(
 						"Use this command with the following parameters:\n" +
 						"  `{0}{1} list` - Display the list of your custom aliases.\n" +
 						"  `{0}{1} create alias command` - Create a new `alias` to the old `command`.\n" +

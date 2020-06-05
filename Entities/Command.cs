@@ -260,12 +260,29 @@ namespace Valkyrja.entities
 
 		public async Task SendReplySafe(string message, AllowedMentions allowedMentions = null)
 		{
-			await this.Client.LogMessage(LogType.Response, this.Channel, this.Client.GlobalConfig.UserId, message);
+			//await this.Client.LogMessage(LogType.Response, this.Channel, this.Client.GlobalConfig.UserId, message);
 
 			if( this.Server.Config.IgnoreEveryone )
 				message = message.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
 
-			await this.Channel.SendMessageSafe(message, allowedMentions: allowedMentions);
+			try
+			{
+				if( this.Server.CommandReplyMsgIds.ContainsKey(this.Message.Id) )
+				{
+					if( await this.Channel.GetMessageAsync(this.Server.CommandReplyMsgIds[this.Message.Id]) is SocketUserMessage msg )
+					{
+						await msg.ModifyAsync(m => m.Content = message);
+						return;
+					}
+				}
+			}
+			catch( HttpException e )
+			{
+				await Server.HandleHttpException(e, $"Unable to get message history in <#{this.Channel.Id}>");
+			}
+
+			IUserMessage reply = await this.Channel.SendMessageSafe(message, allowedMentions: allowedMentions);
+			this.Server.CommandReplyMsgIds.TryAdd(this.Message.Id, reply.Id);
 		}
 
 		public async Task SendReplyUnsafe(string message)

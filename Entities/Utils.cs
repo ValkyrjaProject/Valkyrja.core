@@ -359,15 +359,14 @@ namespace Valkyrja.entities
 			return self.Username + "#" + self.DiscriminatorValue.ToString("0000");
 		}
 
-		public static async Task SendMessageSafe(this IUser self, string message, Embed embed = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed), message);
-		public static async Task SendMessageSafe(this ISocketMessageChannel self, string message, Embed embed = null, AllowedMentions allowedMentions = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed, allowedMentions: allowedMentions ?? AllowedMentions.Regular), message);
+		public static async Task<IUserMessage> SendMessageSafe(this IUser self, string message, Embed embed = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed), message);
+		public static async Task<IUserMessage> SendMessageSafe(this ISocketMessageChannel self, string message, Embed embed = null, AllowedMentions allowedMentions = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed, allowedMentions: allowedMentions ?? AllowedMentions.Regular), message);
 
-		private static async Task SendMessageSafe(Func<string, Task> sendMessage, string message)
+		private static async Task<IUserMessage> SendMessageSafe(Func<string, Task<IUserMessage>> sendMessage, string message)
 		{
 			if( message == null )
 			{
-				await sendMessage(null);
-				return;
+				return await sendMessage(null);
 			}
 
 
@@ -398,18 +397,20 @@ namespace Valkyrja.entities
 					split = chunk.Substring(0, GlobalConfig.MessageCharacterLimit).LastIndexOf(' ');
 					if( split == -1 || (safetyCopy.Length == (newChunk = chunk.Substring(0, split)).Length && safetyCopy == newChunk) )
 					{
-						await sendMessage("I've encountered an error trying to send a single word longer than " + GlobalConfig.MessageCharacterLimit.ToString() + " characters.");
-						return;
+						return await sendMessage("I've encountered an error trying to send a single word longer than " + GlobalConfig.MessageCharacterLimit.ToString() + " characters.");
 					}
 
 					await sendMessage(newChunk);
 					chunk = chunk.Substring(split + 1);
 				}
+
 				await sendMessage(chunk);
 			}
 
 			if( !string.IsNullOrWhiteSpace(message) )
-				await sendMessage(message);
+				return await sendMessage(message);
+
+			return null;
 		}
 	}
 }

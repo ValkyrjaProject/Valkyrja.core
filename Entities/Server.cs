@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -37,6 +38,7 @@ namespace Valkyrja.entities
 		public SocketMessage[] AntispamRecentMessages = null;
 		public Dictionary<guid, int> UserMentionCount = new Dictionary<guid, int>();
 		public List<SocketGuildUser> AntispamRecentUsernames = new List<SocketGuildUser>();
+		public ConcurrentDictionary<guid, guid> CommandReplyMsgIds = new ConcurrentDictionary<guid, guid>();
 
 		public List<guid> IgnoredChannels;
 
