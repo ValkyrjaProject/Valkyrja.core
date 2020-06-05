@@ -56,7 +56,7 @@ namespace Valkyrja.entities
 		public string moderation_kick_done{ get; set; } = "I've fired them railguns at {0}.";
 
 
-		static private readonly Regex RngRegex = new Regex("(?<=<\\|>).*?(?=<\\|>)", RegexOptions.Singleline | RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
+		static internal readonly Regex RngRegex = new Regex("(?<=<\\|>).*?(?=<\\|>)", RegexOptions.Singleline | RegexOptions.Compiled, TimeSpan.FromMilliseconds(50));
 		public string GetString(string key, params object[] args)
 		{
 			if( key == "CustomCommands" || key == "Aliases" )

@@ -885,6 +885,11 @@ namespace Valkyrja.core
 				}
 			}
 
+			MatchCollection matches = Localisation.RngRegex.Matches(msg);
+			if( matches.Count > 1 )
+				msg = matches[Utils.Random.Next(0, matches.Count)].Value;
+
+
 			if( cmd.MentionsEnabled )
 				await channel.SendMessageSafe(msg, allowedMentions: AllowedMentions.All);
 			else
