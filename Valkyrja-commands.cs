@@ -22,15 +22,15 @@ namespace Valkyrja.core
 		private readonly Regex RegexHardwareHelp = new Regex(".*(hardware|server).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		private const string HardwareString = "I used to run on Dual Xeon server. It bork. Now it's the below!\n```md\n" +
 		                                      "|     [Mainboard][Asus PRIME x570-Pro]\n" +
-		                                      "|           [CPU][AMD Ryzen 3950X @4.6GHz 16c](32t)\n" +
+		                                      "|           [CPU][AMD Ryzen 3950X @4.2GHz 16c](32t)\n" +
 		                                      "|     4x [Memory][G.Skill Ripjaws V 32GB DDR4-3200 CL16](128GB)\n" +
 		                                      "|    2x [Storage][Samsung 830 Pro 128GB SSD](raid1)\n" +
-		                                      "|    1x [Storage][Seagate Barracuda 3TB 7200RPM]\n" +
+		                                      "|    4x [Storage][Corsair MP510 512GB NVMe PCIe3.0](raid5|write2.1GB/s)\n" +
 		                                      "|    4x [Storage][Hitachi NAS 4TB 7200RPM](raid5|write1.4GB/s)\n" +
 		                                      "|    [CPU Cooler][Noctua NH-D15 SE-AM4]\n" +
 		                                      "|    2x [CPU Fan][Noctua NF-A15]\n" +
-		                                      "|4x [Exhaust Fan][Noctua NF-A12x25]\n" +
-		                                      "| 2x [Intake Fan][Noctua NF-A14]\n" +
+		                                      "|3x [Exhaust Fan][Noctua NF-A12x25]\n" +
+		                                      "| 3x [Intake Fan][Noctua NF-A14]\n" +
 		                                      "|          [Case][be quiet! Dark Base Pro 900]\n" +
 		                                      "|  [Power Supply][Corsair RM750x Gold]\n" +
 		                                      "```\n" +

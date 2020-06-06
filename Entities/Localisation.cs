@@ -33,7 +33,7 @@ namespace Valkyrja.entities
 
 			public const string OperationQueuedString = "This command was placed in a queue for large operations at position `{0}` and will be executed as soon as possible. Should you wish to cancel it at any time, use `!cancel {1}`\n_(Premium Contributors do not have to wait.)_";
 
-			public const string MentionHelp = "Find out everything about me, my author, all the features, commands and configuration at the https://valkyrja.app";
+			public const string MentionHelp = "Find out everything about me, my authors, all the features, commands and configuration at the https://valkyrja.app";
 
 			public const string MentionPrefix = "Try this: `{0}`\n_(Server owner can change it at <https://valkyrja.app/config>!)_";
 
