@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 
 using guid = System.UInt64;
+// ReSharper disable UnusedMember.Global
 
 namespace Valkyrja.entities
 {
@@ -47,13 +48,22 @@ namespace Valkyrja.entities
 		public guid Id{ get; set; } = 0;
 
 		[Column("moderation_ban_done", TypeName = "text")]
-		public string moderation_ban_done{ get; set; } = "_\\*fires them railguns at {0}*_  Ò_Ó";
+		public string moderation_ban_done{ get; set; } = "<|>_\\*fires them railguns at {0}*_  Ò_Ó<|>_\\*PewPewPew!!*_\nRIP {0}<|>";
 
 		[Column("moderation_mute_done", TypeName = "text")]
 		public string moderation_mute_done{ get; set; } = "*Silence!!  ò_ó\n...\nI keel u, {0}!!*  Ò_Ó";
 
 		[Column("moderation_kick_done", TypeName = "text")]
-		public string moderation_kick_done{ get; set; } = "I've fired them railguns at {0}.";
+		public string moderation_kick_done{ get; set; } = "<|>I've fired them railguns at {0}.<|>Bye {0}! o/<|>";
+
+		[Column("moderation_op_missing", TypeName = "text")]
+		public string moderation_op_missing{ get; set; } = "`{0}op`?";
+
+		[Column("moderation_op_enabled", TypeName = "text")]
+		public string moderation_op_enabled{ get; set; } = "Go get em tiger!";
+
+		[Column("moderation_op_disabled", TypeName = "text")]
+		public string moderation_op_disabled{ get; set; } = "All done?";
 
 		[Column("role_promote_done", TypeName = "text")]
 		public string role_promote_done{ get; set; } = "Done!";
@@ -106,7 +116,8 @@ namespace Valkyrja.entities
 
 				result = string.Format(result, args);
 			}
-				return result;
+
+			return result;
 		}
 	}
 }
