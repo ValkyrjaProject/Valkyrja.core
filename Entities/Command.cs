@@ -303,6 +303,16 @@ namespace Valkyrja.entities
 			this.ArgumentDescription = argumentDescription;
 		}
 
+		public override string ToString()
+		{
+			return $"`{this.ArgsList}`\n{this.ArgumentDescription.Replace("\n", "\n  ")}\n";
+		}
+
+		public string ToString(string commandWithPrefix)
+		{
+			return $"`{commandWithPrefix} {this.ArgsList}`\n{this.ArgumentDescription.Replace("\n", "\n  ")}";
+		}
+
 		public Embed ToEmbed(Server server, Command command)
 		{
 			EmbedBuilder embedBuilder = new EmbedBuilder()
