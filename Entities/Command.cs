@@ -379,8 +379,8 @@ namespace Valkyrja.entities
 				embedBuilder.AddField("Aliases", aliases, true);
 
 
-			IEnumerable<CommandChannelOptions> channelBlacklist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == server.Id && c.CommandId == command.Id && c.Blacklisted).AsEnumerable();
-			IEnumerable<CommandChannelOptions> channelWhitelist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == server.Id && c.CommandId == command.Id && c.Whitelisted).AsEnumerable();
+			List<CommandChannelOptions> channelBlacklist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == server.Id && c.CommandId == command.Id && c.Blacklisted).ToList();
+			List<CommandChannelOptions> channelWhitelist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == server.Id && c.CommandId == command.Id && c.Whitelisted).ToList();
 			if( channelBlacklist.Any() )
 			{
 				StringBuilder blacklistBuilder = new StringBuilder();
