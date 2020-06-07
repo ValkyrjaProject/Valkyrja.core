@@ -334,6 +334,9 @@ namespace Valkyrja.entities
 		[Column("verify_roleid")]
 		public guid VerifyRoleId{ get; set; } = 0;
 
+		[Column("verify_channelid")]
+		public guid VerifyChannelId{ get; set; } = 0;
+
 		[Column("verify_karma")]
 		public Int64 VerifyKarma{ get; set; } = 3;
 
