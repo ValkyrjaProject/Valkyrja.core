@@ -305,12 +305,16 @@ namespace Valkyrja.entities
 
 		public override string ToString()
 		{
-			return $"`{this.ArgsList}`\n{this.ArgumentDescription.Replace("\n", "\n  ")}\n";
+			if( string.IsNullOrEmpty(this.ArgsList) )
+				return "";
+			return $"`{this.ArgsList}`\n\n  {this.ArgumentDescription.Replace("\n", "\n  ")}\n";
 		}
 
 		public string ToString(string commandWithPrefix)
 		{
-			return $"`{commandWithPrefix} {this.ArgsList}`\n{this.ArgumentDescription.Replace("\n", "\n  ")}";
+			if( string.IsNullOrEmpty(this.ArgsList) )
+				return $"`{commandWithPrefix}`";
+			return $"`{commandWithPrefix} {this.ArgsList}`\n  {this.ArgumentDescription.Replace("\n", "\n  ")}";
 		}
 
 		public Embed ToEmbed(Server server, Command command)
