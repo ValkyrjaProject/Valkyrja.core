@@ -263,12 +263,12 @@ namespace Valkyrja.core
 			return "There is an error in the data so I have failed to retrieve the patchnotes. Sorry mastah!";
 		}
 
-		/// <summary> Send a PM to a user safely. </summary>
-		/// <returns>
-		///  1 = success
-		///  0 = first 3 attempts failed
-		/// -1 = more than 3 attempts failed
-		/// </returns>
+		/// <summary>
+		/// Returns:
+		///  1 = success;
+		///  0 = first 3 attempts failed;
+		/// -1 = more than 3 attempts failed;
+		/// </summary>
 		public async Task<int> SendPmSafe(SocketUser user, string message)
 		{
 			if( this.FailedPmCount.ContainsKey(user.Id) && this.FailedPmCount[user.Id] >= 3 )
