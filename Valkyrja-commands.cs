@@ -820,7 +820,7 @@ namespace Valkyrja.core
 			newCommand.ManPage = new ManPage("<command>", "`<command>` - Command ID for which to display .");
 			newCommand.RequiredPermissions = PermissionType.Everyone;
 			newCommand.OnExecute += async e => {
-				string commandId = e.TrimmedMessage;
+				string commandId = e.TrimmedMessage.ToLower();
 				string response = "I ain't got no real command like that. (This feature isn't a thing for Custom Commands!)";
 				if( string.IsNullOrEmpty(commandId) || (!e.Server.Commands.ContainsKey(commandId) && (!e.Server.CustomAliases.ContainsKey(commandId) || !e.Server.Commands.ContainsKey(commandId = e.Server.CustomAliases[commandId].CommandId))) )
 				{
