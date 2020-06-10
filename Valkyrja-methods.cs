@@ -286,7 +286,7 @@ namespace Valkyrja.core
 				this.FailedPmCount[user.Id]++;
 				return 0;
 			}
-			catch( Exception e )
+			catch( Exception )
 			{
 				return -2;
 			}
