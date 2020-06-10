@@ -268,6 +268,7 @@ namespace Valkyrja.core
 		///  1 = success;
 		///  0 = first 3 attempts failed;
 		/// -1 = more than 3 attempts failed;
+		/// -2 = failed due to Discord server issues;
 		/// </summary>
 		public async Task<int> SendPmSafe(SocketUser user, string message)
 		{
@@ -284,6 +285,10 @@ namespace Valkyrja.core
 					this.FailedPmCount.Add(user.Id, 0);
 				this.FailedPmCount[user.Id]++;
 				return 0;
+			}
+			catch( Exception e )
+			{
+				return -2;
 			}
 		}
 	}
