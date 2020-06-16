@@ -279,15 +279,21 @@ namespace Valkyrja.core
 				await user.SendMessageSafe(message);
 				return 1;
 			}
-			catch( HttpException e ) when( (e.DiscordCode.HasValue && e.DiscordCode == 50007) || e.Message.Contains("50007") )
+			catch( HttpException e ) when( (int)e.HttpCode == 403 || (e.DiscordCode.HasValue && e.DiscordCode == 50007) || e.Message.Contains("50007") )
 			{
 				if( !this.FailedPmCount.ContainsKey(user.Id) )
 					this.FailedPmCount.Add(user.Id, 0);
 				this.FailedPmCount[user.Id]++;
 				return 0;
 			}
-			catch( Exception )
+			catch( HttpException e ) when( (int)e.HttpCode >= 500 )
 			{
+				this.Monitoring.Error500s.Inc();
+				return -2;
+			}
+			catch( Exception e )
+			{
+				await LogException(e, "Unknown PM error.", 0);
 				return -2;
 			}
 		}
