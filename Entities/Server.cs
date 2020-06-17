@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Valkyrja.core;
 using Discord;
@@ -45,7 +46,7 @@ namespace Valkyrja.entities
 		public Regex AlertRegex = null;
 		public Dictionary<guid, RoleConfig> Roles;
 		public List<ReactionAssignedRole> ReactionAssignedRoles;
-		public Object ReactionRolesLock{ get; set; } = new Object();
+		public SemaphoreSlim ReactionRolesLock{ get; set; } = new SemaphoreSlim(1, 1);
 
 		private int HttpExceptionCount = 0;
 
