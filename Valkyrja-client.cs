@@ -1040,8 +1040,6 @@ namespace Valkyrja.core
 									catch( Exception ) { }
 								}
 							}
-
-							continue;
 						}
 
 						//Blacklisted servers
@@ -1062,6 +1060,7 @@ namespace Valkyrja.core
 				foreach( Server server in serversToLeave )
 				{
 					await server.Guild.LeaveAsync();
+					this.Servers.Remove(server.Id);
 				}
 			}
 			catch( Exception exception )
