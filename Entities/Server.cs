@@ -97,11 +97,13 @@ namespace Valkyrja.entities
 			this.CustomCommands = dbContext.CustomCommands.AsQueryable().Where(c => c.ServerId == this.Id).ToDictionary(c => c.CommandId.ToLower());
 			this.CustomAliases = dbContext.CustomAliases.AsQueryable().Where(c => c.ServerId == this.Id).ToDictionary(c => c.Alias.ToLower());
 			this.Roles = dbContext.Roles.AsQueryable().Where(c => c.ServerId == this.Id).ToDictionary(c => c.RoleId);
-			lock(this.ReactionRolesLock)
+
+			this.ReactionRolesLock.Wait();
 			{
 				this.ReactionAssignedRoles?.Clear();
 				this.ReactionAssignedRoles = dbContext.ReactionAssignedRoles.AsQueryable().Where(c => c.ServerId == this.Id).ToList();
 			}
+			this.ReactionRolesLock.Release();
 
 			List<ChannelConfig> channels = dbContext.Channels.AsQueryable().Where(c => c.ServerId == this.Id).ToList();
 			this.IgnoredChannels = channels.Where(c => c.Ignored).Select(c => c.ChannelId).ToList();
