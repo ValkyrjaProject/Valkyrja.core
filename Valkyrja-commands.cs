@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Rest;
 using Valkyrja.entities;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
@@ -798,14 +799,24 @@ namespace Valkyrja.core
 			newCommand.IsBonusCommand = true;
 			newCommand.IsSupportCommand = true;
 			newCommand.OnExecute += async e => {
-				SocketUserMessage msg = null;
-				if( e.MessageArgs == null || e.MessageArgs.Length < 2 || !guid.TryParse(e.MessageArgs[0], out guid id) || (msg = await e.Channel.GetMessageAsync(id) as SocketUserMessage) == null )
+				IMessage msg = null;
+				if( e.MessageArgs == null || e.MessageArgs.Length < 2 || !guid.TryParse(e.MessageArgs[0], out guid id) || (msg = await e.Channel.GetMessageAsync(id)) == null )
 				{
 					await e.SendReplySafe("Edit what?");
 					return;
 				}
 
-				await msg.ModifyAsync(m => m.Content = e.TrimmedMessage.Substring(e.MessageArgs[0].Length+1));
+				switch( msg ) {
+					case RestUserMessage message:
+						await message?.ModifyAsync(m => m.Content = e.TrimmedMessage.Substring(e.MessageArgs[0].Length+1));
+						break;
+					case SocketUserMessage message:
+						await message?.ModifyAsync(m => m.Content = e.TrimmedMessage.Substring(e.MessageArgs[0].Length+1));
+						break;
+					default:
+						await e.SendReplySafe("GetMessage went bork.");
+						break;
+				}
 			};
 			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
