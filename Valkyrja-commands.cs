@@ -779,8 +779,33 @@ namespace Valkyrja.core
 			newCommand.IsSupportCommand = true;
 			newCommand.OnExecute += async e => {
 				if( string.IsNullOrWhiteSpace(e.TrimmedMessage) )
+				{
+					await e.SendReplySafe("Say what?");
 					return;
+				}
+
 				await e.SendReplySafe(e.TrimmedMessage);
+			};
+			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
+
+// !edit
+			newCommand = new Command("edit");
+			newCommand.Type = CommandType.Standard;
+			newCommand.Description = "Edit a message the bot previously said!";
+			newCommand.ManPage = new ManPage("<MessageId> <text>", "`<MessageId>` - An ID of a message that will be edited.\n\n`<text>` - Text which the bot will repeat.");
+			newCommand.RequiredPermissions = PermissionType.SubModerator;
+			newCommand.DeleteRequest = true;
+			newCommand.IsBonusCommand = true;
+			newCommand.IsSupportCommand = true;
+			newCommand.OnExecute += async e => {
+				SocketUserMessage msg = null;
+				if( e.MessageArgs == null || e.MessageArgs.Length < 2 || !guid.TryParse(e.MessageArgs[0], out guid id) || (msg = await e.Channel.GetMessageAsync(id) as SocketUserMessage) == null )
+				{
+					await e.SendReplySafe("Edit what?");
+					return;
+				}
+
+				await msg.ModifyAsync(m => m.Content = e.TrimmedMessage.Substring(e.MessageArgs[0].Length+1));
 			};
 			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 
