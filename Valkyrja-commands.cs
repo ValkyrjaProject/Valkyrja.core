@@ -870,6 +870,7 @@ namespace Valkyrja.core
 				await e.Channel.SendMessageSafe(null, embed);
 			};
 			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
+			this.Commands.Add("manual", newCommand.CreateAlias("manual"));
 
 // !help
 			newCommand = new Command("help");
