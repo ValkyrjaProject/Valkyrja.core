@@ -373,16 +373,16 @@ namespace Valkyrja.entities
 
 		public async Task<bool> HandleHttpException(HttpException exception, string helptext = "")
 		{
-			try
+			string logMsg = "HttpException - further logging disabled";
+			if( (int)exception.HttpCode >= 500 )
+				logMsg = "DiscordPoop";
+			else if( (int)exception.HttpCode == 404 )
+				logMsg = "";
+			else if( exception.Message.Contains("50007") )
+				logMsg = "Failed to PM";
+			else if( this.HttpExceptionCount < 5 )
 			{
-				string logMsg = "HttpException - further logging disabled";
-				if( (int)exception.HttpCode >= 500 )
-					logMsg = "DiscordPoop";
-				else if( (int)exception.HttpCode == 404 )
-					logMsg = "";
-				else if( exception.Message.Contains("50007") )
-					logMsg = "Failed to PM";
-				else if( this.HttpExceptionCount < 5 )
+				try
 				{
 					string msg = $"Received error code `{(int)exception.HttpCode}`\n{helptext}\n\nPlease fix my permissions and channel access on your Discord Server `{this.Guild.Name}`.\n\nYou can also set these messages to be sent into a notification channel on the config page. If you are unsure what's going on, consult our support team at {GlobalConfig.DiscordInvite}";
 					SocketTextChannel channel = null;
@@ -393,23 +393,20 @@ namespace Valkyrja.entities
 					else
 						await this.Client.SendPmSafe(this.Guild.Owner, msg);
 				}
-
-				if( ++this.HttpExceptionCount > 1 )
+				catch( Exception e )
 				{
-					logMsg = null;
+					if( !(e is HttpException) )
+						await this.Client.LogException(e, "Server.HandleHttpException", this.Id);
 				}
-
-				if( !string.IsNullOrEmpty(logMsg) )
-					await this.Client.LogException(exception, logMsg, this.Id);
 			}
-			catch( Exception e )
+
+			if( ++this.HttpExceptionCount > 1 )
 			{
-				if( e is HttpException ex && (int)ex.HttpCode >= 500 )
-				{
-					//DiscordPoop
-				}
-				await this.Client.LogException(e, "Server.HandleHttpException", this.Id);
+				logMsg = null;
 			}
+
+			if( !string.IsNullOrEmpty(logMsg) )
+				await this.Client.LogException(exception, logMsg, this.Id);
 
 			return this.HttpExceptionCount > 3;
 		}
