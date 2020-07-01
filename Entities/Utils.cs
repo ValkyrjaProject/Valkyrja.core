@@ -70,6 +70,18 @@ namespace Valkyrja.entities
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static string GetDatestamp()
+		{
+			return GetDatestamp(DateTime.UtcNow);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static string GetDatestamp(DateTime time)
+		{
+			return time.ToUniversalTime().ToString("yyyy-MM-dd");
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static string GetTimestamp(DateTimeOffset time)
 		{
 			return time.ToUniversalTime().ToString("yyyy-MM-dd_HH:mm:ss") + " UTC";
