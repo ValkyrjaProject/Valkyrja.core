@@ -148,14 +148,27 @@ namespace Valkyrja.entities
 			if( this.WarningCount > 0 || !string.IsNullOrEmpty(this.Notes) )
 			{
 				whoisString.AppendLine($"They have **{this.WarningCount}** warning{(this.WarningCount > 1 ? "s" : "")}, with these notes:");
+				whoisString.AppendLine(GetWarningsString(true));
+			}
+
+			return whoisString.ToString().Replace("@everyone", "@-everyone").Replace("@here", "@-here");
+		}
+
+		public string GetWarningsString(bool skipCount = false)
+		{
+			StringBuilder whoisString = new StringBuilder();
+			if( this.WarningCount > 0 || !string.IsNullOrEmpty(this.Notes) )
+			{
+				whoisString.AppendLine($"You have **{this.WarningCount}** warning{(this.WarningCount > 1 ? "s" : "")}, with these notes:");
 				int i = 0;
 				foreach( string w in this.Notes.Split('|') )
 				{
 					whoisString.AppendLine($"**{++i})** {w.Trim()}");
 				}
+				return whoisString.ToString().Replace("@everyone", "@-everyone").Replace("@here", "@-here");
 			}
 
-			return whoisString.ToString().Replace("@everyone", "@-everyone").Replace("@here", "@-here");
+			return "You've been a Good boi..\n_\\*pats*_";
 		}
 
 		public void AddWarning(string warning)
