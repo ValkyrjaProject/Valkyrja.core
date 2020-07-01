@@ -159,7 +159,8 @@ namespace Valkyrja.entities
 			StringBuilder whoisString = new StringBuilder();
 			if( this.WarningCount > 0 || !string.IsNullOrEmpty(this.Notes) )
 			{
-				whoisString.AppendLine($"You have **{this.WarningCount}** warning{(this.WarningCount > 1 ? "s" : "")}, with these notes:");
+				if( !skipCount )
+					whoisString.AppendLine($"You have **{this.WarningCount}** warning{(this.WarningCount > 1 ? "s" : "")}, with these notes:");
 				int i = 0;
 				foreach( string w in this.Notes.Split('|') )
 				{
