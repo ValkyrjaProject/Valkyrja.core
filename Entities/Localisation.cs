@@ -66,7 +66,7 @@ namespace Valkyrja.entities
 		public string moderation_op_disabled{ get; set; } = "All done?";
 
 		[Column("moderation_nth_infraction", TypeName = "text")]
-		public string moderation_nth_infraction{ get; set; } = "\n`{0}` now has `{0}` infractions.";
+		public string moderation_nth_infraction{ get; set; } = "`{0}` now has `{0}` infractions.";
 
 		[Column("role_promote_done", TypeName = "text")]
 		public string role_promote_done{ get; set; } = "Done!";
