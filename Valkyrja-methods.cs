@@ -269,9 +269,12 @@ namespace Valkyrja.core
 		///  0 = first 3 attempts failed;
 		/// -1 = more than 3 attempts failed;
 		/// -2 = failed due to Discord server issues;
+		/// -3 = user not found;
 		/// </summary>
 		public async Task<int> SendPmSafe(SocketUser user, string message)
 		{
+			if( user == null )
+				return -3;
 			if( this.FailedPmCount.ContainsKey(user.Id) && this.FailedPmCount[user.Id] >= 3 )
 				return -1;
 			try
