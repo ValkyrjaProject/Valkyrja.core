@@ -175,6 +175,9 @@ namespace Valkyrja.entities
 		[Column("mute_ignore_channelid")]
 		public guid MuteIgnoreChannelId{ get; set; } = 0;
 
+		[Column("mute_message", TypeName = "text")]
+		public string MuteMessage{ get; set; }
+
 		[Column("slowmode_default")]
 		public int SlowmodeDefaultSeconds{ get; set; } = 60;
 
