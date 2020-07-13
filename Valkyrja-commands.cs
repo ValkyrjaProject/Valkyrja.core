@@ -939,10 +939,10 @@ namespace Valkyrja.core
 							newString += $"{(i == 0 ? "`" : i == aliasCount - 1 ? " and `" : ", `")}{prefix}{cmd.Aliases[i]}`";
 					}
 
-					await Append(newString);
-					await AddCustomAlias(cmd.Id);
 					if( cmd.ManPage != null )
 						newString += $"\n **-** Use `{prefix}man {cmd.Id}` to display full manual page.";
+					await Append(newString);
+					await AddCustomAlias(cmd.Id);
 				}
 
 				async Task  AddCustomCommand(CustomCommand cmd)
