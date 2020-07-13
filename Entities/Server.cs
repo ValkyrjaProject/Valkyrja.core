@@ -233,14 +233,14 @@ namespace Valkyrja.entities
 			if( commandPermissions != PermissionType.OwnerOnly &&
 			    channel != null && commandChannelOptions != null &&
 				(currentChannelOptions = commandChannelOptions.FirstOrDefault(c => c.ChannelId == channel.Id)) != null &&
-			    currentChannelOptions.Blacklisted )
+			    currentChannelOptions.Blocked )
 				return false;
 
 			if( commandPermissions != PermissionType.OwnerOnly &&
 			    channel != null && commandChannelOptions != null &&
-			    commandChannelOptions.Any(c => c.Whitelisted) &&
+			    commandChannelOptions.Any(c => c.Allowed) &&
 			    ((currentChannelOptions = commandChannelOptions.FirstOrDefault(c => c.ChannelId == channel.Id)) == null ||
-			    !currentChannelOptions.Whitelisted) )
+			    !currentChannelOptions.Allowed) )
 				return false; //False only if there are *some* whitelisted channels, but it's not the current one.
 
 			//Custom Command Permission Overrides

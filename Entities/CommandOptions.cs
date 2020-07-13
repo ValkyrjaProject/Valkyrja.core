@@ -44,10 +44,10 @@ namespace Valkyrja.entities
 		[DatabaseGenerated(DatabaseGeneratedOption.None)]
 		public guid ChannelId{ get; set; } = 0;
 
-		[Column("blacklisted")]
-		public bool Blacklisted{ get; set; } = false;
+		[Column("blacklisted")] //Not gonna mess with production database.
+		public bool Blocked{ get; set; } = false;
 
-		[Column("whitelisted")]
-		public bool Whitelisted{ get; set; } = false;
+		[Column("whitelisted")] //Not gonna mess with production database.
+		public bool Allowed{ get; set; } = false;
 	}
 }

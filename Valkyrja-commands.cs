@@ -1305,8 +1305,8 @@ namespace Valkyrja.core
 					else if( options.DeleteRequest )
 						responseBuilder.Append("\n+ This command will attempt to delete the message that issued the command.");
 
-					IEnumerable<CommandChannelOptions> channelBlacklist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId && c.Blacklisted);
-					IEnumerable<CommandChannelOptions> channelWhitelist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId && c.Whitelisted);
+					IEnumerable<CommandChannelOptions> channelBlacklist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId && c.Blocked);
+					IEnumerable<CommandChannelOptions> channelWhitelist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId && c.Allowed);
 					if( channelBlacklist.Any() )
 					{
 						responseBuilder.Append("\n+ This command can not be invoked in any of the following channels:");
@@ -1454,11 +1454,11 @@ namespace Valkyrja.core
 				switch(e.MessageArgs[1].ToLower())
 				{
 					case "add":
-						commandOptions.Whitelisted = true;
+						commandOptions.Allowed = true;
 						dbContext.SaveChanges();
 						break;
 					case "remove":
-						commandOptions.Whitelisted = false;
+						commandOptions.Allowed = false;
 						dbContext.SaveChanges();
 						break;
 					default:
@@ -1495,11 +1495,11 @@ namespace Valkyrja.core
 					switch( e.MessageArgs[0].ToLower() )
 					{
 						case "add":
-							commandOptions.Whitelisted = true;
+							commandOptions.Allowed = true;
 							dbContext.SaveChanges();
 							break;
 						case "remove":
-							commandOptions.Whitelisted = false;
+							commandOptions.Allowed = false;
 							dbContext.SaveChanges();
 							break;
 						default:
@@ -1547,11 +1547,11 @@ namespace Valkyrja.core
 				switch(e.MessageArgs[1].ToLower())
 				{
 					case "add":
-						commandOptions.Blacklisted = true;
+						commandOptions.Blocked = true;
 						dbContext.SaveChanges();
 						break;
 					case "remove":
-						commandOptions.Blacklisted = false;
+						commandOptions.Blocked = false;
 						dbContext.SaveChanges();
 						break;
 					default:
@@ -1588,11 +1588,11 @@ namespace Valkyrja.core
 					switch( e.MessageArgs[0].ToLower() )
 					{
 						case "add":
-							commandOptions.Blacklisted = true;
+							commandOptions.Blocked = true;
 							dbContext.SaveChanges();
 							break;
 						case "remove":
-							commandOptions.Blacklisted = false;
+							commandOptions.Blocked = false;
 							dbContext.SaveChanges();
 							break;
 						default:
@@ -1627,7 +1627,7 @@ namespace Valkyrja.core
 
 				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
 				await dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId)
-					.ForEachAsync(c => c.Blacklisted = c.Whitelisted = false);
+					.ForEachAsync(c => c.Blocked = c.Allowed = false);
 
 				dbContext.SaveChanges();
 				dbContext.Dispose();
@@ -1646,7 +1646,7 @@ namespace Valkyrja.core
 				foreach( CustomCommand cmd in e.Server.CustomCommands.Values )
 				{
 					await dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == e.Server.Id && c.CommandId == cmd.CommandId)
-						.ForEachAsync(c => c.Blacklisted = c.Whitelisted = false);
+						.ForEachAsync(c => c.Blocked = c.Allowed = false);
 				}
 
 				dbContext.SaveChanges();

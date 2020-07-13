@@ -327,8 +327,7 @@ namespace Valkyrja.entities
 				.AddField("Arguments", string.IsNullOrEmpty(this.ArgumentDescription) ? "None" : this.ArgumentDescription, false);
 
 
-			ServerContext dbContext = ServerContext.Create(server.DbConnectionString);
-			CommandOptions options = dbContext.GetOrAddCommandOptions(server, command.Id);
+			CommandOptions options = server.GetCommandOptions(command.Id);
 			string permissionString = $"`{options.PermissionOverrides.ToString()}`";
 			if( options.PermissionOverrides == PermissionOverrides.Default )
 			{
@@ -379,29 +378,30 @@ namespace Valkyrja.entities
 				embedBuilder.AddField("Aliases", aliases, true);
 
 
-			List<CommandChannelOptions> channelBlacklist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == server.Id && c.CommandId == command.Id && c.Blacklisted).ToList();
-			List<CommandChannelOptions> channelWhitelist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == server.Id && c.CommandId == command.Id && c.Whitelisted).ToList();
-			if( channelBlacklist.Any() )
+			IEnumerable<CommandChannelOptions> commandChannelOptions = server.GetCommandChannelOptions(command.Id);
+			List<CommandChannelOptions> blockedChannels = commandChannelOptions.Where(c => c.ServerId == server.Id && c.CommandId == command.Id && c.Blocked).ToList();
+			List<CommandChannelOptions> allowedChannels = commandChannelOptions.Where(c => c.ServerId == server.Id && c.CommandId == command.Id && c.Allowed).ToList();
+			if( blockedChannels.Any() )
 			{
-				StringBuilder blacklistBuilder = new StringBuilder();
-				foreach( CommandChannelOptions channelOptions in channelBlacklist )
+				StringBuilder blockedChannelsBuilder = new StringBuilder();
+				foreach( CommandChannelOptions channelOptions in blockedChannels )
 				{
-					blacklistBuilder.Append($"<#{channelOptions.ChannelId}> ");
+					blockedChannelsBuilder.Append($"<#{channelOptions.ChannelId}> ");
 				}
 
-				embedBuilder.AddField("Channel Blacklist", blacklistBuilder.ToString(), channelWhitelist.Any());
+				embedBuilder.AddField("Blocked Channels", blockedChannelsBuilder.ToString(), allowedChannels.Any());
 			}
-			if( channelWhitelist.Any() )
+			if( allowedChannels.Any() )
 			{
-				StringBuilder whitelistBuilder = new StringBuilder();
-				foreach( CommandChannelOptions channelOptions in channelWhitelist )
+				StringBuilder allowedChannelsBuilder = new StringBuilder();
+				foreach( CommandChannelOptions channelOptions in allowedChannels )
 				{
-					if( channelBlacklist.Any(c => c.ChannelId == channelOptions.ChannelId) )
+					if( blockedChannels.Any(c => c.ChannelId == channelOptions.ChannelId) )
 						continue;
-					whitelistBuilder.Append($"<#{channelOptions.ChannelId}> ");
+					allowedChannelsBuilder.Append($"<#{channelOptions.ChannelId}> ");
 				}
 
-				embedBuilder.AddField("Channel Whitelist", whitelistBuilder.Length == 0 ? " " : whitelistBuilder.ToString(), channelBlacklist.Any());
+				embedBuilder.AddField("Allowed Channels", allowedChannelsBuilder.Length == 0 ? " " : allowedChannelsBuilder.ToString(), blockedChannels.Any());
 			}
 
 
