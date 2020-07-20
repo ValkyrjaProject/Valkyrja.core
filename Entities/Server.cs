@@ -126,7 +126,7 @@ namespace Valkyrja.entities
 			}
 
 			SocketRole role;
-			if( this.Config.MuteRoleId != 0 && (role = this.Guild.GetRole(this.Config.MuteRoleId)) != null && this.Guild.CurrentUser.GuildPermissions.ManageChannels )
+			if( this.Config.MuteRoleId != 0 && (role = this.Guild?.GetRole(this.Config.MuteRoleId)) != null && (this.Guild?.CurrentUser?.GuildPermissions.ManageChannels ?? false) )
 			{
 				foreach( SocketGuildChannel channel in this.Guild.Channels.Where(c => (c is SocketTextChannel || c is SocketCategoryChannel) && !(c is SocketNewsChannel)) )
 				{
@@ -178,7 +178,7 @@ namespace Valkyrja.entities
 			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
 			this.CachedCommandOptions = dbContext.CommandOptions.AsQueryable().FirstOrDefault(c => c.ServerId == this.Id && c.CommandId == commandString);
 			dbContext.Dispose();
-			return this.CachedCommandOptions;
+			return this.CachedCommandOptions ?? new CommandOptions{ServerId = this.Id, CommandId = commandString};
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -192,7 +192,7 @@ namespace Valkyrja.entities
 			ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
 			this.CachedCommandChannelOptions = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == this.Id && c.CommandId == commandString)?.ToList();
 			dbContext.Dispose();
-			return this.CachedCommandChannelOptions;
+			return this.CachedCommandChannelOptions ?? new List<CommandChannelOptions>();
 		}
 
 		///<summary> Returns the correct commandId if it exists, empty otherwise. Returns null if it is restricted command. </summary>
