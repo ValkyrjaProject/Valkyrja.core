@@ -42,6 +42,7 @@ namespace Valkyrja.entities
 		public ConcurrentDictionary<guid, guid> CommandReplyMsgIds = new ConcurrentDictionary<guid, guid>();
 
 		public List<guid> IgnoredChannels;
+		public List<guid> AutoAnnounceChannels;
 
 		public Regex AlertRegex = null;
 		public Dictionary<guid, RoleConfig> Roles;
@@ -107,6 +108,7 @@ namespace Valkyrja.entities
 
 			List<ChannelConfig> channels = dbContext.Channels.AsQueryable().Where(c => c.ServerId == this.Id).ToList();
 			this.IgnoredChannels = channels.Where(c => c.Ignored).Select(c => c.ChannelId).ToList();
+			this.AutoAnnounceChannels = channels.Where(c => c.AutoAnnounce).Select(c => c.ChannelId).ToList();
 
 			if( !string.IsNullOrWhiteSpace(this.Config.LogAlertRegex) && this.Config.AlertChannelId != 0 )
 			{

@@ -23,6 +23,9 @@ namespace Valkyrja.entities
 		[Column("ignored")]
 		public bool Ignored{ get; set; } = false;
 
+		[Column("auto_announce")]
+		public bool AutoAnnounce{ get; set; } = false;
+
 		[Column("temporary")]
 		public bool Temporary{ get; set; } = false;
 
