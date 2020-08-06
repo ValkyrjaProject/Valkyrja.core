@@ -263,7 +263,7 @@ namespace Valkyrja.entities
 		public static string ToNames(this IEnumerable<string> self)
 		{
 			if( self == null || !self.Any() )
-				return "None.";
+				return "None";
 
 			StringBuilder builder = new StringBuilder();
 			int count = self.Count();
@@ -282,7 +282,7 @@ namespace Valkyrja.entities
 		public static string ToNamesList(this string[] self)
 		{
 			if( self == null || !self.Any() )
-				return "None.";
+				return "None";
 
 			StringBuilder builder = new StringBuilder();
 			for(int i = 0; i < self.Length; i++)
