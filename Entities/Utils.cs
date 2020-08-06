@@ -260,7 +260,7 @@ namespace Valkyrja.entities
 			return builder.ToString();
 		}
 
-		public static string ToNames(this IEnumerable<string> self)
+		public static string ToNames(this IEnumerable<string> self, string prefix = "`", string suffix = "`")
 		{
 			if( self == null || !self.Any() )
 				return "None";
@@ -270,11 +270,11 @@ namespace Valkyrja.entities
 			int i = -1;
 			foreach(string element in self)
 			{
-				builder.Append((++i == 0 ? "`" : i < count-1 ? "`, `" : "` and `") + element.Replace("`", "'"));
+				builder.Append((++i == 0 ? prefix : i < count-1 ? $"{suffix}, {prefix}" : $"{suffix} and {prefix}") + element.Replace("`", "'"));
 			}
 
 			if( count > 0 )
-				builder.Append("`");
+				builder.Append(suffix);
 
 			return builder.ToString();
 		}
@@ -299,7 +299,7 @@ namespace Valkyrja.entities
 		public static string ToNamesList(this List<string> self)
 		{
 			if( self == null || !self.Any() )
-				return "None.";
+				return "None";
 
 			StringBuilder builder = new StringBuilder();
 			for(int i = 0; i < self.Count; i++)
