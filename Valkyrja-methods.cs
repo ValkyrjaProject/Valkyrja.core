@@ -264,42 +264,33 @@ namespace Valkyrja.core
 			return "There is an error in the data so I have failed to retrieve the patchnotes. Sorry mastah!";
 		}
 
-		/// <summary>
-		/// Returns:
-		///  1 = success;
-		///  0 = first 3 attempts failed;
-		/// -1 = more than 3 attempts failed;
-		/// -2 = failed due to Discord server issues;
-		/// -3 = user not found;
-		/// -4 = unknown;
-		/// </summary>
-		public async Task<int> SendPmSafe(SocketUser user, string message, Embed embed = null)
+		public async Task<PmErrorCode> SendPmSafe(SocketUser user, string message, Embed embed = null)
 		{
 			if( user == null )
-				return -3;
+				return PmErrorCode.UserNull;
 			if( this.FailedPmCount.ContainsKey(user.Id) && this.FailedPmCount[user.Id] >= 3 )
-				return -1;
+				return PmErrorCode.ThresholdExceeded;
 			try
 			{
 				await user.SendMessageSafe(message, embed);
-				return 1;
+				return PmErrorCode.Success;
 			}
 			catch( HttpException e ) when( (int)e.HttpCode == 403 || (e.DiscordCode.HasValue && e.DiscordCode == 50007) || e.Message.Contains("50007") )
 			{
 				if( !this.FailedPmCount.ContainsKey(user.Id) )
 					this.FailedPmCount.Add(user.Id, 0);
 				this.FailedPmCount[user.Id]++;
-				return 0;
+				return PmErrorCode.Failed;
 			}
 			catch( HttpException e ) when( (int)e.HttpCode >= 500 )
 			{
 				this.Monitoring.Error500s.Inc();
-				return -2;
+				return PmErrorCode.Thrown500;
 			}
 			catch( Exception e )
 			{
 				await LogException(e, "Unknown PM error.", 0);
-				return -4;
+				return PmErrorCode.Unknown;
 			}
 		}
 	}

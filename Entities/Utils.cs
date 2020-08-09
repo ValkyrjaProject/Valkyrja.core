@@ -122,6 +122,17 @@ namespace Valkyrja.entities
 		}
 	}
 
+	public enum PmErrorCode
+	{
+		Undefined = -1,
+		Success = 0,
+		Failed = 1,
+		ThresholdExceeded = 2,
+		UserNull = 3,
+		Thrown500 = 4,
+		Unknown = 5
+	}
+
 	public static class Extensions
 	{
 		public static string ToFancyString(this TimeSpan self)
