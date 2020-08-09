@@ -271,6 +271,7 @@ namespace Valkyrja.core
 		/// -1 = more than 3 attempts failed;
 		/// -2 = failed due to Discord server issues;
 		/// -3 = user not found;
+		/// -4 = unknown;
 		/// </summary>
 		public async Task<int> SendPmSafe(SocketUser user, string message, Embed embed = null)
 		{
@@ -298,7 +299,7 @@ namespace Valkyrja.core
 			catch( Exception e )
 			{
 				await LogException(e, "Unknown PM error.", 0);
-				return -2;
+				return -4;
 			}
 		}
 	}

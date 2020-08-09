@@ -859,7 +859,6 @@ namespace Valkyrja.core
 			Match match = this.RegexCustomCommandPmAll.Match(msg);
 			if( match.Success )
 			{
-
 				List<SocketUser> toPm = new List<SocketUser>();
 				string pm = msg;
 				msg = "It is nao sent via PM.";
