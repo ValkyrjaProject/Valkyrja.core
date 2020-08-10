@@ -5,9 +5,11 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 using Discord;
 using Valkyrja.entities;
 using Discord.Net;
+using Discord.Rest;
 using Discord.WebSocket;
 
 using guid = System.UInt64;
@@ -291,6 +293,244 @@ namespace Valkyrja.core
 			{
 				await LogException(e, "Unknown PM error.", 0);
 				return PmErrorCode.Unknown;
+			}
+		}
+
+		public async Task SendEmbedFromCli(string trimmedMessage, Server server, SocketTextChannel channel, SocketUser author, SocketUser pmInstead = null)
+		{
+			if( string.IsNullOrEmpty(trimmedMessage) || trimmedMessage == "-h" || trimmedMessage == "--help" )
+			{
+				await channel.SendMessageSafe("```md\nCreate an embed using the following parameters:\n" +
+				                      "[ --channel     ] Channel where to send the embed.\n" +
+				                      "[ --edit <msgId>] Replace a MessageId with a new embed (use after --channel)\n" +
+				                      "[ --title       ] Title\n" +
+				                      "[ --description ] Description\n" +
+				                      "[ --footer      ] Footer\n" +
+				                      "[ --color       ] #rrggbb hex color used for the embed stripe.\n" +
+				                      "[ --image       ] URL of a Hjuge image in the bottom.\n" +
+				                      "[ --thumbnail   ] URL of a smol image on the side.\n" +
+				                      "[ --fieldName   ] Create a new field with specified name.\n" +
+				                      "[ --fieldValue  ] Text value of a field - has to follow a name.\n" +
+				                      "[ --fieldInline ] Use to set the field as inline.\n" +
+				                      "Where you can repeat the field* options multiple times.\n```"
+				);
+				return;
+			}
+
+			bool debug = false;
+			IMessage msg = null;
+			EmbedFieldBuilder currentField = null;
+			EmbedBuilder embedBuilder = new EmbedBuilder();
+
+			foreach( Match match in this.RegexCliParam.Matches(trimmedMessage) )
+			{
+				string optionString = this.RegexCliOption.Match(match.Value).Value;
+
+				if( optionString == "--debug" )
+				{
+					if( IsGlobalAdmin(author.Id) || IsSupportTeam(author.Id) )
+						debug = true;
+					continue;
+				}
+
+				if( optionString == "--fieldInline" )
+				{
+					if( currentField == null )
+					{
+						await channel.SendMessageSafe($"`fieldInline` can not precede `fieldName`.");
+						return;
+					}
+
+					currentField.WithIsInline(true);
+					if( debug )
+						await channel.SendMessageSafe($"Setting inline for field `{currentField.Name}`");
+					continue;
+				}
+
+				string value;
+				if( match.Value.Length <= optionString.Length || string.IsNullOrWhiteSpace(value = match.Value.Substring(optionString.Length + 1).Trim()) )
+				{
+					await channel.SendMessageSafe($"Invalid value for `{optionString}`");
+					return;
+				}
+
+				if( value.Length >= UserProfileOption.ValueCharacterLimit )
+				{
+					await channel.SendMessageSafe($"`{optionString}` is too long! (It's {value.Length} characters while the limit is {UserProfileOption.ValueCharacterLimit})");
+					return;
+				}
+
+				switch( optionString )
+				{
+					case "--channel":
+						if( !guid.TryParse(value.Trim('<', '>', '#'), out guid id) || (channel = server.Guild.GetTextChannel(id)) == null )
+						{
+							await channel.SendMessageSafe($"Channel {value} not found.");
+							return;
+						}
+
+						if( debug )
+							await channel.SendMessageSafe($"Channel set: `{channel.Name}`");
+
+						break;
+					case "--title":
+						if( value.Length > 256 )
+						{
+							await channel.SendMessageSafe($"`--title` is too long (`{value.Length} > 256`)");
+							return;
+						}
+
+						embedBuilder.WithTitle(value);
+						if( debug )
+							await channel.SendMessageSafe($"Title set: `{value}`");
+
+						break;
+					case "--description":
+						if( value.Length > 2048 )
+						{
+							await channel.SendMessageSafe($"`--description` is too long (`{value.Length} > 2048`)");
+							return;
+						}
+
+						embedBuilder.WithDescription(value);
+						if( debug )
+							await channel.SendMessageSafe($"Description set: `{value}`");
+
+						break;
+					case "--footer":
+						if( value.Length > 2048 )
+						{
+							await channel.SendMessageSafe($"`--footer` is too long (`{value.Length} > 2048`)");
+							return;
+						}
+
+						embedBuilder.WithFooter(value);
+						if( debug )
+							await channel.SendMessageSafe($"Description set: `{value}`");
+
+						break;
+					case "--image":
+						try
+						{
+							embedBuilder.WithImageUrl(value.Trim('<', '>'));
+						}
+						catch( Exception )
+						{
+							await channel.SendMessageSafe($"`--image` is invalid url");
+							return;
+						}
+
+						if( debug )
+							await channel.SendMessageSafe($"Image URL set: `{value}`");
+
+						break;
+					case "--thumbnail":
+						try
+						{
+							embedBuilder.WithThumbnailUrl(value.Trim('<', '>'));
+						}
+						catch( Exception )
+						{
+							await channel.SendMessageSafe($"`--thumbnail` is invalid url");
+							return;
+						}
+
+						if( debug )
+							await channel.SendMessageSafe($"Thumbnail URL set: `{value}`");
+
+						break;
+					case "--color":
+						uint color = uint.Parse(value.TrimStart('#'), System.Globalization.NumberStyles.AllowHexSpecifier);
+						if( color > uint.Parse("FFFFFF", System.Globalization.NumberStyles.AllowHexSpecifier) )
+						{
+							await channel.SendMessageSafe("Color out of range.");
+							return;
+						}
+
+						embedBuilder.WithColor(color);
+						if( debug )
+							await channel.SendMessageSafe($"Color `{value}` set.");
+
+						break;
+					case "--fieldName":
+						if( value.Length > 256 )
+						{
+							await channel.SendMessageSafe($"`--fieldName` is too long (`{value.Length} > 256`)\n```\n{value}\n```");
+							return;
+						}
+
+						if( currentField != null && currentField.Value == null )
+						{
+							await channel.SendMessageSafe($"Field `{currentField.Name}` is missing a value!");
+							return;
+						}
+
+						if( embedBuilder.Fields.Count >= 25 )
+						{
+							await channel.SendMessageSafe("Too many fields! (Limit is 25)");
+							return;
+						}
+
+						embedBuilder.AddField(currentField = new EmbedFieldBuilder().WithName(value));
+						if( debug )
+							await channel.SendMessageSafe($"Creating new field `{currentField.Name}`");
+
+						break;
+					case "--fieldValue":
+						if( value.Length > 1024 )
+						{
+							await channel.SendMessageSafe($"`--fieldValue` is too long (`{value.Length} > 1024`)\n```\n{value}\n```");
+							return;
+						}
+
+						if( currentField == null )
+						{
+							await channel.SendMessageSafe($"`fieldValue` can not precede `fieldName`.");
+							return;
+						}
+
+						currentField.WithValue(value);
+						if( debug )
+							await channel.SendMessageSafe($"Setting value:\n```\n{value}\n```\n...for field:`{currentField.Name}`");
+
+						break;
+					case "--edit":
+						if( !guid.TryParse(value, out guid msgId) || (msg = await channel.GetMessageAsync(msgId)) == null )
+						{
+							await channel.SendMessageSafe($"`--edit` did not find a message with ID `{value}` in the <#{channel.Id}> channel.");
+							return;
+						}
+
+						break;
+					default:
+						await channel.SendMessageSafe($"Unknown option: `{optionString}`");
+						return;
+				}
+			}
+
+			if( currentField != null && currentField.Value == null )
+			{
+				await channel.SendMessageSafe($"Field `{currentField.Name}` is missing a value!");
+				return;
+			}
+
+			switch( msg )
+			{
+				case null:
+					if( pmInstead != null )
+						await pmInstead.SendMessageAsync(embed: embedBuilder.Build());
+					else
+						await channel.SendMessageAsync(embed: embedBuilder.Build());
+					break;
+				case RestUserMessage message:
+					await message?.ModifyAsync(m => m.Embed = embedBuilder.Build());
+					break;
+				case SocketUserMessage message:
+					await message?.ModifyAsync(m => m.Embed = embedBuilder.Build());
+					break;
+				default:
+					await channel.SendMessageSafe("GetMessage went bork.");
+					break;
 			}
 		}
 	}

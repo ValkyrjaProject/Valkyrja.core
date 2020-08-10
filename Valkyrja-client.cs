@@ -53,6 +53,9 @@ namespace Valkyrja.core
 		private readonly Regex RegexEveryone = new Regex("(@everyone)|(@here)", RegexOptions.Compiled);
 		private readonly Regex RegexCustomCommandPmAll = new Regex("^<pm(-sender)?>", RegexOptions.Compiled);
 		private readonly Regex RegexCustomCommandPmMentioned = new Regex("^<pm>", RegexOptions.Compiled);
+		//private readonly Regex EmbedParamRegex = new Regex("--?\\w+\\s(?!--?\\w|$).*?(?=\\s--?\\w|$)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+		private readonly Regex RegexCliParam = new Regex("--?\\w+.*?(?=\\s--?\\w|$)", RegexOptions.Singleline | RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+		private readonly Regex RegexCliOption = new Regex("--?\\w+", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
 		public Regex RegexDiscordInvites;
 		public Regex RegexShortLinks;
 		public Regex RegexExtendedLinks;
@@ -874,7 +877,15 @@ namespace Valkyrja.core
 				{
 					try
 					{
-						await user.SendMessageSafe(pm);
+						if( pm.StartsWith($"{server.Config.CommandPrefix}embed") )
+						{
+							pm = pm.Substring($"{server.Config.CommandPrefix}embed".Length).Trim();
+							await SendEmbedFromCli(pm, server, channel, message.Author, user);
+						}
+						else
+						{
+							await user.SendMessageSafe(pm);
+						}
 					}
 					catch( Exception )
 					{
@@ -889,10 +900,18 @@ namespace Valkyrja.core
 				msg = matches[Utils.Random.Next(0, matches.Count)].Value;
 
 
-			if( cmd.MentionsEnabled )
-				await channel.SendMessageSafe(msg, allowedMentions: AllowedMentions.All);
+			if( !match.Success && msg.StartsWith($"{server.Config.CommandPrefix}embed") )
+			{
+				msg = msg.Substring($"{server.Config.CommandPrefix}embed".Length).Trim();
+				await SendEmbedFromCli(msg, server, channel, message.Author);
+			}
 			else
-				await channel.SendMessageSafe(msg);
+			{
+				if( cmd.MentionsEnabled )
+					await channel.SendMessageSafe(msg, allowedMentions: AllowedMentions.All);
+				else
+					await channel.SendMessageSafe(msg);
+			}
 
 			return true;
 		}
