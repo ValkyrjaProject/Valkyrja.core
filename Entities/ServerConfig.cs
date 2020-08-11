@@ -157,6 +157,9 @@ namespace Valkyrja.entities
 		[Column("antispam_ignore_members")]
 		public bool AntispamIgnoreMembers{ get; set; } = false;
 
+		[Column("operator_enforce")]
+		public bool OperatorEnforce{ get; set; } = true;
+
 		[Column("operator_roleid")]
 		public guid OperatorRoleId{ get; set; } = 0;
 
