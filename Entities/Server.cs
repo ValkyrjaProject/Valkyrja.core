@@ -50,6 +50,7 @@ namespace Valkyrja.entities
 		public SemaphoreSlim ReactionRolesLock{ get; set; } = new SemaphoreSlim(1, 1);
 
 		private int HttpExceptionCount = 0;
+		private bool IgnoreMuteSetup = false;
 
 
 		public Server(SocketGuild guild)
@@ -128,7 +129,7 @@ namespace Valkyrja.entities
 			}
 
 			SocketRole role;
-			if( this.Config.MuteRoleId != 0 && (role = this.Guild?.GetRole(this.Config.MuteRoleId)) != null && (this.Guild?.CurrentUser?.GuildPermissions.ManageChannels ?? false) )
+			if( !this.IgnoreMuteSetup && this.Config.MuteRoleId != 0 && (role = this.Guild?.GetRole(this.Config.MuteRoleId)) != null && (this.Guild?.CurrentUser?.GuildPermissions.ManageChannels ?? false) )
 			{
 				foreach( SocketGuildChannel channel in this.Guild.Channels.Where(c => (c is SocketTextChannel || c is SocketCategoryChannel) && !(c is SocketNewsChannel)) )
 				{
@@ -143,6 +144,7 @@ namespace Valkyrja.entities
 					catch( HttpException e )
 					{
 						await HandleHttpException(e, $"Couldn't configure channel permissions for the muted role for channel <#{channel.Id}> (if you truly do not want it configured in some channels, just add that role to these channels manually with no permissions.)");
+						this.IgnoreMuteSetup = true;
 						break;
 					}
 					catch( Exception e )
