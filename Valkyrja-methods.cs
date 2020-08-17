@@ -440,17 +440,24 @@ namespace Valkyrja.core
 
 						break;
 					case "--color":
-						uint color = uint.Parse(value.TrimStart('#'), System.Globalization.NumberStyles.AllowHexSpecifier);
-						if( color > uint.Parse("FFFFFF", System.Globalization.NumberStyles.AllowHexSpecifier) )
+						try
 						{
-							await channel.SendMessageSafe("Color out of range.");
+							uint color = uint.Parse(value.TrimStart('#'), System.Globalization.NumberStyles.AllowHexSpecifier);
+							if( color > uint.Parse("FFFFFF", System.Globalization.NumberStyles.AllowHexSpecifier) )
+							{
+								await channel.SendMessageSafe("Color out of range.");
+								return;
+							}
+
+							embedBuilder.WithColor(color);
+							if( debug )
+								await channel.SendMessageSafe($"Color `{value}` set.");
+						}
+						catch( Exception )
+						{
+							await channel.SendMessageSafe("Invalid color format.");
 							return;
 						}
-
-						embedBuilder.WithColor(color);
-						if( debug )
-							await channel.SendMessageSafe($"Color `{value}` set.");
-
 						break;
 					case "--fieldName":
 						if( value.Length > 256 )
