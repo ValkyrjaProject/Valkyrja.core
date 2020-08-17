@@ -388,7 +388,9 @@ namespace Valkyrja.entities
 			{
 				try
 				{
-					string msg = $"Received error code `{(int)exception.HttpCode}`\n{helptext}\n\nPlease fix my permissions and channel access on your Discord Server `{this.Guild.Name}`.\n\nYou can also set these messages to be sent into a notification channel on the config page. If you are unsure what's going on, consult our support team at {GlobalConfig.DiscordInvite}";
+					logMsg = $"Received error code `{(int)exception.HttpCode}`\n{helptext}";
+					string msg = $"{logMsg}\n\nPlease fix my permissions and channel access on your Discord Server `{this.Guild.Name}`.\n\nYou can also set these messages to be sent into a notification channel on the config page. If you are unsure what's going on, consult our support team at {GlobalConfig.DiscordInvite}";
+
 					SocketTextChannel channel = null;
 					if( this.Config.NotificationChannelId > 0 && (channel = this.Guild.GetTextChannel(this.Config.NotificationChannelId)) != null )
 					{
