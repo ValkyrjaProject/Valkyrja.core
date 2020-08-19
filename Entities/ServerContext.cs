@@ -15,6 +15,8 @@ namespace Valkyrja.entities
 		public DbSet<Localisation> Localisations{ get; set; }
 		public DbSet<ChannelConfig> Channels{ get; set; }
 		public DbSet<RoleConfig> Roles{ get; set; }
+		public DbSet<CategoryMuteRole> CategoryMuteRoles{ get; set; }
+		public DbSet<CategoryMemberRole> CategoryMemberRoles{ get; set; }
 		public DbSet<ReactionAssignedRole> ReactionAssignedRoles{ get; set; }
 		public DbSet<RoleGroupConfig> PublicRoleGroups{ get; set; }
 
@@ -56,6 +58,12 @@ namespace Valkyrja.entities
 
 			modelBuilder.Entity<RoleConfig>()
 				.HasKey(p => p.RoleId);
+
+			modelBuilder.Entity<CategoryMuteRole>()
+				.HasKey(p => new{p.ServerId, p.ModRoleId, p.MuteRoleId});
+
+			modelBuilder.Entity<CategoryMemberRole>()
+				.HasKey(p => new{p.ServerId, p.ModRoleId, p.MemberRoleId});
 
 			modelBuilder.Entity<ReactionAssignedRole>()
 				.HasKey(p => p.RoleId);
@@ -129,16 +137,33 @@ namespace Valkyrja.entities
 			return userData;
 		}
 
-		public RoleConfig GetOrAddRole(guid serverId, guid roleId)
+		public CategoryMemberRole GetOrAddMemberRole(guid serverId, guid modRoleId, guid memberRoleId)
 		{
-			RoleConfig roleConfig = this.Roles.AsQueryable().FirstOrDefault(u => u.ServerId == serverId && u.RoleId == roleId);
+			CategoryMemberRole roleConfig = this.CategoryMemberRoles.AsQueryable().FirstOrDefault(u => u.ServerId == serverId && u.ModRoleId == modRoleId && u.MemberRoleId == memberRoleId);
 			if( roleConfig == null )
 			{
-				roleConfig = new RoleConfig(){
+				roleConfig = new CategoryMemberRole(){
 					ServerId = serverId,
-					RoleId = roleId
+					ModRoleId = modRoleId,
+					MemberRoleId = memberRoleId,
 				};
-				this.Roles.Add(roleConfig);
+				this.CategoryMemberRoles.Add(roleConfig);
+			}
+
+			return roleConfig;
+		}
+
+		public CategoryMuteRole GetOrAddMuteRole(guid serverId, guid modRoleId, guid muteRoleId)
+		{
+			CategoryMuteRole roleConfig = this.CategoryMuteRoles.AsQueryable().FirstOrDefault(u => u.ServerId == serverId && u.ModRoleId == modRoleId && u.MuteRoleId == muteRoleId);
+			if( roleConfig == null )
+			{
+				roleConfig = new CategoryMuteRole(){
+					ServerId = serverId,
+					ModRoleId = modRoleId,
+					MuteRoleId = muteRoleId,
+				};
+				this.CategoryMuteRoles.Add(roleConfig);
 			}
 
 			return roleConfig;
