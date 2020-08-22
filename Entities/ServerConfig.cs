@@ -49,9 +49,6 @@ namespace Valkyrja.entities
 		[Column("execute_on_edit")]
 		public bool ExecuteOnEdit{ get; set; } = true;
 
-		[Column("use_category_mute")]
-		public bool UseCategoryMute{ get; set; } = true;
-
 		[Column("antispam_priority")]
 		public bool AntispamPriority{ get; set; } = false;
 

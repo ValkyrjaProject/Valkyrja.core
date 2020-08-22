@@ -15,7 +15,7 @@ namespace Valkyrja.entities
 		public DbSet<Localisation> Localisations{ get; set; }
 		public DbSet<ChannelConfig> Channels{ get; set; }
 		public DbSet<RoleConfig> Roles{ get; set; }
-		public DbSet<CategoryMuteRole> CategoryMuteRoles{ get; set; }
+		/*public DbSet<CategoryMuteRole> CategoryMuteRoles{ get; set; }*/
 		public DbSet<CategoryMemberRole> CategoryMemberRoles{ get; set; }
 		public DbSet<ReactionAssignedRole> ReactionAssignedRoles{ get; set; }
 		public DbSet<RoleGroupConfig> PublicRoleGroups{ get; set; }
@@ -59,8 +59,8 @@ namespace Valkyrja.entities
 			modelBuilder.Entity<RoleConfig>()
 				.HasKey(p => p.RoleId);
 
-			modelBuilder.Entity<CategoryMuteRole>()
-				.HasKey(p => new{p.ServerId, p.ModRoleId, p.MuteRoleId});
+			/*modelBuilder.Entity<CategoryMuteRole>()
+				.HasKey(p => new{p.ServerId, p.ModRoleId, p.MuteRoleId});*/
 
 			modelBuilder.Entity<CategoryMemberRole>()
 				.HasKey(p => new{p.ServerId, p.ModRoleId, p.MemberRoleId});
@@ -153,7 +153,7 @@ namespace Valkyrja.entities
 			return roleConfig;
 		}
 
-		public CategoryMuteRole GetOrAddMuteRole(guid serverId, guid modRoleId, guid muteRoleId)
+/*		public CategoryMuteRole GetOrAddMuteRole(guid serverId, guid modRoleId, guid muteRoleId)
 		{
 			CategoryMuteRole roleConfig = this.CategoryMuteRoles.AsQueryable().FirstOrDefault(u => u.ServerId == serverId && u.ModRoleId == modRoleId && u.MuteRoleId == muteRoleId);
 			if( roleConfig == null )
@@ -167,7 +167,7 @@ namespace Valkyrja.entities
 			}
 
 			return roleConfig;
-		}
+		}*/
 
 		public CommandOptions GetOrAddCommandOptions(Server server, string commandId)
 		{

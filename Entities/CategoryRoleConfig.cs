@@ -7,7 +7,7 @@ using guid = System.UInt64;
 
 namespace Valkyrja.entities
 {
-	[Table("category_mute_roles")]
+/*	[Table("category_mute_roles")]
 	public class CategoryMuteRole
 	{
 		[Key]
@@ -24,7 +24,7 @@ namespace Valkyrja.entities
 		[Column("mute_roleid")]
 		public guid MuteRoleId{ get; set; } = 0;
 	}
-
+*/
 	[Table("category_member_roles")]
 	public class CategoryMemberRole
 	{
