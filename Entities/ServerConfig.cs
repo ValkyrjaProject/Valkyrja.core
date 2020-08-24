@@ -295,6 +295,9 @@ namespace Valkyrja.entities
 		[Column("log_alert_regex", TypeName = "text")]
 		public string LogAlertRegex{ get; set; } = null;
 
+		[Column("delete_alert_regex", TypeName = "text")]
+		public string DeleteAlertRegex{ get; set; } = null;
+
 		[Column("log_message_join", TypeName = "text")]
 		public string LogMessageJoin{ get; set; } = "{0} joined the server.";
 

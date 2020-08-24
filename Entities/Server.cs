@@ -45,6 +45,7 @@ namespace Valkyrja.entities
 		public List<guid> AutoAnnounceChannels;
 
 		public Regex AlertRegex = null;
+		public Regex DeleteAlertRegex = null;
 		public Dictionary<guid, RoleConfig> Roles;
 		/*public Dictionary<guid, CategoryMuteRole> CategoryMuteRoles;*/
 		public Dictionary<guid, CategoryMemberRole> CategoryMemberRoles;
@@ -135,6 +136,23 @@ namespace Valkyrja.entities
 			else
 			{
 				this.AlertRegex = null;
+			}
+
+			if( !string.IsNullOrWhiteSpace(this.Config.DeleteAlertRegex) && this.Config.AlertChannelId != 0 )
+			{
+				try
+				{
+					this.DeleteAlertRegex = new Regex($"({this.Config.DeleteAlertRegex})", RegexOptions.Compiled | RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(150));
+				}
+				catch(Exception e)
+				{
+					this.DeleteAlertRegex = null;
+					await client.LogException(e, $"ReloadConfig failed AlertRegex: {this.Config.DeleteAlertRegex}", this.Id);
+				}
+			}
+			else
+			{
+				this.DeleteAlertRegex = null;
 			}
 
 			SocketRole role;
