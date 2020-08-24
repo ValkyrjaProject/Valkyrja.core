@@ -353,6 +353,13 @@ namespace Valkyrja.entities
 			return IsOwner(user) || user.Roles.Any(r => this.Roles.Any(p => p.Value.PermissionLevel >= RolePermissionLevel.Member && p.Value.RoleId == r.Id));
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool HasIgnoredRole(SocketGuildUser user)
+		{
+			return this.Client.IsGlobalAdmin(user.Id) || IsOwner(user) ||
+			       user.Roles.Any(r => this.Roles.Any(p => p.Value.RoleId == r.Id && (p.Value.PermissionLevel >= RolePermissionLevel.SubModerator || p.Value.AntispamIgnored)));
+		}
+
 
 		public string GetPropertyValue(string propertyName)
 		{
