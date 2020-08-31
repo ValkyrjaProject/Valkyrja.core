@@ -86,8 +86,9 @@ namespace Valkyrja.entities
 		/// <see cref="T:string" />: Reason for the ban. <br />
 		/// <see cref="T:SocketGuildUser" />: Who issued the ban. <br />
 		/// <see cref="T:bool" />: Silent? True to not PM the users. <br />
-		/// <see cref="T:bool" />: True to prune recent messages. </summary>
-		public Func<Server, List<UserData>, TimeSpan, string, SocketGuildUser, bool, bool, Task> BanUsers = null;
+		/// <see cref="T:bool" />: True to prune recent messages. <br />
+		/// <see cref="T:bool" />: True for redacted user ID and discrim. </summary>
+		public Func<Server, List<UserData>, TimeSpan, string, SocketGuildUser, bool, bool, bool, Task> BanUsers = null;
 
 		/// <summary> An event used to pass an unban instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to unban. <br />
