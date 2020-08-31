@@ -161,8 +161,11 @@ namespace Valkyrja.entities
 				foreach( SocketGuildChannel channel in this.Guild.Channels.Where(c => (c is SocketTextChannel || c is SocketCategoryChannel) && !(c is SocketNewsChannel)) )
 				{
 					if( this.Config.MuteIgnoreChannelId == channel.Id ||
-					    channel.PermissionOverwrites.Any(p => p.TargetId == role.Id) )
+					    channel.PermissionOverwrites.Any(p => p.TargetId == role.Id) ||
+					    channel.PermissionOverwrites.Any(p => (this.Guild.CurrentUser.Id == p.TargetId || this.Guild.CurrentUser.Roles.Select(r => r.Id).Contains(p.TargetId)) &&
+					                                          p.Permissions.ViewChannel == PermValue.Deny || p.Permissions.ManageChannel == PermValue.Deny || p.Permissions.ManageRoles == PermValue.Deny) )
 						continue;
+
 
 					try
 					{
