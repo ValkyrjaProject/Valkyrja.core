@@ -48,7 +48,7 @@ namespace Valkyrja.entities
 		public Regex DeleteAlertRegex = null;
 		public Dictionary<guid, RoleConfig> Roles;
 		/*public Dictionary<guid, CategoryMuteRole> CategoryMuteRoles;*/
-		public Dictionary<guid, CategoryMemberRole> CategoryMemberRoles;
+		public List<CategoryMemberRole> CategoryMemberRoles;
 		public List<ReactionAssignedRole> ReactionAssignedRoles;
 		public SemaphoreSlim ReactionRolesLock{ get; set; } = new SemaphoreSlim(1, 1);
 
@@ -108,7 +108,7 @@ namespace Valkyrja.entities
 			this.CategoryMuteRoles = dbContext.CategoryMuteRoles.AsQueryable().Where(c => c.ServerId == this.Id).ToDictionary(c => c.ModRoleId);*/
 
 			this.CategoryMemberRoles?.Clear();
-			this.CategoryMemberRoles = dbContext.CategoryMemberRoles.AsQueryable().Where(c => c.ServerId == this.Id).ToDictionary(c => c.ModRoleId);
+			this.CategoryMemberRoles = dbContext.CategoryMemberRoles.AsQueryable().Where(c => c.ServerId == this.Id).ToList();
 
 			this.ReactionRolesLock.Wait();
 			{
