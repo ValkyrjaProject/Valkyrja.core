@@ -154,10 +154,10 @@ namespace Valkyrja.entities
 
 		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to log. <br />
-		/// <see cref="T:SocketGuildUser" />: Muted user. <br />
+		/// <see cref="T:IGuildUser" />: Muted user. <br />
 		/// <see cref="T:string" />: Mute duration. <br />
 		/// <see cref="T:SocketGuildUser" />: User who issued the mute. </summary>
-		public Func<Server, SocketGuildUser, string, SocketGuildUser, Task> LogMute = null;
+		public Func<Server, IGuildUser, string, SocketGuildUser, Task> LogMute = null;
 
 		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to log. <br />

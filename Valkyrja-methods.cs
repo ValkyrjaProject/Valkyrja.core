@@ -266,7 +266,7 @@ namespace Valkyrja.core
 			return "There is an error in the data so I have failed to retrieve the patchnotes. Sorry mastah!";
 		}
 
-		public async Task<PmErrorCode> SendPmSafe(SocketUser user, string message, Embed embed = null)
+		public async Task<PmErrorCode> SendPmSafe(IUser user, string message, Embed embed = null)
 		{
 			if( user == null )
 				return PmErrorCode.UserNull;
