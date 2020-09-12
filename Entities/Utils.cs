@@ -97,6 +97,39 @@ namespace Valkyrja.entities
 
 			return "<:DiscordPoop:356545886454677506>";
 		}
+
+		public static string GetDurationString(TimeSpan duration)
+		{
+			StringBuilder durationString = new StringBuilder();
+
+			if( duration == TimeSpan.Zero )
+				durationString.Append("permanently");
+			else
+			{
+				durationString.Append("for ");
+				if( duration.Days > 0 )
+				{
+					durationString.Append(duration.Days);
+					durationString.Append(duration.Days == 1 ? " day" : " days");
+					if( duration.Hours > 0 || duration.Minutes > 0 )
+						durationString.Append(" and ");
+				}
+				if( duration.Hours > 0 )
+				{
+					durationString.Append(duration.Hours);
+					durationString.Append(duration.Hours == 1 ? " hour" : " hours");
+					if( duration.Minutes > 0 )
+						durationString.Append(" and ");
+				}
+				if( duration.Minutes > 0 )
+				{
+					durationString.Append(duration.Minutes);
+					durationString.Append(duration.Minutes == 1 ? " minute" : " minutes");
+				}
+			}
+
+			return durationString.ToString();
+		}
 	}
 
 	public static class Bash
