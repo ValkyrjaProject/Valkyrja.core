@@ -453,10 +453,13 @@ namespace Valkyrja.core
 
 		private Task Log(LogEntry logEntry)
 		{
-			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
-			dbContext.Log.Add(logEntry);
-			dbContext.SaveChanges();
-			dbContext.Dispose();
+			if( logEntry.Type != LogType.Debug )
+			{
+				GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
+				dbContext.Log.Add(logEntry);
+				dbContext.SaveChanges();
+				dbContext.Dispose();
+			}
 
 			Console.WriteLine($"[{logEntry.Type}]: {logEntry.Message}");
 
