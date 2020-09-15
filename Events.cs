@@ -443,7 +443,7 @@ namespace Valkyrja.entities
 
 			try
 			{
-				msg = originalMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
+				msg = originalMessage.HasValue ? originalMessage.Value : null;
 			}
 			catch( HttpException e )
 			{

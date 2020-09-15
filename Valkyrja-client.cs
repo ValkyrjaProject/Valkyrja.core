@@ -181,6 +181,7 @@ namespace Valkyrja.core
 			config.HandlerTimeout = null;
 			config.MessageCacheSize = this.GlobalConfig.ChannelMessageCacheSize;
 			config.ConnectionTimeout = 300000;
+			//config.ExclusiveBulkDelete = false; //not set is the same behavior as false, we handle deleted message events well enough to not care ... for now.
 
 			this.DiscordClient = new DiscordSocketClient(config);
 
@@ -461,7 +462,8 @@ namespace Valkyrja.core
 			if( logEntry.Type == LogType.Debug && logEntry.Message.Contains("PRESENCE") )
 				return Task.CompletedTask;
 
-			Console.WriteLine($"[{logEntry.Type}]: {logEntry.Message}");
+			if( this.GlobalConfig.LogDebug )
+				Console.WriteLine($"[{logEntry.Type}]: {logEntry.Message}");
 
 			return Task.CompletedTask;
 		}
