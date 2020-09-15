@@ -46,7 +46,7 @@ namespace Valkyrja.entities
 		public Func<SocketMessage, Task> MessageReceived = null;
 		/// <summary> Expects true to cancel the execution of other message events. </summary>
 		public Func<SocketMessage, Task<bool>> PriorityMessageReceived = null;
-		public Func<SocketMessage, SocketMessage, ISocketMessageChannel, Task> MessageUpdated = null;
+		public Func<IMessage, SocketMessage, ISocketMessageChannel, Task> MessageUpdated = null;
 		public Func<SocketMessage, ISocketMessageChannel, Task> MessageDeleted = null;
 
 		public Func<IUserMessage, ISocketMessageChannel, SocketReaction, Task> ReactionAdded = null;
@@ -427,7 +427,7 @@ namespace Valkyrja.entities
 			if( channel is SocketGuildChannel guildChannel && guildChannel.Guild.CurrentUser.GuildPermissions.ReadMessageHistory )
 				msg = originalMessage.GetOrDownloadAsync().GetAwaiter().GetResult();
 
-			Task.Run(async () => await this.MessageUpdated(msg as SocketMessage, updatedMessage, channel));
+			Task.Run(async () => await this.MessageUpdated(msg, updatedMessage, channel));
 			return Task.CompletedTask;
 		}
 

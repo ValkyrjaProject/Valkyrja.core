@@ -806,12 +806,13 @@ namespace Valkyrja.core
 					return;
 				}
 
-				switch( msg ) {
+				switch( msg )
+				{
 					case RestUserMessage message:
-						await message?.ModifyAsync(m => m.Content = e.TrimmedMessage.Substring(e.MessageArgs[0].Length+1));
+						await message?.ModifyAsync(m => m.Content = e.TrimmedMessage.Substring(e.MessageArgs[0].Length + 1));
 						break;
 					case SocketUserMessage message:
-						await message?.ModifyAsync(m => m.Content = e.TrimmedMessage.Substring(e.MessageArgs[0].Length+1));
+						await message?.ModifyAsync(m => m.Content = e.TrimmedMessage.Substring(e.MessageArgs[0].Length + 1));
 						break;
 					default:
 						await e.SendReplySafe("GetMessage went bork.");
