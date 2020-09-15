@@ -458,6 +458,8 @@ namespace Valkyrja.core
 			dbContext.SaveChanges();
 			dbContext.Dispose();
 
+			Console.WriteLine($"[{logEntry.Type}]: {logEntry.Message}");
+
 			return Task.CompletedTask;
 		}
 
