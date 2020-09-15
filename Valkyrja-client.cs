@@ -361,9 +361,6 @@ namespace Valkyrja.core
 
 			try
 			{
-				if( this.GlobalConfig.LogDebug )
-					Console.WriteLine("ValkyrjaClient: MessageReceived on thread " + Thread.CurrentThread.ManagedThreadId);
-
 				this.MessagesCounter++;
 				this.MessagesThisMinute++;
 

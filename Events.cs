@@ -386,10 +386,18 @@ namespace Valkyrja.entities
 //Message events
 		private Task OnMessageReceived(SocketMessage message)
 		{
+			DateTime startTime = DateTime.UtcNow;
+			if( this.Client.GlobalConfig.LogDebug )
+				Console.WriteLine($"ValkyrjaClient: [EVENT] MessageReceived: {message.Id}");
+
 			this.Client.Monitoring.Messages.Inc();
+			if( this.Client.GlobalConfig.LogDebug )
+				Console.WriteLine($"ValkyrjaClient: [EVENT] MessageReceived: {message.Id} | Monitoring took {(DateTime.UtcNow - startTime).Milliseconds}ms");
 
 			if( this.PriorityMessageReceived != null && this.PriorityMessageReceived(message).GetAwaiter().GetResult() )
 				return Task.CompletedTask;
+			if( this.Client.GlobalConfig.LogDebug )
+				Console.WriteLine($"ValkyrjaClient: [EVENT] MessageReceived: {message.Id} | Priority took {(DateTime.UtcNow - startTime).Milliseconds}ms");
 
 			if( this.MessageReceived != null )
 				Task.Run(async () => await TriggerMessageReceivedEvent(message));
