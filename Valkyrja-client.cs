@@ -461,6 +461,9 @@ namespace Valkyrja.core
 				dbContext.Dispose();
 			}
 
+			if( logEntry.Type == LogType.Debug && logEntry.Message.Contains("PRESENCE") )
+				return Task.CompletedTask;
+
 			Console.WriteLine($"[{logEntry.Type}]: {logEntry.Message}");
 
 			return Task.CompletedTask;
