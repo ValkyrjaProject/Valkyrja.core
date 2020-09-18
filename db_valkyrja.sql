@@ -1,19 +1,33 @@
--- MySQL dump 10.16  Distrib 10.3.10-MariaDB, for Linux (x86_64)
+-- MariaDB dump 10.17  Distrib 10.4.13-MariaDB, for Linux (x86_64)
 --
--- Host: localhost    Database: db_botwinder
+-- Host: localhost    Database: db_valkyrja
 -- ------------------------------------------------------
--- Server version	10.3.10-MariaDB
+-- Server version	10.4.13-MariaDB
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
+/*!40101 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `antispam_urls`
+--
+
+DROP TABLE IF EXISTS `antispam_urls`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `antispam_urls` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `url` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `blacklist`
@@ -30,6 +44,21 @@ CREATE TABLE `blacklist` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `category_member_roles`
+--
+
+DROP TABLE IF EXISTS `category_member_roles`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `category_member_roles` (
+  `serverid` bigint(20) unsigned NOT NULL,
+  `mod_roleid` bigint(20) unsigned NOT NULL,
+  `member_roleid` bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (`serverid`,`mod_roleid`,`member_roleid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `channels`
 --
 
@@ -42,6 +71,8 @@ CREATE TABLE `channels` (
   `ignored` tinyint(1) NOT NULL DEFAULT 0,
   `temporary` tinyint(1) NOT NULL DEFAULT 0,
   `muted_until` datetime NOT NULL,
+  `muted` tinyint(1) NOT NULL DEFAULT 0,
+  `auto_announce` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`channelid`),
   UNIQUE KEY `channelid` (`channelid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -108,6 +139,7 @@ CREATE TABLE `custom_commands` (
   `commandid` varchar(127) COLLATE utf8mb4_unicode_ci NOT NULL,
   `response` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `description` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mentions_enabled` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`serverid`,`commandid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -140,12 +172,12 @@ CREATE TABLE `exceptions` (
   `shardid` bigint(20) NOT NULL,
   `serverid` bigint(20) unsigned NOT NULL,
   `datetime` datetime NOT NULL,
-  `message` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `message` varchar(1024) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `stack` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `data` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=27856 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2279 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -193,6 +225,9 @@ CREATE TABLE `global_config` (
   `log_exceptions` tinyint(1) NOT NULL DEFAULT 1,
   `log_commands` tinyint(1) NOT NULL DEFAULT 1,
   `log_responses` tinyint(1) NOT NULL DEFAULT 1,
+  `antispam_allowed_duplicateusers` bigint(20) NOT NULL DEFAULT 0,
+  `antispam_duplicateusers_period` bigint(20) NOT NULL DEFAULT 0,
+  `message_cache_size` bigint(20) NOT NULL DEFAULT 500,
   PRIMARY KEY (`configuration_name`),
   UNIQUE KEY `configuration_name` (`configuration_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -224,10 +259,21 @@ DROP TABLE IF EXISTS `localisation`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `localisation` (
   `id` bigint(20) unsigned NOT NULL,
-  `iso` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `about` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `string1` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
-  `string2...` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `moderation_ban_done` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT '<|>_\\*fires them railguns at {0}*_  Ò_Ó<|>_\\*PewPewPew!!*_\nRIP {0}<|>',
+  `moderation_mute_done` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT '*Silence!!  ò_ó\n...\nI keel u, {0}!!*  Ò_Ó',
+  `moderation_kick_done` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT '<|>I\'ve fired them railguns at {0}.<|>Bye {0}! o/<|>',
+  `moderation_op_missing` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT '`{0}op`?',
+  `moderation_op_enabled` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT 'Go get em tiger!',
+  `moderation_op_disabled` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT 'All done?',
+  `moderation_nth_infraction` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT '`{0}` now has `{1}` infractions.',
+  `role_promote_done` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT 'Done!',
+  `role_demote_done` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT 'Done!',
+  `role_join_done` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT 'Done!',
+  `role_leave_done` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT 'Done!',
+  `role_join_exclusiveremoved` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT '\n_(I\'ve removed the other exclusive roles from the same role group.)_',
+  `role_publicroles_print` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT 'You can use `{0}join` and `{0}leave` commands with these Public Roles: ',
+  `role_publicroles_group` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT '\n\n**{0}** - you can join {1} of these:\n',
+  `role_memberroles_print` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT 'You can use `{0}promote` and `{0}demote` commands with these Member Roles: {1}',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -251,7 +297,7 @@ CREATE TABLE `logs` (
   `message` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `logtype_timestamp` (`type`,`datetime`)
-) ENGINE=InnoDB AUTO_INCREMENT=4974902 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=56393837 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -439,7 +485,7 @@ CREATE TABLE `server_config` (
   `antispam_links_beam_ban` tinyint(1) NOT NULL DEFAULT 0,
   `antispam_links_imgur` tinyint(1) NOT NULL DEFAULT 0,
   `antispam_links_imgur_ban` tinyint(1) NOT NULL DEFAULT 0,
-  `antispam_tolerance` bigint(20) NOT NULL DEFAULT 4,
+  `antispam_tolerance` bigint(20) NOT NULL DEFAULT 2,
   `antispam_ignore_members` tinyint(1) NOT NULL DEFAULT 0,
   `operator_roleid` bigint(20) unsigned NOT NULL DEFAULT 0,
   `quickban_duration` bigint(20) NOT NULL DEFAULT 0,
@@ -504,6 +550,38 @@ CREATE TABLE `server_config` (
   `exp_member_messages` bigint(20) NOT NULL DEFAULT 0,
   `exp_member_roleid` bigint(20) unsigned NOT NULL DEFAULT 0,
   `antispam_username` tinyint(1) NOT NULL DEFAULT 0,
+  `alert_channelid` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `color_alertchannel` int(10) unsigned NOT NULL DEFAULT 10421504,
+  `log_alert_regex` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `antispam_norole` tinyint(1) NOT NULL DEFAULT 0,
+  `antispam_porn` tinyint(1) NOT NULL DEFAULT 0,
+  `tempchannel_categoryid` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `profile_channelid` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `alert_role_mention` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `log_antispam_kick` tinyint(1) NOT NULL DEFAULT 0,
+  `tempchannel_giveadmin` tinyint(1) NOT NULL DEFAULT 0,
+  `antispam_mute_insteadof_ban` tinyint(1) NOT NULL DEFAULT 0,
+  `nicknames` tinyint(1) NOT NULL DEFAULT 1,
+  `tos` tinyint(1) NOT NULL DEFAULT 0,
+  `antispam_duplicate_multiuser` tinyint(1) NOT NULL DEFAULT 0,
+  `antispam_tolerance_ban` bigint(20) NOT NULL DEFAULT 6,
+  `alert_whitelistid` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `antispam_norole_minutes` bigint(20) NOT NULL DEFAULT 7,
+  `antispam_norole_recent` tinyint(1) NOT NULL DEFAULT 0,
+  `stats` tinyint(1) NOT NULL DEFAULT 0,
+  `captcha` tinyint(1) NOT NULL DEFAULT 0,
+  `verify_accountage` tinyint(1) NOT NULL DEFAULT 0,
+  `verify_accountage_days` bigint(20) NOT NULL DEFAULT 0,
+  `notification_channelid` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `last_touched` datetime DEFAULT NULL,
+  `slowmode_default` int(10) NOT NULL DEFAULT 60,
+  `antispam_links_chan` tinyint(1) NOT NULL DEFAULT 0,
+  `antispam_links_chan_ban` tinyint(1) NOT NULL DEFAULT 0,
+  `verify_channelid` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `ban_duration` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mute_message` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `operator_enforce` tinyint(1) NOT NULL DEFAULT 1,
+  `delete_alert_regex` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`serverid`),
   UNIQUE KEY `serverid` (`serverid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -554,7 +632,47 @@ CREATE TABLE `shards` (
   `disconnects` bigint(20) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `stats_daily`
+--
+
+DROP TABLE IF EXISTS `stats_daily`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `stats_daily` (
+  `serverid` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `datetime` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `user_joined` bigint(20) NOT NULL DEFAULT 0,
+  `user_left` bigint(20) NOT NULL DEFAULT 0,
+  `user_verified` bigint(20) NOT NULL DEFAULT 0,
+  `user_banned_valk` bigint(20) NOT NULL DEFAULT 0,
+  `user_kicked_valk` bigint(20) NOT NULL DEFAULT 0,
+  `user_kicked_discord` bigint(20) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`serverid`,`datetime`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `stats_total`
+--
+
+DROP TABLE IF EXISTS `stats_total`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `stats_total` (
+  `serverid` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `datetime` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `user_joined` bigint(20) NOT NULL DEFAULT 0,
+  `user_left` bigint(20) NOT NULL DEFAULT 0,
+  `user_verified` bigint(20) NOT NULL DEFAULT 0,
+  `user_banned_valk` bigint(20) NOT NULL DEFAULT 0,
+  `user_kicked_valk` bigint(20) NOT NULL DEFAULT 0,
+  `user_kicked_discord` bigint(20) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`serverid`,`datetime`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -585,42 +703,6 @@ CREATE TABLE `support_team` (
   PRIMARY KEY (`userid`),
   UNIQUE KEY `userid` (`userid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `timer_responses`
---
-
-DROP TABLE IF EXISTS `timer_responses`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `timer_responses` (
-  `id` bigint(20) NOT NULL,
-  `timerid` bigint(20) unsigned NOT NULL,
-  `message` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `timers`
---
-
-DROP TABLE IF EXISTS `timers`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `timers` (
-  `timerid` bigint(20) unsigned NOT NULL,
-  `serverid` bigint(20) unsigned NOT NULL,
-  `channelid` bigint(20) unsigned NOT NULL,
-  `enabled` tinyint(1) NOT NULL,
-  `self_command` tinyint(1) NOT NULL,
-  `last_triggered` datetime NOT NULL,
-  `start_at` datetime NOT NULL,
-  `expire_after` datetime NOT NULL,
-  `repeat_interval` bigint(20) NOT NULL,
-  PRIMARY KEY (`timerid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -677,7 +759,25 @@ CREATE TABLE `users` (
   `exp_relative` bigint(20) NOT NULL,
   `memo` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `username` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `muted` tinyint(1) NOT NULL DEFAULT 0,
+  `banned` tinyint(1) NOT NULL DEFAULT 0,
+  `exp_locked` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`userid`,`serverid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `verification_data`
+--
+
+DROP TABLE IF EXISTS `verification_data`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `verification_data` (
+  `serverid` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `userid` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `value` varchar(255) CHARACTER SET latin1 DEFAULT NULL,
+  PRIMARY KEY (`serverid`,`userid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -705,4 +805,4 @@ CREATE TABLE `votes` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-02-19 20:48:12
+-- Dump completed on 2020-09-18 20:49:15
