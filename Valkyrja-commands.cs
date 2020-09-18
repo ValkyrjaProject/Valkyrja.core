@@ -28,12 +28,7 @@ namespace Valkyrja.core
 		                                      "|    2x [Storage][Samsung 830 Pro 128GB SSD](raid1)\n" +
 		                                      "|    4x [Storage][Corsair MP510 512GB NVMe PCIe3.0](raid5|write2.1GB/s)\n" +
 		                                      "|    4x [Storage][Hitachi NAS 4TB 7200RPM](raid5|write1.4GB/s)\n" +
-		                                      "|    [CPU Cooler][Noctua NH-D15 SE-AM4]\n" +
-		                                      "|    2x [CPU Fan][Noctua NF-A15]\n" +
-		                                      "|3x [Exhaust Fan][Noctua NF-A12x25]\n" +
-		                                      "| 3x [Intake Fan][Noctua NF-A14]\n" +
-		                                      "|          [Case][be quiet! Dark Base Pro 900]\n" +
-		                                      "|  [Power Supply][Corsair RM750x Gold]\n" +
+		                                      "|       [Cooling][Noctua]\n" +
 		                                      "```\n" +
 		                                      "...and I'm connected through an APU2C4 router running pfSense, with 300/300 Mbps and ISP failover. Pics here: <https://rhea.dev/persephone>";
 
@@ -869,7 +864,7 @@ namespace Valkyrja.core
 				if( !string.IsNullOrEmpty(cmd.ParentId) && e.Server.Commands.ContainsKey(cmd.ParentId) )
 					cmd = e.Server.Commands[cmd.ParentId];
 				Embed embed = e.Server.GetManPage(cmd);
-				await e.Channel.SendMessageSafe(null, embed);
+				await e.SendReplySafe(null, embed);
 			};
 			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 			this.Commands.Add("manual", newCommand.CreateAlias("manual"));

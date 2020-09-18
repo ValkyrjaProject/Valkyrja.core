@@ -258,12 +258,14 @@ namespace Valkyrja.entities
 			this.MessageArgs = messageArgs;
 		}
 
-		public async Task SendReplySafe(string text, AllowedMentions allowedMentions = null)
+		public async Task SendReplySafe(string text = null, Embed embed = null, AllowedMentions allowedMentions = null)
 		{
 			//await this.Client.LogMessage(LogType.Response, this.Channel, this.Client.GlobalConfig.UserId, message);
+			if( text == null && embed == null )
+				return;
 
 			if( this.Server.Config.IgnoreEveryone )
-				text = text.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
+				text = text?.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
 
 			try
 			{
@@ -273,10 +275,16 @@ namespace Valkyrja.entities
 					switch( msg )
 					{
 						case RestUserMessage message:
-							await message.ModifyAsync(m => m.Content = text);
+							await message.ModifyAsync(m => {
+								m.Content = text;
+								m.Embed = embed;
+							});
 							break;
 						case SocketUserMessage message:
-							await message.ModifyAsync(m => m.Content = text);
+							await message.ModifyAsync(m => {
+								m.Content = text;
+								m.Embed = embed;
+							});
 							break;
 					}
 
@@ -288,7 +296,7 @@ namespace Valkyrja.entities
 				await Server.HandleHttpException(e, $"Unable to get message history in <#{this.Channel.Id}>");
 			}
 
-			IUserMessage reply = await this.Channel.SendMessageSafe(text, allowedMentions: allowedMentions);
+			IUserMessage reply = await this.Channel.SendMessageSafe(text, embed, allowedMentions: allowedMentions);
 			if( reply == null || this.Message == null )
 				return;
 
