@@ -47,7 +47,7 @@ namespace Valkyrja.entities
 		/// <summary> Expects true to cancel the execution of other message events. </summary>
 		public Func<SocketMessage, Task<bool>> PriorityMessageReceived = null;
 		public Func<IMessage, SocketMessage, ISocketMessageChannel, Task> MessageUpdated = null;
-		public Func<SocketMessage, ISocketMessageChannel, Task> MessageDeleted = null;
+		public Func<IMessage, ISocketMessageChannel, Task> MessageDeleted = null;
 
 		public Func<IUserMessage, ISocketMessageChannel, SocketReaction, Task> ReactionAdded = null;
 		public Func<IUserMessage, ISocketMessageChannel, SocketReaction, Task> ReactionRemoved = null;
@@ -455,7 +455,7 @@ namespace Valkyrja.entities
 			}
 
 			if( msg != null )
-				Task.Run(async () => await this.MessageDeleted(msg as SocketMessage, channel));
+				Task.Run(async () => await this.MessageDeleted(msg, channel));
 			return Task.CompletedTask;
 		}
 
