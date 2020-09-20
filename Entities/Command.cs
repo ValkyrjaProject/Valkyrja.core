@@ -279,6 +279,8 @@ namespace Valkyrja.entities
 							await message.ModifyAsync(m => m.Content = text);
 							break;
 					}
+
+					return;
 				}
 			}
 			catch( HttpException e )
