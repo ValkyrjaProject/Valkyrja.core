@@ -76,7 +76,7 @@ namespace Valkyrja.entities
 		[Column("memo", TypeName = "text")]
 		public string Memo{ get; set; } = "";
 
-		public string GetNamesString(ServerContext dbContext, SocketGuildUser user = null)
+		public string GetNamesString(ServerContext dbContext, IGuildUser user = null)
 		{
 			StringBuilder whoisString = new StringBuilder();
 
@@ -101,7 +101,7 @@ namespace Valkyrja.entities
 
 			return whoisString.ToString().Replace("@everyone", "@-everyone").Replace("@here", "@-here");
 		}
-		public string GetWhoisString(ServerContext dbContext, SocketGuildUser user = null)
+		public string GetWhoisString(ServerContext dbContext, IGuildUser user = null)
 		{
 			StringBuilder whoisString = new StringBuilder();
 
@@ -115,8 +115,8 @@ namespace Valkyrja.entities
 			if( user?.JoinedAt != null )
 				whoisString.AppendLine($"    Joined the server: `{Utils.GetTimestamp(user.JoinedAt.Value)}`");
 
-			if( user != null )
-				whoisString.AppendLine("    Roles: " + user.Roles.Select(r => r.Name.Replace('`', '\'')).ToNames());
+			if( user is SocketGuildUser u )
+				whoisString.AppendLine("    Roles: " + u.Roles.Select(r => r.Name.Replace('`', '\'')).ToNames());
 
 			if( this.Verified )
 				whoisString.AppendLine("    Verified: `true`");

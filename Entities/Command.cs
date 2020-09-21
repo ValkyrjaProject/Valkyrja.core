@@ -289,6 +289,9 @@ namespace Valkyrja.entities
 			}
 
 			IUserMessage reply = await this.Channel.SendMessageSafe(text, allowedMentions: allowedMentions);
+			if( reply == null || this.Message == null )
+				return;
+
 			this.Server.CommandReplyMsgIds.TryAdd(this.Message.Id, reply.Id);
 
 			if( this.CommandOptions != null && this.CommandOptions.DeleteReply )
