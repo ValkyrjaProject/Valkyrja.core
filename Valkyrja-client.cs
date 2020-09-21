@@ -395,7 +395,7 @@ namespace Valkyrja.core
 
 		private async Task OnMessageUpdated(IMessage originalMessage, SocketMessage updatedMessage, ISocketMessageChannel iChannel)
 		{
-			if( !this.IsConnected || originalMessage.Content == updatedMessage.Content )
+			if( !this.IsConnected || originalMessage.Content == updatedMessage.Content || updatedMessage.Content == null )
 				return;
 
 			try
