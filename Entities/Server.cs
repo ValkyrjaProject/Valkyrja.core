@@ -33,13 +33,15 @@ namespace Valkyrja.entities
 		private List<CommandChannelOptions> CachedCommandChannelOptions;
 
 		public DateTime ClearAntispamMuteTime = DateTime.UtcNow;
-		public Dictionary<guid, int> AntispamMuteCount = new Dictionary<guid, int>();
-		public Dictionary<guid, int> AntispamMessageCount = new Dictionary<guid, int>();
-		public Dictionary<guid, SocketMessage[]> AntispamRecentUserMessages = new Dictionary<guid, SocketMessage[]>();
+		//public readonly Dictionary<guid, int> AntispamMuteCount = new Dictionary<guid, int>();
+		public readonly Dictionary<guid, int> AntispamMessageCount = new Dictionary<guid, int>();
+		public readonly Dictionary<guid, SocketMessage[]> AntispamRecentUserMessages = new Dictionary<guid, SocketMessage[]>();
 		public SocketMessage[] AntispamRecentMessages = null;
-		public Dictionary<guid, int> UserMentionCount = new Dictionary<guid, int>();
-		public List<SocketGuildUser> AntispamRecentUsernames = new List<SocketGuildUser>();
-		public ConcurrentDictionary<guid, guid> CommandReplyMsgIds = new ConcurrentDictionary<guid, guid>();
+		public readonly Dictionary<guid, int> UserMentionCount = new Dictionary<guid, int>();
+		public readonly List<SocketGuildUser> AntispamRecentUsernames = new List<SocketGuildUser>();
+		public readonly ConcurrentDictionary<guid, guid> CommandReplyMsgIds = new ConcurrentDictionary<guid, guid>();
+		public readonly Queue<(SocketGuildUser, DateTime)> RecentlyJoinedUsers = new Queue<(SocketGuildUser, DateTime)>();
+		public readonly SemaphoreSlim JoinrateLock = new SemaphoreSlim(1, 1);
 
 		public List<guid> IgnoredChannels;
 		public List<guid> AutoAnnounceChannels;
