@@ -160,6 +160,9 @@ namespace Valkyrja.entities
 		[Column("antispam_joinrate_enabled")]
 		public bool AntispamJoinrateEnabled{ get; set; } = false;
 
+		[Column("antispam_joinrate_ban")]
+		public bool AntispamJoinrateBan{ get; set; } = false;
+
 		[Column("antispam_joinrate_count")]
 		public Int64 AntispamJoinrateCount{ get; set; } = 0;
 
