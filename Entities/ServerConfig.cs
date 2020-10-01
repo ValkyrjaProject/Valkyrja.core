@@ -161,10 +161,10 @@ namespace Valkyrja.entities
 		public bool AntispamJoinrateEnabled{ get; set; } = false;
 
 		[Column("antispam_joinrate_count")]
-		public int AntispamJoinrateCount{ get; set; } = 0;
+		public Int64 AntispamJoinrateCount{ get; set; } = 0;
 
 		[Column("antispam_joinrate_seconds")]
-		public int AntispamJoinrateSeconds{ get; set; } = 0;
+		public Int64 AntispamJoinrateSeconds{ get; set; } = 0;
 
 		[Column("operator_enforce")]
 		public bool OperatorEnforce{ get; set; } = true;
