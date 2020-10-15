@@ -129,10 +129,15 @@ namespace Valkyrja.entities
 				{
 					this.AlertRegex = new Regex($"({this.Config.LogAlertRegex})", RegexOptions.Compiled | RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(150));
 				}
-				catch(Exception e)
+				catch(Exception)
 				{
 					this.AlertRegex = null;
-					await client.LogException(e, $"ReloadConfig failed AlertRegex: {this.Config.LogAlertRegex}", this.Id);
+					string msg = "Your Alert regular expression is invalid. Fix it or delete it.";
+					SocketTextChannel channel = null;
+					if( this.Config.NotificationChannelId > 0 && (channel = this.Guild.GetTextChannel(this.Config.NotificationChannelId)) != null )
+						await channel.SendMessageSafe(msg);
+					else
+						await this.Client.SendPmSafe(this.Guild.Owner, msg);
 				}
 			}
 			else
@@ -146,10 +151,15 @@ namespace Valkyrja.entities
 				{
 					this.DeleteAlertRegex = new Regex($"({this.Config.DeleteAlertRegex})", RegexOptions.Compiled | RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(150));
 				}
-				catch(Exception e)
+				catch(Exception)
 				{
 					this.DeleteAlertRegex = null;
-					await client.LogException(e, $"ReloadConfig failed AlertRegex: {this.Config.DeleteAlertRegex}", this.Id);
+					string msg = "Your Alert regular expression is invalid. Fix it or delete it.";
+					SocketTextChannel channel = null;
+					if( this.Config.NotificationChannelId > 0 && (channel = this.Guild.GetTextChannel(this.Config.NotificationChannelId)) != null )
+						await channel.SendMessageSafe(msg);
+					else
+						await this.Client.SendPmSafe(this.Guild.Owner, msg);
 				}
 			}
 			else
