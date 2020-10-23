@@ -1302,8 +1302,8 @@ namespace Valkyrja.core
 					else if( options.DeleteRequest )
 						responseBuilder.Append("\n+ This command will attempt to delete the message that issued the command.");
 
-					IEnumerable<CommandChannelOptions> channelBlacklist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId && c.Blocked);
-					IEnumerable<CommandChannelOptions> channelWhitelist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId && c.Allowed);
+					List<CommandChannelOptions> channelBlacklist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId && c.Blocked).ToList();
+					List<CommandChannelOptions> channelWhitelist = dbContext.CommandChannelOptions.AsQueryable().Where(c => c.ServerId == e.Server.Id && c.CommandId == commandId && c.Allowed).ToList();
 					if( channelBlacklist.Any() )
 					{
 						responseBuilder.Append("\n+ This command can not be invoked in any of the following channels:");
