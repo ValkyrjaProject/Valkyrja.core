@@ -31,6 +31,9 @@ namespace Valkyrja.entities
 		[Column("discord_token", TypeName = "varchar(255)")]
 		public string DiscordToken{ get; set; } = "";
 
+		[Column("intent_members")]
+		public bool IntentMembers{ get; set; } = true;
+
 		[Column("userid")]
 		public guid UserId{ get; set; } = 278834060053446666;
 
