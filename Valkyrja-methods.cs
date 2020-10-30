@@ -174,43 +174,34 @@ namespace Valkyrja.core
 			return found;
 		}
 
-		public List<SocketGuildUser> GetMentionedGuildUsers(CommandArguments e) //todo - Move this elsewhere...
+		public async Task<List<IGuildUser>> GetMentionedGuildUsers(CommandArguments e) //todo - Move this elsewhere...
 		{
-			List<SocketGuildUser> mentionedUsers = new List<SocketGuildUser>();
-			foreach( SocketUser user in GetMentionedUsers(e) )
-			{
-				if(user is SocketGuildUser guildUser)
-					mentionedUsers.Add(guildUser);
-			}
 
-			return mentionedUsers;
-		}
-		public List<SocketUser> GetMentionedUsers(CommandArguments e) //todo - Move this elsewhere...
-		{
-			List<SocketUser> mentionedUsers = new List<SocketUser>();
+			if( e.MessageArgs == null || e.MessageArgs.Length == 0 )
+				return new List<IGuildUser>();
 
-			if( e.Message.MentionedUsers != null && e.Message.MentionedUsers.Any() )
+			List<IGuildUser> mentionedUsers = new List<IGuildUser>();
+			for( int i = 0; i < e.MessageArgs.Length; i++ )
 			{
-				mentionedUsers.AddRange(e.Message.MentionedUsers);
-			}
-			else if( e.MessageArgs != null && e.MessageArgs.Length > 0 )
-			{
-				for( int i = 0; i < e.MessageArgs.Length; i++)
+				guid id;
+				if( !guid.TryParse(e.MessageArgs[i].Trim('<','@','!','>'), out id) || id == 0 )
+					break;
+
+				IGuildUser user = e.Server.Guild.GetUser(id);
+				if( user == null )
+					user = await this.DiscordClient.Rest.GetGuildUserAsync(e.Server.Id, id);
+				if( user == null )
+					continue;
+
+				if( mentionedUsers.Contains(user) )
 				{
-					guid id;
-					SocketUser user;
-					if( !guid.TryParse(e.MessageArgs[i], out id) || id == 0 || (user = e.Server.Guild.GetUser(id)) == null )
-						break;
-					if( mentionedUsers.Contains(user) )
-					{
-						List<string> newArgs = new List<string>(e.MessageArgs);
-						newArgs.RemoveAt(i);
-						e.MessageArgs = newArgs.ToArray();
-						continue;
-					}
-
-					mentionedUsers.Add(user);
+					List<string> newArgs = new List<string>(e.MessageArgs);
+					newArgs.RemoveAt(i);
+					e.MessageArgs = newArgs.ToArray();
+					continue;
 				}
+
+				mentionedUsers.Add(user);
 			}
 
 			return mentionedUsers;
