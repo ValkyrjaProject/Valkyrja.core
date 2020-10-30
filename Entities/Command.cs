@@ -176,7 +176,7 @@ namespace Valkyrja.entities
 
 				if( !string.IsNullOrWhiteSpace(e.TrimmedMessage) && e.TrimmedMessage == "help" )
 				{
-					await e.SendReplySafe(e.Command.Description);
+					await e.SendReplySafe(e.Command.ManPage.ToString(e.Server.Config.CommandPrefix + e.CommandId));
 					return true;
 				}
 

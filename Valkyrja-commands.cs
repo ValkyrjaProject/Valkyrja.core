@@ -3,7 +3,6 @@ using System.Collections;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
@@ -11,7 +10,6 @@ using Discord.Rest;
 using Valkyrja.entities;
 using Discord.WebSocket;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using guid = System.UInt64;
 
 namespace Valkyrja.core
@@ -61,6 +59,7 @@ namespace Valkyrja.core
 			newCommand.Type = CommandType.LargeOperation;
 			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Display all teh command numbers.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				await e.SendReplySafe("I'm counting! Do not disturb!! >_<");
@@ -138,6 +137,7 @@ namespace Valkyrja.core
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Display all teh numbers. Use with `long` arg for more numbers.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				StringBuilder shards = new StringBuilder();
@@ -182,6 +182,7 @@ namespace Valkyrja.core
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Query for servers with min - max users.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				int min = 0;
@@ -226,6 +227,7 @@ namespace Valkyrja.core
 			newCommand.IsCoreCommand = true;
 			newCommand.IsSupportCommand = true;
 			newCommand.Description = "Display some info about specific server with id/name, or owners id/username.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				if( string.IsNullOrEmpty(e.TrimmedMessage) )
@@ -273,6 +275,7 @@ namespace Valkyrja.core
 			newCommand.IsCoreCommand = true;
 			newCommand.IsSupportCommand = true;
 			newCommand.Description = "Get configuration for emoji reaction assigned roles on the current server, or optional serverId.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				guid serverId = e.Server.Id;
@@ -307,11 +310,12 @@ namespace Valkyrja.core
 			newCommand.IsCoreCommand = true;
 			newCommand.IsSupportCommand = true;
 			newCommand.Description = "Get a server config property by its exact name. Defaults to the current server - use with serverid as the first parameter to explicitly specify different one.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				if( e.MessageArgs.Length < 1 )
 				{
-					await e.SendReplySafe($"{e.Command.Description}");
+					await e.SendReplySafe(e.Command.ManPage.ToString(e.Server.Config.CommandPrefix + e.CommandId));
 					return;
 				}
 
@@ -342,11 +346,12 @@ namespace Valkyrja.core
 			newCommand.IsCoreCommand = true;
 			newCommand.IsSupportCommand = true;
 			newCommand.Description = "Set a server config property referenced by its exact name. Use with serverid, the exact property name, and the new value (use `i`, `u` and `f` for number type)";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				if( e.MessageArgs.Length < 3 )
 				{
-					await e.SendReplySafe($"{e.Command.Description}");
+					await e.SendReplySafe(e.Command.ManPage.ToString(e.Server.Config.CommandPrefix + e.CommandId));
 					return;
 				}
 
@@ -396,6 +401,7 @@ namespace Valkyrja.core
 			newCommand.IsCoreCommand = true;
 			newCommand.IsSupportCommand = true;
 			newCommand.Description = "Get an invite url with serverid.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				guid id;
@@ -424,6 +430,7 @@ namespace Valkyrja.core
 			newCommand.IsCoreCommand = true;
 			newCommand.IsSupportCommand = true;
 			newCommand.Description = "Clear the Invite url to be re-created, with serverid.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				guid id;
@@ -454,6 +461,7 @@ namespace Valkyrja.core
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Shut down the bot.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				await e.SendReplySafe("bai");
@@ -468,6 +476,7 @@ namespace Valkyrja.core
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Get a list of exceptions.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				StringBuilder response = new StringBuilder();
@@ -493,6 +502,7 @@ namespace Valkyrja.core
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Get an exception stack for specific ID.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				string responseString = "I couldn't find that exception.";
@@ -511,6 +521,7 @@ namespace Valkyrja.core
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Add or remove an ID to or from the blacklist.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e => {
 				guid id = 0;
@@ -573,6 +584,7 @@ namespace Valkyrja.core
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Add or remove an ID to or from the subscribers, use with optional bonus or premium parameter.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e =>{
 				guid id = 0;
@@ -644,6 +656,7 @@ namespace Valkyrja.core
 			newCommand.Type = CommandType.Standard;
 			newCommand.IsCoreCommand = true;
 			newCommand.Description = "Add or remove an ID to or from the partners, use with optional premium parameter.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.OwnerOnly;
 			newCommand.OnExecute += async e =>{
 				guid id = 0;
@@ -1349,7 +1362,7 @@ namespace Valkyrja.core
 				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
 				    !bool.TryParse(e.MessageArgs[1], out bool deleteRequest) )
 				{
-					await e.SendReplySafe("Invalid parameters...\n" + e.Command.Description);
+					await e.SendReplySafe(e.Command.ManPage.ToString(e.Server.Config.CommandPrefix + e.CommandId));
 					return;
 				}
 
@@ -1388,7 +1401,7 @@ namespace Valkyrja.core
 				if( e.MessageArgs == null || e.MessageArgs.Length < 2 ||
 				    !bool.TryParse(e.MessageArgs[1], out bool deleteReply) )
 				{
-					await e.SendReplySafe("Invalid parameters...\n" + e.Command.Description);
+					await e.SendReplySafe(e.Command.ManPage.ToString(e.Server.Config.CommandPrefix + e.CommandId));
 					return;
 				}
 
@@ -1428,7 +1441,7 @@ namespace Valkyrja.core
 				    (e.MessageArgs[1].ToLower() != "add" && e.MessageArgs[1].ToLower() != "remove") ||
 				    !guid.TryParse(e.MessageArgs[2].Trim('<', '#', '>'), out guid channelId) || e.Server.Guild.GetChannel(channelId) == null )
 				{
-					await e.SendReplySafe("Invalid parameters...\n" + e.Command.Description);
+					await e.SendReplySafe(e.Command.ManPage.ToString(e.Server.Config.CommandPrefix + e.CommandId));
 					return;
 				}
 
@@ -1459,7 +1472,7 @@ namespace Valkyrja.core
 						dbContext.SaveChanges();
 						break;
 					default:
-						responseString = "Invalid parameters...\n" + e.Command.Description;
+						responseString = "Invalid parameters...\n" + e.Command.ManPage.ToString(e.Server.Config.CommandPrefix + e.CommandId);
 						break;
 				}
 
@@ -1479,7 +1492,7 @@ namespace Valkyrja.core
 				    (e.MessageArgs[0].ToLower() != "add" && e.MessageArgs[0].ToLower() != "remove") ||
 				    !guid.TryParse(e.MessageArgs[1].Trim('<', '#', '>'), out guid channelId) || e.Server.Guild.GetChannel(channelId) == null )
 				{
-					await e.SendReplySafe("Invalid parameters...\n" + e.Command.Description);
+					await e.SendReplySafe(e.Command.ManPage.ToString(e.Server.Config.CommandPrefix + e.CommandId));
 					return;
 				}
 
@@ -1500,7 +1513,7 @@ namespace Valkyrja.core
 							dbContext.SaveChanges();
 							break;
 						default:
-							responseString = "Invalid parameters...\n" + e.Command.Description;
+							responseString = "Invalid parameters...\n" + e.Command.ManPage.ToString(e.Server.Config.CommandPrefix + e.CommandId);
 							break;
 					}
 				}
@@ -1521,7 +1534,7 @@ namespace Valkyrja.core
 				    (e.MessageArgs[1].ToLower() != "add" && e.MessageArgs[1].ToLower() != "remove") ||
 				    !guid.TryParse(e.MessageArgs[2].Trim('<', '#', '>'), out guid channelId) || e.Server.Guild.GetChannel(channelId) == null )
 				{
-					await e.SendReplySafe("Invalid parameters...\n" + e.Command.Description);
+					await e.SendReplySafe(e.Command.ManPage.ToString(e.Server.Config.CommandPrefix + e.CommandId));
 					return;
 				}
 
@@ -1552,7 +1565,7 @@ namespace Valkyrja.core
 						dbContext.SaveChanges();
 						break;
 					default:
-						responseString = "Invalid parameters...\n" + e.Command.Description;
+						responseString = "Invalid parameters...\n" + e.Command.ManPage.ToString(e.Server.Config.CommandPrefix + e.CommandId);
 						break;
 				}
 
@@ -1572,7 +1585,7 @@ namespace Valkyrja.core
 				    (e.MessageArgs[0].ToLower() != "add" && e.MessageArgs[0].ToLower() != "remove") ||
 				    !guid.TryParse(e.MessageArgs[1].Trim('<', '#', '>'), out guid channelId) || e.Server.Guild.GetChannel(channelId) == null )
 				{
-					await e.SendReplySafe("Invalid parameters...\n" + e.Command.Description);
+					await e.SendReplySafe(e.Command.ManPage.ToString(e.Server.Config.CommandPrefix + e.CommandId));
 					return;
 				}
 
@@ -1593,7 +1606,7 @@ namespace Valkyrja.core
 							dbContext.SaveChanges();
 							break;
 						default:
-							responseString = "Invalid parameters...\n" + e.Command.Description;
+							responseString = "Invalid parameters...\n" + e.Command.ManPage.ToString(e.Server.Config.CommandPrefix + e.CommandId);
 							break;
 					}
 				}
@@ -1607,11 +1620,12 @@ namespace Valkyrja.core
 			newCommand = new Command("cmdResetRestrictions");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Reset restrictions placed on a command by the _cmdChannelWhitelist_ and _cmdChannelBlacklist_ commands. Use with the `CommandID` as parameter.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
 			newCommand.OnExecute += async e => {
 				if( e.MessageArgs == null || e.MessageArgs.Length < 1 )
 				{
-					await e.SendReplySafe("Invalid parameters...\n" + e.Command.Description);
+					await e.SendReplySafe(e.Command.ManPage.ToString(e.Server.Config.CommandPrefix + e.CommandId));
 					return;
 				}
 
@@ -1637,6 +1651,7 @@ namespace Valkyrja.core
 			newCommand = new Command("cmdResetRestrictionsAllCC");
 			newCommand.Type = CommandType.Standard;
 			newCommand.Description = "Reset restrictions placed on all custom commands by the _cmdChannelWhitelist_ and _cmdChannelBlacklist_ commands.";
+			newCommand.ManPage = new ManPage("", "");
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin;
 			newCommand.OnExecute += async e => {
 				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
