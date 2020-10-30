@@ -180,17 +180,17 @@ namespace Valkyrja.entities
 
 		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to log. <br />
-		/// <see cref="T:SocketGuildUser" />: User who was promoted. <br />
+		/// <see cref="T:IGuildUser" />: User who was promoted. <br />
 		/// <see cref="T:string" />: Name of the role. <br />
 		/// <see cref="T:SocketGuildUser" />: User who issued the promote. </summary>
-		public Func<Server, SocketGuildUser, string, SocketGuildUser, Task> LogPromote = null;
+		public Func<Server, IGuildUser, string, SocketGuildUser, Task> LogPromote = null;
 
 		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to log. <br />
-		/// <see cref="T:SocketGuildUser" />: User who was demoted. <br />
+		/// <see cref="T:IGuildUser" />: User who was demoted. <br />
 		/// <see cref="T:string" />: Name of the role. <br />
 		/// <see cref="T:SocketGuildUser" />: User who issued the demote. </summary>
-		public Func<Server, SocketGuildUser, string, SocketGuildUser, Task> LogDemote = null;
+		public Func<Server, IGuildUser, string, SocketGuildUser, Task> LogDemote = null;
 
 		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to log. <br />
