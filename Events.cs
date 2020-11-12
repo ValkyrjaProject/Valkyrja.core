@@ -101,16 +101,18 @@ namespace Valkyrja.entities
 		/// <see cref="T:List{UserData}" />: User to be muted. <br />
 		/// <see cref="T:TimeSpan" />: Duration of the mute. <br />
 		/// <see cref="T:IRole" />: MutedRole. <br />
-		/// <see cref="T:SocketGuildUser" />: Who issued the mute. </summary>
-		public Func<Server, UserData, TimeSpan, IRole, SocketGuildUser, Task> MuteUser = null;
+		/// <see cref="T:SocketGuildUser" />: Who issued the mute. <br />
+		/// <see cref="T:string" />: Reason for the mute. </summary>
+		public Func<Server, UserData, TimeSpan, IRole, SocketGuildUser, string, Task> MuteUser = null;
 
 		/// <summary> An event used to pass a mute instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to mute. <br />
 		/// <see cref="T:List{UserData}" />: Users to be muted. <br />
 		/// <see cref="T:TimeSpan" />: Duration of the mute. <br />
 		/// <see cref="T:IRole" />: MutedRole. <br />
-		/// <see cref="T:SocketGuildUser" />: Who issued the mute. </summary>
-		public Func<Server, List<UserData>, TimeSpan, IRole, SocketGuildUser, Task> MuteUsers = null;
+		/// <see cref="T:SocketGuildUser" />: Who issued the mute. <br />
+		/// <see cref="T:string" />: Reason for the mute. </summary>
+		public Func<Server, List<UserData>, TimeSpan, IRole, SocketGuildUser, string, Task> MuteUsers = null;
 
 		/// <summary> An event used to pass a mute instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to mute. <br />
@@ -156,8 +158,9 @@ namespace Valkyrja.entities
 		/// <see cref="T:Server" />: Server on which to log. <br />
 		/// <see cref="T:IGuildUser" />: Muted user. <br />
 		/// <see cref="T:string" />: Mute duration. <br />
-		/// <see cref="T:SocketGuildUser" />: User who issued the mute. </summary>
-		public Func<Server, IGuildUser, string, SocketGuildUser, Task> LogMute = null;
+		/// <see cref="T:SocketGuildUser" />: Who issued the mute. <br />
+		/// <see cref="T:string" />: Reason for the mute. </summary>
+		public Func<Server, IGuildUser, string, SocketGuildUser, string, Task> LogMute = null;
 
 		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to log. <br />
