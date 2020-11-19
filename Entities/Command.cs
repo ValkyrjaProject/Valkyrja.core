@@ -269,7 +269,7 @@ namespace Valkyrja.entities
 
 			try
 			{
-				if( this.Server.CommandReplyMsgIds.ContainsKey(this.Message.Id) )
+				if( this.Server.CommandReplyMsgIds.ContainsKey(this.Message.Id) && (text == null || text.Length < GlobalConfig.MessageCharacterLimit) )
 				{
 					IMessage msg = await this.Channel.GetMessageAsync(this.Server.CommandReplyMsgIds[this.Message.Id]);
 					switch( msg )
@@ -279,16 +279,14 @@ namespace Valkyrja.entities
 								m.Content = text;
 								m.Embed = embed;
 							});
-							break;
+							return;
 						case SocketUserMessage message:
 							await message.ModifyAsync(m => {
 								m.Content = text;
 								m.Embed = embed;
 							});
-							break;
+							return;
 					}
-
-					return;
 				}
 			}
 			catch( HttpException e )
