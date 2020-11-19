@@ -890,7 +890,7 @@ namespace Valkyrja.core
 						if( pm.StartsWith($"{server.Config.CommandPrefix}embed") )
 						{
 							pm = pm.Substring($"{server.Config.CommandPrefix}embed".Length).Trim();
-							await SendEmbedFromCli(pm, server, channel, message.Author, user);
+							await SendEmbedFromCli(new CommandArguments(this, null, server, channel, message, cmd.CommandId, msg, null, commandOptions), user);
 						}
 						else
 						{
@@ -913,7 +913,7 @@ namespace Valkyrja.core
 			if( !match.Success && msg.StartsWith($"{server.Config.CommandPrefix}embed") )
 			{
 				msg = msg.Substring($"{server.Config.CommandPrefix}embed".Length).Trim();
-				await SendEmbedFromCli(msg, server, channel, message.Author);
+				await SendEmbedFromCli(new CommandArguments(this, null, server, channel, message, cmd.CommandId, msg, null, commandOptions));
 			}
 			else
 			{

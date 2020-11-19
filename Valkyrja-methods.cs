@@ -287,11 +287,11 @@ namespace Valkyrja.core
 			}
 		}
 
-		public async Task SendEmbedFromCli(string trimmedMessage, Server server, SocketTextChannel channel, SocketUser author, SocketUser pmInstead = null)
+		public async Task SendEmbedFromCli(CommandArguments cmdArgs, SocketUser pmInstead = null)
 		{
-			if( string.IsNullOrEmpty(trimmedMessage) || trimmedMessage == "-h" || trimmedMessage == "--help" )
+			if( string.IsNullOrEmpty(cmdArgs.TrimmedMessage) || cmdArgs.TrimmedMessage == "-h" || cmdArgs.TrimmedMessage == "--help" )
 			{
-				await channel.SendMessageSafe("```md\nCreate an embed using the following parameters:\n" +
+				await cmdArgs.SendReplySafe("```md\nCreate an embed using the following parameters:\n" +
 				                      "[ --channel     ] Channel where to send the embed.\n" +
 				                      "[ --edit <msgId>] Replace a MessageId with a new embed (use after --channel)\n" +
 				                      "[ --title       ] Title\n" +
@@ -308,18 +308,20 @@ namespace Valkyrja.core
 				return;
 			}
 
+			SocketTextChannel channel = cmdArgs.Channel;
+
 			bool debug = false;
 			IMessage msg = null;
 			EmbedFieldBuilder currentField = null;
 			EmbedBuilder embedBuilder = new EmbedBuilder();
 
-			foreach( Match match in this.RegexCliParam.Matches(trimmedMessage) )
+			foreach( Match match in this.RegexCliParam.Matches(cmdArgs.TrimmedMessage) )
 			{
 				string optionString = this.RegexCliOption.Match(match.Value).Value;
 
 				if( optionString == "--debug" )
 				{
-					if( IsGlobalAdmin(author.Id) || IsSupportTeam(author.Id) )
+					if( IsGlobalAdmin(cmdArgs.Message.Author.Id) || IsSupportTeam(cmdArgs.Message.Author.Id) )
 						debug = true;
 					continue;
 				}
@@ -328,7 +330,7 @@ namespace Valkyrja.core
 				{
 					if( currentField == null )
 					{
-						await channel.SendMessageSafe($"`fieldInline` can not precede `fieldName`.");
+						await cmdArgs.SendReplySafe($"`fieldInline` can not precede `fieldName`.");
 						return;
 					}
 
@@ -341,22 +343,22 @@ namespace Valkyrja.core
 				string value;
 				if( match.Value.Length <= optionString.Length || string.IsNullOrWhiteSpace(value = match.Value.Substring(optionString.Length + 1).Trim()) )
 				{
-					await channel.SendMessageSafe($"Invalid value for `{optionString}`");
+					await cmdArgs.SendReplySafe($"Invalid value for `{optionString}`");
 					return;
 				}
 
 				if( value.Length >= UserProfileOption.ValueCharacterLimit )
 				{
-					await channel.SendMessageSafe($"`{optionString}` is too long! (It's {value.Length} characters while the limit is {UserProfileOption.ValueCharacterLimit})");
+					await cmdArgs.SendReplySafe($"`{optionString}` is too long! (It's {value.Length} characters while the limit is {UserProfileOption.ValueCharacterLimit})");
 					return;
 				}
 
 				switch( optionString )
 				{
 					case "--channel":
-						if( !guid.TryParse(value.Trim('<', '>', '#'), out guid id) || (channel = server.Guild.GetTextChannel(id)) == null )
+						if( !guid.TryParse(value.Trim('<', '>', '#'), out guid id) || (channel = cmdArgs.Server.Guild.GetTextChannel(id)) == null )
 						{
-							await channel.SendMessageSafe($"Channel {value} not found.");
+							await cmdArgs.SendReplySafe($"Channel {value} not found.");
 							return;
 						}
 
@@ -367,7 +369,7 @@ namespace Valkyrja.core
 					case "--title":
 						if( value.Length > 256 )
 						{
-							await channel.SendMessageSafe($"`--title` is too long (`{value.Length} > 256`)");
+							await cmdArgs.SendReplySafe($"`--title` is too long (`{value.Length} > 256`)");
 							return;
 						}
 
@@ -379,7 +381,7 @@ namespace Valkyrja.core
 					case "--description":
 						if( value.Length > 2048 )
 						{
-							await channel.SendMessageSafe($"`--description` is too long (`{value.Length} > 2048`)");
+							await cmdArgs.SendReplySafe($"`--description` is too long (`{value.Length} > 2048`)");
 							return;
 						}
 
@@ -391,7 +393,7 @@ namespace Valkyrja.core
 					case "--footer":
 						if( value.Length > 2048 )
 						{
-							await channel.SendMessageSafe($"`--footer` is too long (`{value.Length} > 2048`)");
+							await cmdArgs.SendReplySafe($"`--footer` is too long (`{value.Length} > 2048`)");
 							return;
 						}
 
@@ -407,7 +409,7 @@ namespace Valkyrja.core
 						}
 						catch( Exception )
 						{
-							await channel.SendMessageSafe($"`--image` is invalid url");
+							await cmdArgs.SendReplySafe($"`--image` is invalid url");
 							return;
 						}
 
@@ -422,7 +424,7 @@ namespace Valkyrja.core
 						}
 						catch( Exception )
 						{
-							await channel.SendMessageSafe($"`--thumbnail` is invalid url");
+							await cmdArgs.SendReplySafe($"`--thumbnail` is invalid url");
 							return;
 						}
 
@@ -436,7 +438,7 @@ namespace Valkyrja.core
 							uint color = uint.Parse(value.TrimStart('#'), System.Globalization.NumberStyles.AllowHexSpecifier);
 							if( color > uint.Parse("FFFFFF", System.Globalization.NumberStyles.AllowHexSpecifier) )
 							{
-								await channel.SendMessageSafe("Color out of range.");
+								await cmdArgs.SendReplySafe("Color out of range.");
 								return;
 							}
 
@@ -446,26 +448,26 @@ namespace Valkyrja.core
 						}
 						catch( Exception )
 						{
-							await channel.SendMessageSafe("Invalid color format.");
+							await cmdArgs.SendReplySafe("Invalid color format.");
 							return;
 						}
 						break;
 					case "--fieldName":
 						if( value.Length > 256 )
 						{
-							await channel.SendMessageSafe($"`--fieldName` is too long (`{value.Length} > 256`)\n```\n{value}\n```");
+							await cmdArgs.SendReplySafe($"`--fieldName` is too long (`{value.Length} > 256`)\n```\n{value}\n```");
 							return;
 						}
 
 						if( currentField != null && currentField.Value == null )
 						{
-							await channel.SendMessageSafe($"Field `{currentField.Name}` is missing a value!");
+							await cmdArgs.SendReplySafe($"Field `{currentField.Name}` is missing a value!");
 							return;
 						}
 
 						if( embedBuilder.Fields.Count >= 25 )
 						{
-							await channel.SendMessageSafe("Too many fields! (Limit is 25)");
+							await cmdArgs.SendReplySafe("Too many fields! (Limit is 25)");
 							return;
 						}
 
@@ -477,13 +479,13 @@ namespace Valkyrja.core
 					case "--fieldValue":
 						if( value.Length > 1024 )
 						{
-							await channel.SendMessageSafe($"`--fieldValue` is too long (`{value.Length} > 1024`)\n```\n{value}\n```");
+							await cmdArgs.SendReplySafe($"`--fieldValue` is too long (`{value.Length} > 1024`)\n```\n{value}\n```");
 							return;
 						}
 
 						if( currentField == null )
 						{
-							await channel.SendMessageSafe($"`fieldValue` can not precede `fieldName`.");
+							await cmdArgs.SendReplySafe($"`fieldValue` can not precede `fieldName`.");
 							return;
 						}
 
@@ -495,20 +497,20 @@ namespace Valkyrja.core
 					case "--edit":
 						if( !guid.TryParse(value, out guid msgId) || (msg = await channel.GetMessageAsync(msgId)) == null )
 						{
-							await channel.SendMessageSafe($"`--edit` did not find a message with ID `{value}` in the <#{channel.Id}> channel.");
+							await cmdArgs.SendReplySafe($"`--edit` did not find a message with ID `{value}` in the <#{channel.Id}> channel.");
 							return;
 						}
 
 						break;
 					default:
-						await channel.SendMessageSafe($"Unknown option: `{optionString}`");
+						await cmdArgs.SendReplySafe($"Unknown option: `{optionString}`");
 						return;
 				}
 			}
 
 			if( currentField != null && currentField.Value == null )
 			{
-				await channel.SendMessageSafe($"Field `{currentField.Name}` is missing a value!");
+				await cmdArgs.SendReplySafe($"Field `{currentField.Name}` is missing a value!");
 				return;
 			}
 
@@ -518,7 +520,7 @@ namespace Valkyrja.core
 					if( pmInstead != null )
 						await pmInstead.SendMessageAsync(embed: embedBuilder.Build());
 					else
-						await channel.SendMessageAsync(embed: embedBuilder.Build());
+						await cmdArgs.SendReplySafe(embed: embedBuilder.Build());
 					break;
 				case RestUserMessage message:
 					await message?.ModifyAsync(m => m.Embed = embedBuilder.Build());
@@ -527,7 +529,7 @@ namespace Valkyrja.core
 					await message?.ModifyAsync(m => m.Embed = embedBuilder.Build());
 					break;
 				default:
-					await channel.SendMessageSafe("GetMessage went bork.");
+					await cmdArgs.SendReplySafe("GetMessage went bork.");
 					break;
 			}
 		}
