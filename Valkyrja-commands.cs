@@ -784,7 +784,7 @@ namespace Valkyrja.core
 			newCommand.ManPage = new ManPage("<text>", "`<text>` - Text which the bot will repeat.");
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator | PermissionType.SubModerator;
 			newCommand.DeleteRequest = true;
-			newCommand.IsBonusCommand = true;
+			newCommand.IsBonusAdminCommand = true;
 			newCommand.IsSupportCommand = true;
 			newCommand.OnExecute += async e => {
 				if( string.IsNullOrWhiteSpace(e.TrimmedMessage) )
@@ -804,7 +804,7 @@ namespace Valkyrja.core
 			newCommand.ManPage = new ManPage("<MessageId> <text>", "`<MessageId>` - An ID of a message that will be edited.\n\n`<text>` - Text which the bot will repeat.");
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator | PermissionType.SubModerator;
 			newCommand.DeleteRequest = true;
-			newCommand.IsBonusCommand = true;
+			newCommand.IsBonusAdminCommand = true;
 			newCommand.IsSupportCommand = true;
 			newCommand.OnExecute += async e => {
 				IMessage msg = null;

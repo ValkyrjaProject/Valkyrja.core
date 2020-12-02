@@ -52,6 +52,9 @@ namespace Valkyrja.entities
 		public bool IsBonusCommand{ get; set; }
 
 		/// <summary> Subscriber bonus only </summary>
+		public bool IsBonusAdminCommand{ get; set; }
+
+		/// <summary> Subscriber bonus only </summary>
 		public bool IsPremiumCommand{ get; set; }
 
 		/// <summary> Subscriber bonus only </summary>
@@ -115,6 +118,7 @@ namespace Valkyrja.entities
 			newCommand.IsCustomCommand = this.IsCustomCommand;
 			newCommand.Type = this.Type;
 			newCommand.IsBonusCommand = this.IsBonusCommand;
+			newCommand.IsBonusAdminCommand = this.IsBonusAdminCommand;
 			newCommand.IsPremiumCommand = this.IsPremiumCommand;
 			newCommand.IsPremiumServerwideCommand = this.IsPremiumServerwideCommand;
 			newCommand.RequiredPermissions = this.RequiredPermissions;
@@ -134,6 +138,8 @@ namespace Valkyrja.entities
 				return true;
 
 			//Premium-only commands
+			if( this.IsBonusAdminCommand && (client.IsBonusSubscriber(server.Guild.OwnerId) || client.IsTrialServer(server.Id)) && server.IsAdmin(user) )
+				return true;
 			if( this.IsPremiumCommand && !client.IsPremiumSubscriber(user.Id) )
 				return false;
 			if( this.IsBonusCommand && !client.IsBonusSubscriber(user.Id) )
