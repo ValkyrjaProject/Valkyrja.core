@@ -784,6 +784,7 @@ namespace Valkyrja.core
 			newCommand.ManPage = new ManPage("<text>", "`<text>` - Text which the bot will repeat.");
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator | PermissionType.SubModerator;
 			newCommand.DeleteRequest = true;
+			newCommand.IsBonusCommand = true;
 			newCommand.IsBonusAdminCommand = true;
 			newCommand.IsSupportCommand = true;
 			newCommand.OnExecute += async e => {
@@ -804,6 +805,7 @@ namespace Valkyrja.core
 			newCommand.ManPage = new ManPage("<MessageId> <text>", "`<MessageId>` - An ID of a message that will be edited.\n\n`<text>` - Text which the bot will repeat.");
 			newCommand.RequiredPermissions = PermissionType.ServerOwner | PermissionType.Admin | PermissionType.Moderator | PermissionType.SubModerator;
 			newCommand.DeleteRequest = true;
+			newCommand.IsBonusCommand = true;
 			newCommand.IsBonusAdminCommand = true;
 			newCommand.IsSupportCommand = true;
 			newCommand.OnExecute += async e => {
@@ -1188,7 +1190,7 @@ namespace Valkyrja.core
 				StringBuilder responseBuilder = new StringBuilder();
 				foreach( Command cmd in this.Commands.Values.OrderBy(c => c.RequiredPermissions) )
 				{
-					if( cmd.IsAlias || cmd.IsCoreCommand || cmd.RequiredPermissions == PermissionType.OwnerOnly )
+					if( cmd.IsAlias || cmd.IsHidden || cmd.IsCoreCommand || cmd.RequiredPermissions == PermissionType.OwnerOnly )
 						continue;
 
 					CommandOptions options = dbContext.GetOrAddCommandOptions(e.Server, cmd.Id);

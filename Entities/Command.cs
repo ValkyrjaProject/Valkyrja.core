@@ -136,10 +136,10 @@ namespace Valkyrja.entities
 
 			if( this.IsSupportCommand && client.IsSupportTeam(user.Id) )
 				return true;
-
-			//Premium-only commands
 			if( this.IsBonusAdminCommand && (client.IsBonusSubscriber(server.Guild.OwnerId) || client.IsTrialServer(server.Id)) && server.IsAdmin(user) )
 				return true;
+
+			//Premium-only commands
 			if( this.IsPremiumCommand && !client.IsPremiumSubscriber(user.Id) )
 				return false;
 			if( this.IsBonusCommand && !client.IsBonusSubscriber(user.Id) )
@@ -398,7 +398,20 @@ namespace Valkyrja.entities
 			embedBuilder.AddField("Permissions", permissionString, !string.IsNullOrEmpty(aliases));
 			if( !string.IsNullOrEmpty(aliases) )
 				embedBuilder.AddField("Aliases", aliases, true);
+			if( command.IsPremiumCommand || command.IsPremiumCommand || command.IsBonusCommand || command.IsBonusAdminCommand )
+			{
+				string flags = "";
+				if( command.IsBonusCommand )
+					flags += "Bonus command.\n";
+				if( command.IsBonusAdminCommand )
+					flags += "Bonus command for admins.\n";
+				if( command.IsPremiumCommand )
+					flags += "Premium command.\n";
+				if( command.IsPremiumServerwideCommand )
+					flags += "Premium server-wide command.";
 
+				embedBuilder.AddField("Special Flags", flags, true);
+			}
 
 			IEnumerable<CommandChannelOptions> commandChannelOptions = server.GetCommandChannelOptions(command.Id);
 			List<CommandChannelOptions> blockedChannels = commandChannelOptions.Where(c => c.ServerId == server.Id && c.CommandId == command.Id && c.Blocked).ToList();
