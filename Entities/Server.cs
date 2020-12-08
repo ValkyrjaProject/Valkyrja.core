@@ -331,6 +331,9 @@ namespace Valkyrja.entities
 
 		public Embed GetManPage(Command command)
 		{
+			if( command.IsAlias && !string.IsNullOrEmpty(command.ParentId) ) //Internal, not-custom alias.
+				command = this.Commands[command.ParentId.ToLower()];
+
 			if( command.ManPage == null || command.RequiredPermissions == PermissionType.OwnerOnly )
 				return null;
 
