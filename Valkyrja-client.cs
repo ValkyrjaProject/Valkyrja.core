@@ -811,116 +811,123 @@ namespace Valkyrja.core
 			{
 				CustomCommand customCommand = server.CustomCommands[commandString];
 				if( customCommand.CanExecute(this, server, channel, message.Author as SocketGuildUser) )
-					return await HandleCustomCommand(server, customCommand, server.GetCommandOptions(customCommand.CommandId), channel, message);
+					return await HandleCustomCommand(server, customCommand, server.GetCommandOptions(customCommand.CommandId), channel, message, parameters);
 			}
 
 			return false;
 		}
 
-		private async Task<bool> HandleCustomCommand(Server server, CustomCommand cmd, CommandOptions commandOptions, SocketTextChannel channel, SocketMessage message)
+		private async Task<bool> HandleCustomCommand(Server server, CustomCommand cmd, CommandOptions commandOptions, SocketTextChannel channel, SocketMessage message, string[] messageArgs)
 		{
 			try
 			{
-				if( commandOptions != null && commandOptions.DeleteRequest &&
-				    channel.Guild.CurrentUser.GuildPermissions.ManageMessages && !message.Deleted )
-					await message.DeleteAsync();
-			}
-			catch( HttpException exception )
-			{
-				await server.HandleHttpException(exception, $"Failed to delete the command message in <#{channel.Id}>");
+				try
+				{
+					if( commandOptions != null && commandOptions.DeleteRequest &&
+					    channel.Guild.CurrentUser.GuildPermissions.ManageMessages && !message.Deleted )
+						await message.DeleteAsync();
+				}
+				catch( HttpException exception )
+				{
+					await server.HandleHttpException(exception, $"Failed to delete the command message in <#{channel.Id}>");
+				}
+				catch( Exception exception )
+				{
+					await LogException(exception, "HandleCustomCommand - delete request", server.Id);
+				}
+
+//todo - rewrite using string builder...
+				string msg = cmd.Response;
+
+				if( msg.Contains("{sender}") )
+				{
+					msg = msg.Replace("{{sender}}", "<@{0}>").Replace("{sender}", "<@{0}>");
+					msg = string.Format(msg, message.Author.Id);
+				}
+
+				List<IGuildUser> mentionedUsers = await GetMentionedGuildUsers(server, messageArgs);
+				if( msg.Contains("{mentioned}") && mentionedUsers.Any() )
+				{
+					string mentions = "";
+					for( int i = 0; i < mentionedUsers.Count; i++ )
+					{
+						if( i != 0 )
+							mentions += (i == mentionedUsers.Count - 1) ? " and " : ", ";
+
+						mentions += "<@" + mentionedUsers[i].Id + ">";
+					}
+
+					if( string.IsNullOrEmpty(mentions) )
+					{
+						msg = msg.Replace("{{mentioned}}", "Nobody").Replace("{mentioned}", "Nobody");
+					}
+					else
+					{
+						msg = msg.Replace("{{mentioned}}", "{0}").Replace("{mentioned}", "{0}");
+						msg = string.Format(msg, mentions);
+					}
+				}
+
+				if( server.Config.IgnoreEveryone )
+					msg = msg.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
+
+				Match match = this.RegexCustomCommandPmAll.Match(msg);
+				if( match.Success )
+				{
+					List<IUser> toPm = new List<IUser>();
+					string pm = msg;
+					msg = "It is nao sent via PM.";
+
+					if( this.RegexCustomCommandPmMentioned.IsMatch(pm) && mentionedUsers.Any() )
+						toPm.AddRange(mentionedUsers);
+					else
+						toPm.Add(message.Author);
+
+					pm = pm.Substring(match.Value.Length).Trim();
+
+					foreach( IUser user in toPm )
+					{
+						try
+						{
+							if( pm.StartsWith($"{server.Config.CommandPrefix}embed") )
+							{
+								pm = pm.Substring($"{server.Config.CommandPrefix}embed".Length).Trim();
+								await SendEmbedFromCli(new CommandArguments(this, null, server, channel, message, cmd.CommandId, msg, null, commandOptions), user);
+							}
+							else
+							{
+								await user.SendMessageSafe(pm);
+							}
+						}
+						catch( Exception )
+						{
+							msg = "I'm sorry, I couldn't send the message. Either I'm blocked, or it's _**that** privacy option._";
+							break;
+						}
+					}
+				}
+
+				MatchCollection matches = Localisation.RngRegex.Matches(msg);
+				if( matches.Count > 1 )
+					msg = matches[Utils.Random.Next(0, matches.Count)].Value;
+
+
+				if( !match.Success && msg.StartsWith($"{server.Config.CommandPrefix}embed") )
+				{
+					msg = msg.Substring($"{server.Config.CommandPrefix}embed".Length).Trim();
+					await SendEmbedFromCli(new CommandArguments(this, null, server, channel, message, cmd.CommandId, msg, null, commandOptions));
+				}
+				else
+				{
+					if( cmd.MentionsEnabled )
+						await channel.SendMessageSafe(msg, allowedMentions: AllowedMentions.All);
+					else
+						await channel.SendMessageSafe(msg);
+				}
 			}
 			catch( Exception exception )
 			{
-				await LogException(exception, "HandleCustomCommand - delete request", server.Id);
-			}
-
-//todo - rewrite using string builder...
-			string msg = cmd.Response;
-
-			if( msg.Contains("{sender}") )
-			{
-				msg = msg.Replace("{{sender}}", "<@{0}>").Replace("{sender}", "<@{0}>");
-				msg = string.Format(msg, message.Author.Id);
-			}
-
-			if( msg.Contains("{mentioned}") && message.MentionedUsers != null )
-			{
-				string mentions = "";
-				SocketUser[] mentionedUsers = message.MentionedUsers.ToArray();
-				for( int i = 0; i < mentionedUsers.Length; i++ )
-				{
-					if( i != 0 )
-						mentions += (i == mentionedUsers.Length - 1) ? " and " : ", ";
-
-					mentions += "<@" + mentionedUsers[i].Id + ">";
-				}
-
-				if( string.IsNullOrEmpty(mentions) )
-				{
-					msg = msg.Replace("{{mentioned}}", "Nobody").Replace("{mentioned}", "Nobody");
-				}
-				else
-				{
-					msg = msg.Replace("{{mentioned}}", "{0}").Replace("{mentioned}", "{0}");
-					msg = string.Format(msg, mentions);
-				}
-			}
-
-			if( server.Config.IgnoreEveryone )
-				msg = msg.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
-
-			Match match = this.RegexCustomCommandPmAll.Match(msg);
-			if( match.Success )
-			{
-				List<SocketUser> toPm = new List<SocketUser>();
-				string pm = msg;
-				msg = "It is nao sent via PM.";
-
-				if( this.RegexCustomCommandPmMentioned.IsMatch(pm) && message.MentionedUsers != null && message.MentionedUsers.Any() )
-					toPm.AddRange(message.MentionedUsers);
-				else
-					toPm.Add(message.Author);
-
-				pm = pm.Substring(match.Value.Length).Trim();
-
-				foreach( SocketUser user in toPm )
-				{
-					try
-					{
-						if( pm.StartsWith($"{server.Config.CommandPrefix}embed") )
-						{
-							pm = pm.Substring($"{server.Config.CommandPrefix}embed".Length).Trim();
-							await SendEmbedFromCli(new CommandArguments(this, null, server, channel, message, cmd.CommandId, msg, null, commandOptions), user);
-						}
-						else
-						{
-							await user.SendMessageSafe(pm);
-						}
-					}
-					catch( Exception )
-					{
-						msg = "I'm sorry, I couldn't send the message. Either I'm blocked, or it's _**that** privacy option._";
-						break;
-					}
-				}
-			}
-
-			MatchCollection matches = Localisation.RngRegex.Matches(msg);
-			if( matches.Count > 1 )
-				msg = matches[Utils.Random.Next(0, matches.Count)].Value;
-
-
-			if( !match.Success && msg.StartsWith($"{server.Config.CommandPrefix}embed") )
-			{
-				msg = msg.Substring($"{server.Config.CommandPrefix}embed".Length).Trim();
-				await SendEmbedFromCli(new CommandArguments(this, null, server, channel, message, cmd.CommandId, msg, null, commandOptions));
-			}
-			else
-			{
-				if( cmd.MentionsEnabled )
-					await channel.SendMessageSafe(msg, allowedMentions: AllowedMentions.All);
-				else
-					await channel.SendMessageSafe(msg);
+				await LogException(exception, "HandleCustomCommand", server.Id);
 			}
 
 			return true;

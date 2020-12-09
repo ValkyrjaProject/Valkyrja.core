@@ -174,30 +174,34 @@ namespace Valkyrja.core
 			return found;
 		}
 
-		public async Task<List<IGuildUser>> GetMentionedGuildUsers(CommandArguments e) //todo - Move this elsewhere...
+		public Task<List<IGuildUser>> GetMentionedGuildUsers(CommandArguments e) //todo - Move this elsewhere...
+		{
+			return GetMentionedGuildUsers(e.Server, e.MessageArgs);
+		}
+		public async Task<List<IGuildUser>> GetMentionedGuildUsers(Server server, string[] messageArgs) //todo - Move this elsewhere...
 		{
 
-			if( e.MessageArgs == null || e.MessageArgs.Length == 0 )
+			if( messageArgs == null || messageArgs.Length == 0 )
 				return new List<IGuildUser>();
 
 			List<IGuildUser> mentionedUsers = new List<IGuildUser>();
-			for( int i = 0; i < e.MessageArgs.Length; i++ )
+			for( int i = 0; i < messageArgs.Length; i++ )
 			{
 				guid id;
-				if( !guid.TryParse(e.MessageArgs[i].Trim('<','@','!','>'), out id) || id == 0 )
+				if( !guid.TryParse(messageArgs[i].Trim('<','@','!','>'), out id) || id == 0 )
 					break;
 
-				IGuildUser user = e.Server.Guild.GetUser(id);
+				IGuildUser user = server.Guild.GetUser(id);
 				if( user == null )
-					user = await this.DiscordClient.Rest.GetGuildUserAsync(e.Server.Id, id);
+					user = await this.DiscordClient.Rest.GetGuildUserAsync(server.Id, id);
 				if( user == null )
 					continue;
 
 				if( mentionedUsers.Contains(user) )
 				{
-					List<string> newArgs = new List<string>(e.MessageArgs);
+					List<string> newArgs = new List<string>(messageArgs);
 					newArgs.RemoveAt(i);
-					e.MessageArgs = newArgs.ToArray();
+					messageArgs = newArgs.ToArray();
 					continue;
 				}
 
@@ -287,7 +291,7 @@ namespace Valkyrja.core
 			}
 		}
 
-		public async Task SendEmbedFromCli(CommandArguments cmdArgs, SocketUser pmInstead = null)
+		public async Task SendEmbedFromCli(CommandArguments cmdArgs, IUser pmInstead = null)
 		{
 			if( string.IsNullOrEmpty(cmdArgs.TrimmedMessage) || cmdArgs.TrimmedMessage == "-h" || cmdArgs.TrimmedMessage == "--help" )
 			{
