@@ -312,7 +312,7 @@ namespace Valkyrja.core
 				return;
 			}
 
-			SocketTextChannel channel = cmdArgs.Channel;
+			SocketTextChannel channel = null;
 
 			bool debug = false;
 			IMessage msg = null;
@@ -340,7 +340,7 @@ namespace Valkyrja.core
 
 					currentField.WithIsInline(true);
 					if( debug )
-						await channel.SendMessageSafe($"Setting inline for field `{currentField.Name}`");
+						await cmdArgs.Channel.SendMessageSafe($"Setting inline for field `{currentField.Name}`");
 					continue;
 				}
 
@@ -367,7 +367,7 @@ namespace Valkyrja.core
 						}
 
 						if( debug )
-							await channel.SendMessageSafe($"Channel set: `{channel.Name}`");
+							await cmdArgs.Channel.SendMessageSafe($"Channel set: `{channel.Name}`");
 
 						break;
 					case "--title":
@@ -379,7 +379,7 @@ namespace Valkyrja.core
 
 						embedBuilder.WithTitle(value);
 						if( debug )
-							await channel.SendMessageSafe($"Title set: `{value}`");
+							await cmdArgs.Channel.SendMessageSafe($"Title set: `{value}`");
 
 						break;
 					case "--description":
@@ -391,7 +391,7 @@ namespace Valkyrja.core
 
 						embedBuilder.WithDescription(value);
 						if( debug )
-							await channel.SendMessageSafe($"Description set: `{value}`");
+							await cmdArgs.Channel.SendMessageSafe($"Description set: `{value}`");
 
 						break;
 					case "--footer":
@@ -403,7 +403,7 @@ namespace Valkyrja.core
 
 						embedBuilder.WithFooter(value);
 						if( debug )
-							await channel.SendMessageSafe($"Description set: `{value}`");
+							await cmdArgs.Channel.SendMessageSafe($"Description set: `{value}`");
 
 						break;
 					case "--image":
@@ -418,7 +418,7 @@ namespace Valkyrja.core
 						}
 
 						if( debug )
-							await channel.SendMessageSafe($"Image URL set: `{value}`");
+							await cmdArgs.Channel.SendMessageSafe($"Image URL set: `{value}`");
 
 						break;
 					case "--thumbnail":
@@ -433,7 +433,7 @@ namespace Valkyrja.core
 						}
 
 						if( debug )
-							await channel.SendMessageSafe($"Thumbnail URL set: `{value}`");
+							await cmdArgs.Channel.SendMessageSafe($"Thumbnail URL set: `{value}`");
 
 						break;
 					case "--color":
@@ -448,7 +448,7 @@ namespace Valkyrja.core
 
 							embedBuilder.WithColor(color);
 							if( debug )
-								await channel.SendMessageSafe($"Color `{value}` set.");
+								await cmdArgs.Channel.SendMessageSafe($"Color `{value}` set.");
 						}
 						catch( Exception )
 						{
@@ -477,7 +477,7 @@ namespace Valkyrja.core
 
 						embedBuilder.AddField(currentField = new EmbedFieldBuilder().WithName(value));
 						if( debug )
-							await channel.SendMessageSafe($"Creating new field `{currentField.Name}`");
+							await cmdArgs.Channel.SendMessageSafe($"Creating new field `{currentField.Name}`");
 
 						break;
 					case "--fieldValue":
@@ -495,13 +495,13 @@ namespace Valkyrja.core
 
 						currentField.WithValue(value);
 						if( debug )
-							await channel.SendMessageSafe($"Setting value:\n```\n{value}\n```\n...for field:`{currentField.Name}`");
+							await cmdArgs.Channel.SendMessageSafe($"Setting value:\n```\n{value}\n```\n...for field:`{currentField.Name}`");
 
 						break;
 					case "--edit":
-						if( !guid.TryParse(value, out guid msgId) || (msg = await channel.GetMessageAsync(msgId)) == null )
+						if( !guid.TryParse(value, out guid msgId) || (msg = await channel?.GetMessageAsync(msgId)) == null )
 						{
-							await cmdArgs.SendReplySafe($"`--edit` did not find a message with ID `{value}` in the <#{channel.Id}> channel.");
+							await cmdArgs.SendReplySafe($"`--edit` did not find a message with ID `{value}` in the <#{(channel?.Id ?? 0)}> channel.");
 							return;
 						}
 
@@ -523,8 +523,10 @@ namespace Valkyrja.core
 				case null:
 					if( pmInstead != null )
 						await pmInstead.SendMessageAsync(embed: embedBuilder.Build());
-					else
+					else if( channel == null )
 						await cmdArgs.SendReplySafe(embed: embedBuilder.Build());
+					else
+						await channel.SendMessageAsync(embed: embedBuilder.Build());
 					break;
 				case RestUserMessage message:
 					await message?.ModifyAsync(m => m.Embed = embedBuilder.Build());
