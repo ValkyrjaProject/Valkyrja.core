@@ -416,7 +416,7 @@ namespace Valkyrja.entities
 		}
 
 		public static async Task<IUserMessage> SendMessageSafe(this IUser self, string message, Embed embed = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed), message);
-		public static async Task<IUserMessage> SendMessageSafe(this ISocketMessageChannel self, string message, Embed embed = null, AllowedMentions allowedMentions = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed, allowedMentions: allowedMentions ?? AllowedMentions.Regular), message);
+		public static async Task<IUserMessage> SendMessageSafe(this ISocketMessageChannel self, string message, Embed embed = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed, allowedMentions: allowedMentions ?? AllowedMentions.Regular, messageReference: messageReference), message);
 
 		private static async Task<IUserMessage> SendMessageSafe(Func<string, Task<IUserMessage>> sendMessage, string message)
 		{

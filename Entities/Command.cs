@@ -300,7 +300,7 @@ namespace Valkyrja.entities
 				await Server.HandleHttpException(e, $"Unable to get message history in <#{this.Channel.Id}>");
 			}
 
-			IUserMessage reply = await this.Channel.SendMessageSafe(text, embed, allowedMentions: allowedMentions);
+			IUserMessage reply = await this.Channel.SendMessageSafe(text, embed, allowedMentions: allowedMentions, new MessageReference(this.Message.Id, this.Channel.Id, this.Server.Guild.Id));
 			if( reply == null || this.Message == null )
 				return;
 
