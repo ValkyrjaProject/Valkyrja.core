@@ -794,7 +794,7 @@ namespace Valkyrja.core
 					return;
 				}
 
-				await e.SendReplySafe(e.TrimmedMessage);
+				await e.SendReplySafe(e.TrimmedMessage, messageReference: false);
 			};
 			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 

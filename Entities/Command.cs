@@ -264,7 +264,7 @@ namespace Valkyrja.entities
 			this.MessageArgs = messageArgs;
 		}
 
-		public async Task SendReplySafe(string text = null, Embed embed = null, AllowedMentions allowedMentions = null)
+		public async Task SendReplySafe(string text = null, Embed embed = null, AllowedMentions allowedMentions = null, bool messageReference = true)
 		{
 			//await this.Client.LogMessage(LogType.Response, this.Channel, this.Client.GlobalConfig.UserId, message);
 			if( text == null && embed == null )
@@ -300,7 +300,7 @@ namespace Valkyrja.entities
 				await Server.HandleHttpException(e, $"Unable to get message history in <#{this.Channel.Id}>");
 			}
 
-			IUserMessage reply = await this.Channel.SendMessageSafe(text, embed, allowedMentions: allowedMentions, new MessageReference(this.Message.Id, this.Channel.Id, this.Server.Guild.Id));
+			IUserMessage reply = await this.Channel.SendMessageSafe(text, embed, allowedMentions: allowedMentions, !this.Command.DeleteRequest && messageReference ? new MessageReference(this.Message.Id, this.Channel.Id, this.Server.Guild.Id): null);
 			if( reply == null || this.Message == null )
 				return;
 
