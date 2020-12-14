@@ -542,6 +542,11 @@ namespace Valkyrja.core
 					.FirstOrDefault(s => s.ServerId == id || s.OwnerId == id);
 				switch(e.MessageArgs[0])
 				{
+					case "check":
+						responseString = "Not eating bananas.";
+						if( dbContext.Blacklist.AsQueryable().Any(b => b.Id == id) )
+							responseString = "Banana'd.";
+						break;
 					case "add":
 						if( dbContext.Blacklist.AsQueryable().Any(b => b.Id == id) )
 						{
