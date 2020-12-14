@@ -1062,7 +1062,7 @@ namespace Valkyrja.core
 							}
 
 							//smol server
-							if( pair.Value.Guild.MemberCount < this.GlobalConfig.MinMembers )
+							if( pair.Value.Guild.MemberCount < this.GlobalConfig.MinMembers && pair.Value.Guild.HasAllMembers )
 							{
 								serversToLeave.Add(pair.Value);
 								if( !this.LeaveNotifiedOwners.Contains(pair.Value.Guild.OwnerId) )
