@@ -346,6 +346,9 @@ namespace Valkyrja.entities
 		[Column("captcha")]
 		public bool CaptchaVerificationEnabled{ get; set; } = false;
 
+		[Column("native_gating")]
+		public bool NativeGatingEnabled{ get; set; } = false;
+
 		[Column("verify_accountage")]
 		public bool VerifyAccountAge{ get; set; } = false;
 
