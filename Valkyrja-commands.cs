@@ -571,7 +571,7 @@ namespace Valkyrja.core
 						dbContext.Blacklist.Remove(entry);
 						dbContext.SaveChanges();
 						responseString = server == null ? "Done." : server.ServerId == id ?
-								$"Entry for `{server.OwnerName}`'s server `{server.ServerName}` was removed from the balcklist." :
+								$"Entry for `{server.OwnerName}`'s server `{server.ServerName}` was removed from the blacklist." :
 								$"Entries for all `{server.OwnerName}`'s servers were removed from the blacklist.";
 						break;
 					default:

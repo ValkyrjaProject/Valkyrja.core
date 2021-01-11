@@ -379,6 +379,9 @@ namespace Valkyrja.entities
 		[Column("exp_enabled")]
 		public bool ExpEnabled{ get; set; } = false;
 
+		[Column("exp_ignored_channels")]
+		public bool ExpIgnoredChannels{ get; set; } = false;
+
 		[Column("base_exp_to_levelup")]
 		public Int64 BaseExpToLevelup{ get; set; } = 10;
 
