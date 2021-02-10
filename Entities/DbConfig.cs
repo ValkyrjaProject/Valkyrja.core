@@ -16,6 +16,7 @@ namespace Valkyrja.entities
 		public string Password = "db_password";
 		public string Database = "db_valkyrja";
 		public string MaxPoolSize = "100";
+		public string Timeout = "10";
 		public string ConfigName = "default";
 		public string PrometheusEndpoint = "";
 		public string PrometheusJob = "";
@@ -26,7 +27,7 @@ namespace Valkyrja.entities
 
 		public string GetDbConnectionString()
 		{
-			return $"server={this.Host};userid={this.Username};pwd={this.Password};port={this.Port};database={this.Database};maxpoolsize={this.MaxPoolSize};sslmode=none;";
+			return $"server={this.Host};userid={this.Username};pwd={this.Password};port={this.Port};database={this.Database};maxpoolsize={this.MaxPoolSize};connect_timeout={this.Timeout};default command timeout={this.Timeout};sslmode=none;";
 		}
 
 		public static DbConfig Load()
