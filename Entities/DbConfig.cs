@@ -27,7 +27,7 @@ namespace Valkyrja.entities
 
 		public string GetDbConnectionString()
 		{
-			return $"server={this.Host};userid={this.Username};pwd={this.Password};port={this.Port};database={this.Database};maxpoolsize={this.MaxPoolSize};connect_timeout={this.Timeout};default command timeout={this.Timeout};sslmode=none;";
+			return $"server={this.Host};userid={this.Username};pwd={this.Password};port={this.Port};database={this.Database};maxpoolsize={this.MaxPoolSize};default command timeout={this.Timeout};sslmode=none;";
 		}
 
 		public static DbConfig Load()
