@@ -19,7 +19,6 @@ namespace Valkyrja.core
 		public readonly DbConfig DbConfig;
 		public Monitoring Monitoring{ get; set; }
 		private GlobalContext GlobalDb;
-		private ServerContext ServerDb;
 		public GlobalConfig GlobalConfig{ get; set; }
 		public List<guid> SupportTeam{ get; set; }
 		public Shard CurrentShard{ get; set; }
@@ -96,7 +95,6 @@ namespace Valkyrja.core
 			this.DbConnectionString = this.DbConfig.GetDbConnectionString();
 			this.Monitoring = new Monitoring(this.DbConfig, shardIdOverride);
 			this.GlobalDb = GlobalContext.Create(this.DbConnectionString);
-			this.ServerDb = ServerContext.Create(this.DbConnectionString);
 			if( ++shardIdOverride > 0 )
 				this.DbConfig.ForceShardId = shardIdOverride; //db shards count from one
 		}
@@ -122,9 +120,6 @@ namespace Valkyrja.core
 
 			this.GlobalDb?.Dispose();
 			this.GlobalDb = null;
-
-			this.ServerDb?.Dispose();
-			this.ServerDb = null;
 
 			Console.WriteLine("Disposed of the client.");
 		}
@@ -576,7 +571,6 @@ namespace Valkyrja.core
 				if( this.GlobalConfig.LogDebug )
 					Console.WriteLine("ValkyrjaClient: SaveDatabase loop triggered at: " + Utils.GetTimestamp(DateTime.UtcNow));
 				this.GlobalDb.SaveChanges();
-				this.ServerDb.SaveChanges();
 			}
 		}
 
@@ -615,13 +609,13 @@ namespace Valkyrja.core
 			foreach( KeyValuePair<guid, Server> pair in this.Servers )
 			{
 				ServerStats stats = null;
-				lock( this.DbLock )
-					if( (stats = this.ServerDb.ServerStats.FirstOrDefault(s => s.ServerId == pair.Key)) == null &&
-					    (stats = this.ServerDb.ServerStats.Local.FirstOrDefault(s => s.ServerId == pair.Key)) == null )
+				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+					if( (stats = dbContext.ServerStats.FirstOrDefault(s => s.ServerId == pair.Key)) == null &&
+					    (stats = dbContext.ServerStats.Local.FirstOrDefault(s => s.ServerId == pair.Key)) == null )
 					{
 						stats = new ServerStats();
 						stats.ServerId = pair.Value.Id;
-						this.ServerDb.ServerStats.Add(stats);
+						dbContext.ServerStats.Add(stats);
 					}
 
 				DateTime joinedAt = DateTime.UtcNow;
@@ -651,8 +645,6 @@ namespace Valkyrja.core
 
 				if( string.IsNullOrEmpty(pair.Value.Config.InviteUrl) )
 				{
-					ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
-
 					try
 					{
 						dbContext.ServerConfigurations.AsQueryable().First(s => s.ServerId == pair.Value.Id).InviteUrl =
@@ -662,10 +654,10 @@ namespace Valkyrja.core
 					{
 						dbContext.ServerConfigurations.AsQueryable().First(s => s.ServerId == pair.Value.Id).InviteUrl = "NoPermission";
 					}
-
-					dbContext.SaveChanges();
-					dbContext.Dispose();
 				}
+
+				dbContext.SaveChanges();
+				dbContext.Dispose();
 			}
 		}
 
@@ -1033,10 +1025,18 @@ namespace Valkyrja.core
 					try
 					{
 						//Trial count exceeded
-						ServerStats stats;
-						lock( this.DbLock )
-							stats = this.ServerDb.ServerStats.FirstOrDefault(s => s.ServerId == pair.Value.Id);
-						bool joinedCountExceeded = stats != null && stats.JoinedCount > this.GlobalConfig.VipTrialJoins;
+						bool joinedCountExceeded = false;
+						if( this.GlobalConfig.EnforceRequirements )
+						{
+							lock( this.DbLock )
+							{
+								ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+								ServerStats stats = dbContext.ServerStats.FirstOrDefault(s => s.ServerId == pair.Value.Id);
+								joinedCountExceeded = stats != null && stats.JoinedCount > this.GlobalConfig.VipTrialJoins;
+								dbContext.Dispose();
+							}
+						}
+
 						bool trialTimeExceeded = pair.Value.Guild.CurrentUser?.JoinedAt != null && DateTime.UtcNow - pair.Value.Guild.CurrentUser.JoinedAt.Value.ToUniversalTime() > TimeSpan.FromHours(this.GlobalConfig.VipTrialHours);
 
 						//Not Partnered /trial servers

@@ -285,7 +285,8 @@ namespace Valkyrja.core
 					return;
 				}
 
-				List<ReactionAssignedRole> roles = this.ServerDb.ReactionAssignedRoles.AsQueryable().Where(s => s.ServerId == serverId).ToList();
+				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+				List<ReactionAssignedRole> roles = dbContext.ReactionAssignedRoles.AsQueryable().Where(s => s.ServerId == serverId).ToList();
 				if( !roles.Any() )
 				{
 					await e.SendReplySafe("Roles not found.");
@@ -300,6 +301,7 @@ namespace Valkyrja.core
 				}
 				response.AppendLine($"```");
 
+				dbContext.Dispose();
 				await e.SendReplySafe(response.ToString());
 			};
 			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
@@ -319,10 +321,12 @@ namespace Valkyrja.core
 					return;
 				}
 
+				ServerContext dbContext = ServerContext.Create(this.DbConnectionString);
+
 				guid serverId = e.Server.Id;
 				ServerConfig config = e.Server.Config;
 				if( e.MessageArgs.Length > 1 && (!guid.TryParse(e.MessageArgs[0], out serverId) ||
-				    (config = this.ServerDb.ServerConfigurations.FirstOrDefault(s => s.ServerId == serverId)) == null) )
+				    (config = dbContext.ServerConfigurations.FirstOrDefault(s => s.ServerId == serverId)) == null) )
 				{
 					await e.SendReplySafe("Used with two parameters to specify serverId, but I couldn't find a server.");
 					return;
@@ -336,6 +340,7 @@ namespace Valkyrja.core
 				else
 					propertyValue = $"`{serverId}`.`{propertyName}`: `{propertyValue}`";
 
+				dbContext.Dispose();
 				await e.SendReplySafe(propertyValue);
 			};
 			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
