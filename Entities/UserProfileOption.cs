@@ -10,7 +10,7 @@ namespace Valkyrja.entities
 	[Table("user_profile_options")]
 	public class UserProfileOption
 	{
-		public const int ValueCharacterLimit = 1000;
+		public const int ValueCharacterLimit = 1024;
 
 		[Required]
 		[Column("serverid")]
