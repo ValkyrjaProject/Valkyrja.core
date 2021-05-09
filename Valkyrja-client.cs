@@ -579,7 +579,7 @@ namespace Valkyrja.core
 			GlobalContext dbContext = GlobalContext.Create(this.DbConnectionString);
 			this.CurrentShard = dbContext.Shards.AsQueryable().FirstOrDefault(s => s.Id == this.CurrentShard.Id);
 
-			if( DateTime.UtcNow - this.LastMessageAverageTime > TimeSpan.FromMinutes(1) )
+/*			if( DateTime.UtcNow - this.LastMessageAverageTime > TimeSpan.FromMinutes(1) )
 			{
 				this.CurrentShard.MessagesPerMinute = this.MessagesThisMinute;
 				this.MessagesThisMinute = 0;
@@ -593,10 +593,12 @@ namespace Valkyrja.core
 			this.CurrentShard.Disconnects += this.Disconnects;
 			this.Disconnects = 0;
 
-			this.CurrentShard.TimeStarted = this.TimeStarted;
 			this.CurrentShard.OperationsActive = this.CurrentOperations.Count;
 			this.CurrentShard.ThreadsActive = Process.GetCurrentProcess().Threads.Count;
 			this.CurrentShard.MemoryUsed = GC.GetTotalMemory(false) / 1000000;
+*/
+
+			this.CurrentShard.TimeStarted = this.TimeStarted;
 			this.CurrentShard.ServerCount = this.Servers.Count;
 			this.CurrentShard.UserCount = this.DiscordClient.Guilds.Sum(s => s.MemberCount);
 
