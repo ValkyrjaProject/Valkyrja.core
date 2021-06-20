@@ -53,6 +53,9 @@ namespace Valkyrja.entities
 		[Column("moderation_mute_done", TypeName = "text")]
 		public string moderation_mute_done{ get; set; } = "*Silence!!  ò_ó\n...\nI keel u, {0}!!*  Ò_Ó";
 
+		[Column("moderation_mute_ignorechannel", TypeName = "text")]
+		public string moderation_mute_ignorechannel{ get; set; } = "{0}, you've been muted.";
+
 		[Column("moderation_kick_done", TypeName = "text")]
 		public string moderation_kick_done{ get; set; } = "<|>I've fired them railguns at {0}.<|>Bye {0}! o/<|>";
 
