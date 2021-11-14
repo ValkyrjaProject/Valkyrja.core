@@ -315,6 +315,7 @@ namespace Valkyrja.core
 			SocketTextChannel channel = null;
 
 			bool debug = false;
+			string text = null;
 			IMessage msg = null;
 			EmbedFieldBuilder currentField = null;
 			EmbedBuilder embedBuilder = new EmbedBuilder();
@@ -368,6 +369,18 @@ namespace Valkyrja.core
 
 						if( debug )
 							await cmdArgs.Channel.SendMessageSafe($"Channel set: `{channel.Name}`");
+
+						break;
+					case "--text":
+						if( value.Length > GlobalConfig.MessageCharacterLimit )
+						{
+							await cmdArgs.SendReplySafe($"`--text` is too long (`{value.Length} > {GlobalConfig.MessageCharacterLimit}`)");
+							return;
+						}
+
+						text = value;
+						if( debug )
+							await cmdArgs.Channel.SendMessageSafe($"Text set: `{value}`");
 
 						break;
 					case "--title":
@@ -522,17 +535,23 @@ namespace Valkyrja.core
 			{
 				case null:
 					if( pmInstead != null )
-						await pmInstead.SendMessageAsync(embed: embedBuilder.Build());
+						await pmInstead.SendMessageAsync(text: text, embed: embedBuilder.Build());
 					else if( channel == null )
-						await cmdArgs.SendReplySafe(embed: embedBuilder.Build());
+						await cmdArgs.SendReplySafe(text: text, embed: embedBuilder.Build());
 					else
-						await channel.SendMessageAsync(embed: embedBuilder.Build());
+						await channel.SendMessageAsync(text: text, embed: embedBuilder.Build());
 					break;
 				case RestUserMessage message:
-					await message?.ModifyAsync(m => m.Embed = embedBuilder.Build());
+					await message?.ModifyAsync(m => {
+						m.Content = text;
+						m.Embed = embedBuilder.Build();
+					});
 					break;
 				case SocketUserMessage message:
-					await message?.ModifyAsync(m => m.Embed = embedBuilder.Build());
+					await message?.ModifyAsync(m => {
+						m.Content = text;
+						m.Embed = embedBuilder.Build();
+					});
 					break;
 				default:
 					await cmdArgs.SendReplySafe("GetMessage went bork.");
