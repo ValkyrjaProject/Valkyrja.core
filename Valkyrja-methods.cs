@@ -298,6 +298,7 @@ namespace Valkyrja.core
 				await cmdArgs.SendReplySafe("```md\nCreate an embed using the following parameters:\n" +
 				                      "[ --channel     ] Channel where to send the embed.\n" +
 				                      "[ --edit <msgId>] Replace a MessageId with a new embed (use after --channel)\n" +
+				                      "[ --text        ] Regular content text\n" +
 				                      "[ --title       ] Title\n" +
 				                      "[ --description ] Description\n" +
 				                      "[ --footer      ] Footer\n" +
