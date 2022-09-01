@@ -169,7 +169,7 @@ namespace Valkyrja.core
 			DiscordSocketConfig config = new DiscordSocketConfig();
 			config.ShardId = (int)this.CurrentShard.Id - 1; //Shard's start at one in the database.
 			config.TotalShards = (int)this.GlobalConfig.TotalShards;
-			config.GatewayIntents = GatewayIntents.Guilds | GatewayIntents.GuildMessages | GatewayIntents.GuildMessageReactions | GatewayIntents.DirectMessages | GatewayIntents.GuildBans | GatewayIntents.GuildInvites | GatewayIntents.GuildMessages | GatewayIntents.DirectMessageReactions | GatewayIntents.GuildMessageReactions | GatewayIntents.GuildVoiceStates;
+			config.GatewayIntents = GatewayIntents.Guilds | GatewayIntents.MessageContent | GatewayIntents.GuildMessages | GatewayIntents.GuildMessageReactions | GatewayIntents.DirectMessages | GatewayIntents.GuildBans | GatewayIntents.GuildInvites | GatewayIntents.GuildMessages | GatewayIntents.DirectMessageReactions | GatewayIntents.GuildMessageReactions | GatewayIntents.GuildVoiceStates;
 			if( this.GlobalConfig.IntentMembers )
 				config.GatewayIntents |= GatewayIntents.GuildMembers;
 			config.LogLevel = this.GlobalConfig.LogDebug ? LogSeverity.Debug : LogSeverity.Warning;

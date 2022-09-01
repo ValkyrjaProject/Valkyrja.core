@@ -272,7 +272,7 @@ namespace Valkyrja.core
 				await user.SendMessageSafe(message, embed);
 				return PmErrorCode.Success;
 			}
-			catch( HttpException e ) when( (int)e.HttpCode == 403 || (e.DiscordCode.HasValue && e.DiscordCode == 50007) || e.Message.Contains("50007") )
+			catch( HttpException e ) when( (int)e.HttpCode == 403 || (e.DiscordCode.HasValue && e.DiscordCode == DiscordErrorCode.CannotSendMessageToUser) || e.Message.Contains("50007") )
 			{
 				if( !this.FailedPmCount.ContainsKey(user.Id) )
 					this.FailedPmCount.Add(user.Id, 0);

@@ -47,15 +47,15 @@ namespace Valkyrja.entities
 		/// <summary> Expects true to cancel the execution of other message events. </summary>
 		public Func<SocketMessage, Task<bool>> PriorityMessageReceived = null;
 		public Func<IMessage, SocketMessage, ISocketMessageChannel, Task> MessageUpdated = null;
-		public Func<IMessage, ISocketMessageChannel, Task> MessageDeleted = null;
+		public Func<IMessage, IMessageChannel, Task> MessageDeleted = null;
 
-		public Func<IUserMessage, ISocketMessageChannel, SocketReaction, Task> ReactionAdded = null;
-		public Func<IUserMessage, ISocketMessageChannel, SocketReaction, Task> ReactionRemoved = null;
-		public Func<IUserMessage, ISocketMessageChannel, Task> ReactionsCleared = null;
+		public Func<IUserMessage, IMessageChannel, SocketReaction, Task> ReactionAdded = null;
+		public Func<IUserMessage, IMessageChannel, SocketReaction, Task> ReactionRemoved = null;
+		public Func<IUserMessage, IMessageChannel, Task> ReactionsCleared = null;
 
 		public Func<SocketGuildUser, Task> UserJoined = null;
-		public Func<SocketGuildUser, Task> UserLeft = null;
-		public Func<SocketUser, ISocketMessageChannel, Task> UserTyping = null;
+		public Func<SocketGuild, SocketUser, Task> UserLeft = null;
+		public Func<IUser, IMessageChannel, Task> UserTyping = null;
 		public Func<SocketUser, SocketUser, Task> UserUpdated = null;
 		public Func<SocketUser, SocketVoiceState, SocketVoiceState, Task> UserVoiceStateUpdated = null;
 		public Func<SocketUser, SocketGuild, Task> UserBanned = null;
@@ -434,13 +434,14 @@ namespace Valkyrja.entities
 			return Task.CompletedTask;
 		}
 
-		private Task OnMessageDeleted(Cacheable<IMessage, ulong> originalMessage, ISocketMessageChannel channel)
+
+		private Task OnMessageDeleted(Cacheable<IMessage, ulong> originalMessage, Cacheable<IMessageChannel, ulong> channel)
 		{
 			if( this.MessageDeleted == null )
 				return Task.CompletedTask;
 
 			IMessage msg = null;
-			SocketGuildChannel c = channel as SocketGuildChannel;
+			SocketGuildChannel c = channel.Value as SocketGuildChannel;
 			if( c == null || !this.Client.Servers.ContainsKey(c.Guild.Id) )
 				return Task.CompletedTask;
 
@@ -458,18 +459,18 @@ namespace Valkyrja.entities
 			}
 
 			if( msg != null )
-				Task.Run(async () => await this.MessageDeleted(msg, channel));
+				Task.Run(async () => await this.MessageDeleted(msg, channel.Value));
 			return Task.CompletedTask;
 		}
 
 //Reaction events
-		private Task OnReactionAdded(Cacheable<IUserMessage, ulong> originalMessage, ISocketMessageChannel channel, SocketReaction reaction)
+		private Task OnReactionAdded(Cacheable<IUserMessage, ulong> originalMessage, Cacheable<IMessageChannel, ulong> channel, SocketReaction reaction)
 		{
 			if( this.ReactionAdded == null )
 				return Task.CompletedTask;
 
 			IUserMessage msg = null;
-			SocketGuildChannel c = channel as SocketGuildChannel;
+			SocketGuildChannel c = channel.Value as SocketGuildChannel;
 			if( c == null || !this.Client.Servers.ContainsKey(c.Guild.Id) )
 				return Task.CompletedTask;
 
@@ -487,17 +488,17 @@ namespace Valkyrja.entities
 			}
 
 			if( msg != null )
-				Task.Run(async () => await this.ReactionAdded(msg, channel, reaction));
+				Task.Run(async () => await this.ReactionAdded(msg, channel.Value, reaction));
 			return Task.CompletedTask;
 		}
 
-		private Task OnReactionRemoved(Cacheable<IUserMessage, ulong> originalMessage, ISocketMessageChannel channel, SocketReaction reaction)
+		private Task OnReactionRemoved(Cacheable<IUserMessage, ulong> originalMessage, Cacheable<IMessageChannel, ulong> channel, SocketReaction reaction)
 		{
 			if( this.ReactionRemoved == null )
 				return Task.CompletedTask;
 
 			IUserMessage msg = null;
-			SocketGuildChannel c = channel as SocketGuildChannel;
+			SocketGuildChannel c = channel.Value as SocketGuildChannel;
 			if( c == null || !this.Client.Servers.ContainsKey(c.Guild.Id) )
 				return Task.CompletedTask;
 
@@ -515,17 +516,17 @@ namespace Valkyrja.entities
 			}
 
 			if( msg != null )
-				Task.Run(async () => await this.ReactionRemoved(msg, channel, reaction));
+				Task.Run(async () => await this.ReactionRemoved(msg, channel.Value, reaction));
 			return Task.CompletedTask;
 		}
 
-		private Task OnReactionsCleared(Cacheable<IUserMessage, ulong> originalMessage, ISocketMessageChannel channel)
+		private Task OnReactionsCleared(Cacheable<IUserMessage, ulong> originalMessage, Cacheable<IMessageChannel, ulong> channel)
 		{
 			if( this.ReactionsCleared == null )
 				return Task.CompletedTask;
 
 			IUserMessage msg = null;
-			SocketGuildChannel c = channel as SocketGuildChannel;
+			SocketGuildChannel c = channel.Value as SocketGuildChannel;
 			if( c == null || !this.Client.Servers.ContainsKey(c.Guild.Id) )
 				return Task.CompletedTask;
 
@@ -543,7 +544,7 @@ namespace Valkyrja.entities
 			}
 
 			if( msg != null )
-				Task.Run(async () => await this.ReactionsCleared(msg, channel));
+				Task.Run(async () => await this.ReactionsCleared(msg, channel.Value));
 			return Task.CompletedTask;
 		}
 
@@ -557,21 +558,21 @@ namespace Valkyrja.entities
 			return Task.CompletedTask;
 		}
 
-		private Task OnUserLeft(SocketGuildUser user)
+		private Task OnUserLeft(SocketGuild guild, SocketUser user)
 		{
 			if( this.UserLeft == null )
 				return Task.CompletedTask;
 
-			Task.Run(async () => await this.UserLeft(user));
+			Task.Run(async () => await this.UserLeft(guild, user));
 			return Task.CompletedTask;
 		}
 
-		private Task OnUserTyping(SocketUser user, ISocketMessageChannel channel)
+		private Task OnUserTyping(Cacheable<IUser, ulong> user, Cacheable<IMessageChannel, ulong> channel)
 		{
-			if( this.UserTyping == null )
+			if( this.UserTyping == null || !user.HasValue || !channel.HasValue )
 				return Task.CompletedTask;
 
-			Task.Run(async () => await this.UserTyping(user, channel));
+			Task.Run(async () => await this.UserTyping(user.Value, channel.Value));
 			return Task.CompletedTask;
 		}
 
@@ -584,12 +585,12 @@ namespace Valkyrja.entities
 			return Task.CompletedTask;
 		}
 
-		private Task OnGuildMemberUpdated(SocketGuildUser originalUser, SocketGuildUser updatedUser)
+		private Task OnGuildMemberUpdated(Cacheable<SocketGuildUser, ulong> originalUser, SocketGuildUser updatedUser)
 		{
-			if( this.GuildMemberUpdated == null )
+			if( this.GuildMemberUpdated == null || !originalUser.HasValue )
 				return Task.CompletedTask;
 
-			Task.Run(async () => await this.GuildMemberUpdated(originalUser, updatedUser));
+			Task.Run(async () => await this.GuildMemberUpdated(originalUser.Value, updatedUser));
 			return Task.CompletedTask;
 		}
 

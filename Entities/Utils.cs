@@ -90,7 +90,7 @@ namespace Valkyrja.entities
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static string HandleHttpException(HttpException exception)
 		{
-			if( exception.HttpCode == System.Net.HttpStatusCode.Forbidden || (exception.DiscordCode.HasValue && exception.DiscordCode.Value == 50013) || exception.Message.Contains("Missing Access") || exception.Message.Contains("Missing Permissions") )
+			if( exception.HttpCode == System.Net.HttpStatusCode.Forbidden || (exception.DiscordCode.HasValue && exception.DiscordCode == DiscordErrorCode.InsufficientPermissions) || exception.Message.Contains("Missing Access") || exception.Message.Contains("Missing Permissions") )
 				return "Something went wrong, I may not have server permissions to do that.\n(Hint: <http://i.imgur.com/T8MPvME.png>)";
 			if( exception.HttpCode == System.Net.HttpStatusCode.NotFound || exception.Message.Contains("NotFound") )
 				return "Not found.";
