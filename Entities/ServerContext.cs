@@ -114,7 +114,7 @@ namespace Valkyrja.entities
 		public static ServerContext Create(string connectionString)
 		{
 			DbContextOptionsBuilder<ServerContext> optionsBuilder = new DbContextOptionsBuilder<ServerContext>();
-			optionsBuilder.UseMySql(connectionString).EnableSensitiveDataLogging();
+			optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)).EnableSensitiveDataLogging();
 
 			ServerContext newContext = new ServerContext(optionsBuilder.Options);
 			newContext.Database.EnsureCreated();

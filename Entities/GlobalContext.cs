@@ -56,7 +56,7 @@ namespace Valkyrja.entities
 		public static GlobalContext Create(string connectionString)
 		{
 			DbContextOptionsBuilder<GlobalContext> optionsBuilder = new DbContextOptionsBuilder<GlobalContext>();
-			optionsBuilder.UseMySql(connectionString);
+			optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 
 			GlobalContext newContext = new GlobalContext(optionsBuilder.Options);
 			newContext.Database.EnsureCreated();
