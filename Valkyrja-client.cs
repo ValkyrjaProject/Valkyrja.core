@@ -141,7 +141,8 @@ namespace Valkyrja.core
 
 			//Find a shard for grabs.
 			if( this.DbConfig.ForceShardId > 0 )
-				this.CurrentShard = this.GlobalDb.Shards.FirstOrDefault(s => s.Id == this.DbConfig.ForceShardId);
+				lock( this.DbLock )
+					this.CurrentShard = this.GlobalDb.Shards.FirstOrDefault(s => s.Id == this.DbConfig.ForceShardId);
 			else
 			{
 				Shard GetShard()

@@ -140,7 +140,8 @@ namespace Valkyrja.core
 				ServerId = serverId,
 				ShardId = this.CurrentShard?.Id ?? 0
 			};
-			await this.Events.Exception(exceptionEntry);
+			if( this.Events != null )
+				await this.Events.Exception(exceptionEntry);
 
 			if( exception.InnerException != null && exception.Message != exception.InnerException.Message )
 				await LogException(exception.InnerException, "InnerException | " + data, serverId);
