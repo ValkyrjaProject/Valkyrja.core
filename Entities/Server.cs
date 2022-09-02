@@ -170,7 +170,7 @@ namespace Valkyrja.entities
 			SocketRole role;
 			if( !this.IgnoreMuteSetup && this.Config.MuteRoleId != 0 && (role = this.Guild?.GetRole(this.Config.MuteRoleId)) != null && (this.Guild?.CurrentUser?.GuildPermissions.ManageChannels ?? false) )
 			{
-				foreach( SocketGuildChannel channel in this.Guild.Channels.Where(c => (c is SocketTextChannel || c is SocketCategoryChannel) && !(c is SocketNewsChannel)) )
+				foreach( SocketGuildChannel channel in this.Guild.Channels.Where(c => (c is SocketTextChannel || c is SocketCategoryChannel) && !(c is SocketNewsChannel) && !(c is SocketThreadChannel)) )
 				{
 					if( this.Config.MuteIgnoreChannelId == channel.Id ||
 					    channel.PermissionOverwrites.Any(p => p.TargetId == role.Id) ||

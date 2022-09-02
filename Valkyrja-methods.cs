@@ -124,24 +124,26 @@ namespace Valkyrja.core
 			    exception.Message.Contains("Discord.PermissionTarget") ) //it's a spam
 				return;
 
-			Console.WriteLine(exception.Message);
+			Console.WriteLine($"{exception.GetType()}: {exception.Message}");
 			Console.WriteLine(exception.StackTrace);
 			Console.WriteLine($"{data} | ServerId:{serverId}");
 
 			if( exception is RateLimitedException || exception.Message.Contains("WebSocket connection was closed") ) //hack to not spam my logs
 				return;
 
-			ExceptionEntry exceptionEntry = new ExceptionEntry(){
-				Type = exception.GetType().ToString(),
-				Message = exception.Message,
-				Stack = exception.StackTrace,
-				Data = data,
-				DateTime = DateTime.UtcNow,
-				ServerId = serverId,
-				ShardId = this.CurrentShard?.Id ?? 0
-			};
 			if( this.Events != null )
+			{
+				ExceptionEntry exceptionEntry = new ExceptionEntry(){
+					Type = exception.GetType().ToString(),
+					Message = exception.Message,
+					Stack = exception.StackTrace,
+					Data = data,
+					DateTime = DateTime.UtcNow,
+					ServerId = serverId,
+					ShardId = this.CurrentShard?.Id ?? 0
+				};
 				await this.Events.Exception(exceptionEntry);
+			}
 
 			if( exception.InnerException != null && exception.Message != exception.InnerException.Message )
 				await LogException(exception.InnerException, "InnerException | " + data, serverId);
