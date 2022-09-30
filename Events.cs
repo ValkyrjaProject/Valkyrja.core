@@ -52,6 +52,7 @@ namespace Valkyrja.entities
 		public Func<IUserMessage, IMessageChannel, SocketReaction, Task> ReactionAdded = null;
 		public Func<IUserMessage, IMessageChannel, SocketReaction, Task> ReactionRemoved = null;
 		public Func<IUserMessage, IMessageChannel, Task> ReactionsCleared = null;
+		public Func<SocketMessageComponent, Task> DropdownSelected = null;
 
 		public Func<SocketGuildUser, Task> UserJoined = null;
 		public Func<SocketGuild, SocketUser, Task> UserLeft = null;
@@ -236,6 +237,7 @@ namespace Valkyrja.entities
 			discordClient.ReactionAdded += OnReactionAdded;
 			discordClient.ReactionRemoved += OnReactionRemoved;
 			discordClient.ReactionsCleared += OnReactionsCleared;
+			discordClient.SelectMenuExecuted += OnDropdownSelected;
 
 			discordClient.UserJoined += OnUserJoined;
 			discordClient.UserLeft += OnUserLeft;
@@ -545,6 +547,15 @@ namespace Valkyrja.entities
 
 			if( msg != null )
 				Task.Run(async () => await this.ReactionsCleared(msg, channel.Value));
+			return Task.CompletedTask;
+		}
+
+		private Task OnDropdownSelected(SocketMessageComponent component)
+		{
+			if( component?.User == null || component.ApplicationId != this.Client.DiscordClient.CurrentUser.Id || component.Data.Type != ComponentType.SelectMenu)
+				return Task.CompletedTask;
+
+			Task.Run(async() => await this.DropdownSelected(component));
 			return Task.CompletedTask;
 		}
 
