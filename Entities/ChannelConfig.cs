@@ -26,6 +26,9 @@ namespace Valkyrja.entities
 		[Column("auto_announce")]
 		public bool AutoAnnounce{ get; set; } = false;
 
+		[Column("media_only")]
+		public bool MediaOnly{ get; set; } = false;
+
 		[Column("temporary")]
 		public bool Temporary{ get; set; } = false;
 

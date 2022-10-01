@@ -45,6 +45,7 @@ namespace Valkyrja.entities
 
 		public List<guid> IgnoredChannels;
 		public List<guid> AutoAnnounceChannels;
+		public List<guid> MediaOnlyChannels;
 
 		public Regex AlertRegex = null;
 		public Regex DeleteAlertRegex = null;
@@ -122,6 +123,7 @@ namespace Valkyrja.entities
 			List<ChannelConfig> channels = dbContext.Channels.AsQueryable().Where(c => c.ServerId == this.Id).ToList();
 			this.IgnoredChannels = channels.Where(c => c.Ignored).Select(c => c.ChannelId).ToList();
 			this.AutoAnnounceChannels = channels.Where(c => c.AutoAnnounce).Select(c => c.ChannelId).ToList();
+			this.MediaOnlyChannels = channels.Where(c => c.MediaOnly).Select(c => c.ChannelId).ToList();
 
 			if( !string.IsNullOrWhiteSpace(this.Config.LogAlertRegex) && this.Config.AlertChannelId != 0 )
 			{
