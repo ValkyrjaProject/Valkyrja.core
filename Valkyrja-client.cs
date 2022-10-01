@@ -364,11 +364,13 @@ namespace Valkyrja.core
 				this.MessagesCounter++;
 				this.MessagesThisMinute++;
 
-				if( !(message.Channel is SocketTextChannel channel) )
+				if( !(message.Channel is SocketTextChannel) && !(message.Channel is SocketThreadChannel) )
 				{
 					//await LogMessage(LogType.Pm, null, message);
 					return;
 				}
+
+				SocketTextChannel channel = message.Channel as SocketTextChannel;
 
 				Server server;
 				if( !this.Servers.ContainsKey(channel.Guild.Id) || (server = this.Servers[channel.Guild.Id]) == null )
