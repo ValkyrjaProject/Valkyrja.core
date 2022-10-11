@@ -108,11 +108,11 @@ namespace Valkyrja.core
 					foreach( KeyValuePair<string, int> pair in count.OrderByDescending(p => p.Value) )
 					{
 						total += pair.Value;
-						string newMessage = $"[{pair.Key.PrependSpaces(21)} ][ {pair.Value.ToString().AppendSpaces(21)}]\n";
+						string newMessage = $"[{pair.Key.PrependSpaces(24)} ][{pair.Value.ToString().PrependSpaces(7)} ]\n";
 						if( message.Length + newMessage.Length >= GlobalConfig.MessageCharacterLimit )
 						{
 							message.Append("```");
-							await e.SendReplySafe(message.ToString());
+							await e.SendReplySafe(message.ToString(), modify: false);
 							message.Clear();
 							message.Append("```md\n");
 						}
@@ -128,7 +128,7 @@ namespace Valkyrja.core
 					message.Append(ex.Message);
 					message.Append(ex.StackTrace);
 				}
-				await e.SendReplySafe(message.ToString());
+				await e.SendReplySafe(message.ToString(), modify: false);
 			};
 			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 

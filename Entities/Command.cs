@@ -264,7 +264,7 @@ namespace Valkyrja.entities
 			this.MessageArgs = messageArgs;
 		}
 
-		public async Task SendReplySafe(string text = null, Embed embed = null, AllowedMentions allowedMentions = null, bool messageReference = true)
+		public async Task SendReplySafe(string text = null, Embed embed = null, AllowedMentions allowedMentions = null, bool messageReference = true, bool modify = true)
 		{
 			//await this.Client.LogMessage(LogType.Response, this.Channel, this.Client.GlobalConfig.UserId, message);
 			if( text == null && embed == null )
@@ -275,7 +275,7 @@ namespace Valkyrja.entities
 
 			try
 			{
-				if( this.Server.CommandReplyMsgIds.ContainsKey(this.Message.Id) && (text == null || text.Length < GlobalConfig.MessageCharacterLimit) )
+				if( modify && this.Server.CommandReplyMsgIds.ContainsKey(this.Message.Id) && (text == null || text.Length < GlobalConfig.MessageCharacterLimit) )
 				{
 					IMessage msg = await this.Channel.GetMessageAsync(this.Server.CommandReplyMsgIds[this.Message.Id]);
 					switch( msg )
