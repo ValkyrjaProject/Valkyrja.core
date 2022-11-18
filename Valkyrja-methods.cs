@@ -311,6 +311,7 @@ namespace Valkyrja.core
 				                      "[ --fieldName   ] Create a new field with specified name.\n" +
 				                      "[ --fieldValue  ] Text value of a field - has to follow a name.\n" +
 				                      "[ --fieldInline ] Use to set the field as inline.\n" +
+				                      "[ --reactions   ] Adds emotes as reactions.\n" +
 				                      "Where you can repeat the field* options multiple times.\n```"
 				);
 				return;
@@ -323,6 +324,7 @@ namespace Valkyrja.core
 			IMessage msg = null;
 			EmbedFieldBuilder currentField = null;
 			EmbedBuilder embedBuilder = new EmbedBuilder();
+			List<IEmote> emotes = new List<IEmote>();
 
 			foreach( Match match in this.RegexCliParam.Matches(cmdArgs.TrimmedMessage) )
 			{
@@ -515,6 +517,20 @@ namespace Valkyrja.core
 							await cmdArgs.Channel.SendMessageSafe($"Setting value:\n```\n{value}\n```\n...for field:`{currentField.Name}`");
 
 						break;
+					case "--reactions":
+						MatchCollection words = this.RegexCommandParams.Matches(value);
+						foreach( Match word in words )
+						{
+							if( Emote.TryParse(word.Value, out Emote emote) )
+								emotes.Add(emote);
+							else
+								emotes.Add(new Emoji(word.Value));
+						}
+
+						if( debug )
+							await cmdArgs.Channel.SendMessageSafe($"Adding emoji reactions:\n```\n{value}\n```");
+
+						break;
 					case "--edit":
 						if( !guid.TryParse(value, out guid msgId) || (msg = await channel?.GetMessageAsync(msgId)) == null )
 						{
@@ -539,11 +555,22 @@ namespace Valkyrja.core
 			{
 				case null:
 					if( pmInstead != null )
-						await pmInstead.SendMessageAsync(text: text, embed: embedBuilder.Build());
+						msg = await pmInstead.SendMessageAsync(text: text, embed: embedBuilder.Build());
 					else if( channel == null )
-						await cmdArgs.SendReplySafe(text: text, embed: embedBuilder.Build());
+						msg = await cmdArgs.SendReplySafe(text: text, embed: embedBuilder.Build());
 					else
-						await channel.SendMessageAsync(text: text, embed: embedBuilder.Build());
+						msg = await channel.SendMessageAsync(text: text, embed: embedBuilder.Build());
+					try
+					{
+						foreach( IEmote emote in emotes )
+						{
+							await msg.AddReactionAsync(emote);
+						}
+					}
+					catch( Exception )
+					{
+						await cmdArgs.SendReplySafe("Failed to add the Emoji Reactions.");
+					}
 					break;
 				case RestUserMessage message:
 					await message?.ModifyAsync(m => {

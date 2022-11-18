@@ -264,11 +264,11 @@ namespace Valkyrja.entities
 			this.MessageArgs = messageArgs;
 		}
 
-		public async Task SendReplySafe(string text = null, Embed embed = null, AllowedMentions allowedMentions = null, bool messageReference = true, bool modify = true)
+		public async Task<IMessage> SendReplySafe(string text = null, Embed embed = null, AllowedMentions allowedMentions = null, bool messageReference = true, bool modify = true)
 		{
 			//await this.Client.LogMessage(LogType.Response, this.Channel, this.Client.GlobalConfig.UserId, message);
 			if( text == null && embed == null )
-				return;
+				return null;
 
 			if( this.Server.Config.IgnoreEveryone )
 				text = text?.Replace("@everyone", "@-everyone").Replace("@here", "@-here");
@@ -285,13 +285,13 @@ namespace Valkyrja.entities
 								m.Content = text;
 								m.Embed = embed;
 							});
-							return;
+							return message;
 						case SocketUserMessage message:
 							await message.ModifyAsync(m => {
 								m.Content = text;
 								m.Embed = embed;
 							});
-							return;
+							return message;
 					}
 				}
 			}
@@ -302,7 +302,7 @@ namespace Valkyrja.entities
 
 			IUserMessage reply = await this.Channel.SendMessageSafe(text, embed, allowedMentions: allowedMentions, !(this.Command?.DeleteRequest ?? false) && messageReference ? new MessageReference(this.Message.Id, this.Channel.Id, this.Server.Guild.Id): null);
 			if( reply == null || this.Message == null )
-				return;
+				return reply;
 
 			this.Server.CommandReplyMsgIds.TryAdd(this.Message.Id, reply.Id);
 
@@ -311,6 +311,8 @@ namespace Valkyrja.entities
 				await Task.Delay(3000);
 				await reply.DeleteAsync();
 			}
+
+			return reply;
 		}
 	}
 
