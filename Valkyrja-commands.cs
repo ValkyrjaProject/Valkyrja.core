@@ -50,6 +50,28 @@ namespace Valkyrja.core
 				await SendRawMessageToChannel(channel, responseString);
 		}
 
+		private async Task InitSlashCommands()
+		{
+			try
+			{
+				SlashCommandBuilder pingCommand = new SlashCommandBuilder().WithName("ping").WithDescription("Verify basic functionality.");
+				await this.DiscordClient.CreateGlobalApplicationCommandAsync(pingCommand.Build());
+			}
+			catch( Exception e )
+			{
+				await LogException(e, "InitSlashCommands");
+			}
+		}
+
+		private async Task ExecuteSlashCommand(SocketSlashCommand command)
+		{
+			if( command.CommandName == "ping" && command.GuildId.HasValue && this.Servers.ContainsKey(command.GuildId.Value) )
+			{
+				TimeSpan time = DateTime.UtcNow - Utils.GetTimeFromId(command.Id);
+				await command.RespondAsync(GetStatusString(time, this.Servers[command.GuildId.Value]), ephemeral: true);
+			}
+		}
+
 		private Task InitCommands()
 		{
 			Command newCommand = null;
@@ -850,22 +872,7 @@ namespace Valkyrja.core
 			newCommand.RequiredPermissions = PermissionType.Everyone;
 			newCommand.OnExecute += async e => {
 				TimeSpan time = DateTime.UtcNow - Utils.GetTimeFromId(e.Message.Id);
-
-				string cpuLoad = Bash.Run("grep 'cpu ' /proc/stat | awk '{print ($2+$4)*100/($2+$4+$5)}'");
-				string memoryUsed = Bash.Run("free | grep Mem | awk '{print $3/$2 * 100.0}'");
-				double memoryPercentage = double.Parse(memoryUsed);
-				string[] temp = Bash.Run("sensors | egrep '(temp1|Tdie|Tctl)' | awk '{print $2}'").Split('\n');
-				string subscription = IsPartner(e.Server.Id) ? "Partner   " : (IsSubscriber(e.Server.Guild.OwnerId) ? "Subscriber" : "");
-
-				string message = "Service Status: <https://status.valkyrja.app>\n" +
-				                 $"```md\n" +
-				                 $"[ Memory usage ][ {memoryPercentage:#00.00} % ({memoryPercentage/100*128:000.00}/128 GB) ]\n" +
-				                 $"[     CPU Load ][ {double.Parse(cpuLoad):#00.00} % ({temp[1]})       ]\n" +
-				                 $"[     Shard ID ][ {this.CurrentShard.Id-1:00}                      ]\n" +
-				                 $"[ Subscription ][ {subscription}              ]\n" +
-				                 $"```\n<:ValkThink:535541641507897354> `{time.TotalMilliseconds:#00}`ms <:ValkyrjaNomBlob:509485197763543050>";
-
-				await e.SendReplySafe(message);
+				await e.SendReplySafe(GetStatusString(time, e.Server));
 			};
 			this.Commands.Add(newCommand.Id.ToLower(), newCommand);
 			this.Commands.Add("ping", newCommand.CreateAlias("ping"));

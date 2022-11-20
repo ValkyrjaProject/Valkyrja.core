@@ -294,6 +294,24 @@ namespace Valkyrja.core
 			}
 		}
 
+		private string GetStatusString(TimeSpan latency, Server server)
+		{
+			string cpuLoad = Bash.Run("grep 'cpu ' /proc/stat | awk '{print ($2+$4)*100/($2+$4+$5)}'");
+			string memoryUsed = Bash.Run("free | grep Mem | awk '{print $3/$2 * 100.0}'");
+			double memoryPercentage = double.Parse(memoryUsed);
+			string[] temp = Bash.Run("sensors | egrep '(temp1|Tdie|Tctl)' | awk '{print $2}'").Split('\n');
+			string subscription = IsPartner(server.Id) ? "Partner   " : (IsSubscriber(server.Guild.OwnerId) ? "Subscriber" : "");
+
+			return "Service Status: <https://status.valkyrja.app>\n" +
+			       $"```md\n" +
+			       $"[ Memory usage ][ {memoryPercentage:#00.00} % ({memoryPercentage / 100 * 128:000.00}/128 GB) ]\n" +
+			       $"[     CPU Load ][ {double.Parse(cpuLoad):#00.00} % ({temp[1]})       ]\n" +
+			       $"[     Shard ID ][ {this.CurrentShard.Id - 1:00}                      ]\n" +
+			       $"[ Subscription ][ {subscription}              ]\n" +
+			       $"```\n" +
+			       $"<:ValkThink:535541641507897354> `{latency.TotalMilliseconds:#00}`ms <:ValkyrjaNomBlob:509485197763543050>";
+		}
+
 		public async Task SendEmbedFromCli(CommandArguments cmdArgs, IUser pmInstead = null)
 		{
 			if( string.IsNullOrEmpty(cmdArgs.TrimmedMessage) || cmdArgs.TrimmedMessage == "-h" || cmdArgs.TrimmedMessage == "--help" )
