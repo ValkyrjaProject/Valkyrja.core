@@ -54,7 +54,8 @@ namespace Valkyrja.core
 		{
 			try
 			{
-				SlashCommandBuilder pingCommand = new SlashCommandBuilder().WithName("ping").WithDescription("Verify basic functionality.");
+				SlashCommandBuilder pingCommand = new SlashCommandBuilder().WithName("ping").WithDescription("Verify basic functionality.")
+					.WithNameLocalizations(new Dictionary<string, string>()).WithDescriptionLocalizations(new Dictionary<string, string>()); //D.NET bug #2453
 				await this.DiscordClient.CreateGlobalApplicationCommandAsync(pingCommand.Build());
 			}
 			catch( Exception e )
