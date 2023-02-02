@@ -28,7 +28,7 @@ namespace Valkyrja.core
 		                                      "|    4x [Storage][Hitachi NAS 4TB 7200RPM](raid5|write1.4GB/s)\n" +
 		                                      "|       [Cooling][Noctua]\n" +
 		                                      "```\n" +
-		                                      "...and I'm connected through an APU2C4 router running pfSense, with 300/300 Mbps and ISP failover. Pics here: <https://rhea.dev/persephone>";
+		                                      "...running on UPS to keep all the network gear and the server running for half an hour. And I'm connected through an APU2C4 router running pfSense, with 1.2 gigabit fibre and LTE failover. Pics here: <https://rhea.dev/persephone>";
 
 		private async Task HandleMentionResponse(Server server, SocketTextChannel channel, SocketMessage message)
 		{
