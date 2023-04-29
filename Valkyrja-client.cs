@@ -53,8 +53,9 @@ namespace Valkyrja.core
 		private readonly Regex RegexCustomCommandPmAll = new Regex("^<pm(-sender)?>", RegexOptions.Compiled);
 		private readonly Regex RegexCustomCommandPmMentioned = new Regex("^<pm>", RegexOptions.Compiled);
 		//private readonly Regex EmbedParamRegex = new Regex("--?\\w+\\s(?!--?\\w|$).*?(?=\\s--?\\w|$)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
-		private readonly Regex RegexCliParam = new Regex("--?\\w+.*?(?=\\s--?\\w|$)", RegexOptions.Singleline | RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
-		private readonly Regex RegexCliOption = new Regex("--?\\w+", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+		private readonly Regex RegexCliParam = new Regex("(?<=\\s|^)--?\\w+.*?(?=\\s--?\\w|$)", RegexOptions.Singleline | RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+		private readonly Regex RegexCliOption = new Regex("(?<=\\s|^)--?\\w+", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+		private readonly Regex RegexCliEscape = new Regex("(?<=\\s|^)\\\\(?=--?\\w+)", RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
 		public Regex RegexDiscordInvites;
 		public Regex RegexShortLinks;
 		public Regex RegexExtendedLinks;

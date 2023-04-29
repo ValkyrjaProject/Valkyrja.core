@@ -346,7 +346,8 @@ namespace Valkyrja.core
 
 			foreach( Match match in this.RegexCliParam.Matches(cmdArgs.TrimmedMessage) )
 			{
-				string optionString = this.RegexCliOption.Match(match.Value).Value;
+				string matchValue = this.RegexCliEscape.Replace(match.Value, "");
+				string optionString = this.RegexCliOption.Match(matchValue).Value;
 
 				if( optionString == "--debug" )
 				{
@@ -370,7 +371,7 @@ namespace Valkyrja.core
 				}
 
 				string value;
-				if( match.Value.Length <= optionString.Length || string.IsNullOrWhiteSpace(value = match.Value.Substring(optionString.Length + 1).Trim()) )
+				if( matchValue.Length <= optionString.Length || string.IsNullOrWhiteSpace(value = matchValue.Substring(optionString.Length + 1).Trim()) )
 				{
 					await cmdArgs.SendReplySafe($"Invalid value for `{optionString}`");
 					return;
