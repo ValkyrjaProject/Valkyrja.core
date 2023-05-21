@@ -73,8 +73,22 @@ namespace Valkyrja.entities
 		[Column("exp_relative")]
 		public Int64 Exp{ get; set; } = 0;
 
+		[Column("persistence_flags")]
+		public Int64 PersistenceFlags{ get; set; } = 0;
+
 		[Column("memo", TypeName = "text")]
 		public string Memo{ get; set; } = "";
+
+		public void AssignPersistence(RoleConfig roleConfig)
+		{
+			Int64 roleFlag = this.PersistenceFlags & (1 << (int)roleConfig.PersistenceUserFlag);
+			this.PersistenceFlags = !roleConfig.InversePersistence ? this.PersistenceFlags | roleFlag : this.PersistenceFlags & ~roleFlag;
+		}
+		public void RemovePersistence(RoleConfig roleConfig)
+		{
+			Int64 roleFlag = this.PersistenceFlags & (1 << (int)roleConfig.PersistenceUserFlag);
+			this.PersistenceFlags = roleConfig.InversePersistence ? this.PersistenceFlags | roleFlag : this.PersistenceFlags & ~roleFlag;
+		}
 
 		public string GetNamesString(ServerContext dbContext, IGuildUser user = null)
 		{

@@ -32,6 +32,12 @@ namespace Valkyrja.entities
 		[Column("antispam_ignored")]
 		public bool AntispamIgnored{ get; set; } = false;
 
+		[Column("inverse_persistence")]
+		public bool InversePersistence{ get; set; } = false;
+
+		[Column("persistence_user_flag")]
+		public Int64 PersistenceUserFlag{ get; set; } = 0;
+
 		[Column("level")]
 		public Int64 ExpLevel{ get; set; } = 0;
 
