@@ -81,12 +81,12 @@ namespace Valkyrja.entities
 
 		public void AssignPersistence(RoleConfig roleConfig)
 		{
-			Int64 roleFlag = this.PersistenceFlags & (1 << (int)roleConfig.PersistenceUserFlag);
+			Int64 roleFlag = 1 << (int)roleConfig.PersistenceUserFlag;
 			this.PersistenceFlags = !roleConfig.InversePersistence ? this.PersistenceFlags | roleFlag : this.PersistenceFlags & ~roleFlag;
 		}
 		public void RemovePersistence(RoleConfig roleConfig)
 		{
-			Int64 roleFlag = this.PersistenceFlags & (1 << (int)roleConfig.PersistenceUserFlag);
+			Int64 roleFlag = 1 << (int)roleConfig.PersistenceUserFlag;
 			this.PersistenceFlags = roleConfig.InversePersistence ? this.PersistenceFlags | roleFlag : this.PersistenceFlags & ~roleFlag;
 		}
 
