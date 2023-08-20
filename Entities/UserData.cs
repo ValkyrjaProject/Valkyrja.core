@@ -89,6 +89,10 @@ namespace Valkyrja.entities
 			Int64 roleFlag = 1 << (int)roleConfig.PersistenceUserFlag;
 			this.PersistenceFlags = roleConfig.InversePersistence ? this.PersistenceFlags | roleFlag : this.PersistenceFlags & ~roleFlag;
 		}
+		public bool IsAllowedRole(RoleConfig roleConfig)
+		{
+			return roleConfig == null || roleConfig.PersistenceUserFlag == 0 || (roleConfig.InversePersistence ^ ((this.PersistenceFlags & (1 << (int)roleConfig.PersistenceUserFlag)) > 0));
+		}
 
 		public string GetNamesString(ServerContext dbContext, IGuildUser user = null)
 		{

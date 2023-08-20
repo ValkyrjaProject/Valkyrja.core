@@ -80,6 +80,9 @@ namespace Valkyrja.entities
 		[Column("role_join_done", TypeName = "text")]
 		public string role_join_done{ get; set; } = "Done!";
 
+		[Column("role_join_denied", TypeName = "text")]
+		public string role_join_denied{ get; set; } = "You're not allowed to have that one.";
+
 		[Column("role_join_exclusiveremoved", TypeName = "text")]
 		public string role_join_exclusiveremoved{ get; set; } = "\n_(I've removed the other exclusive roles from the same role group.)_";
 
