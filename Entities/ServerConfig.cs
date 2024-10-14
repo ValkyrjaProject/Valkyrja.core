@@ -175,6 +175,9 @@ namespace Valkyrja.entities
 		[Column("operator_roleid")]
 		public guid OperatorRoleId{ get; set; } = 0;
 
+		[Column("ban_limit")]
+		public int BanLimit{ get; set; } = 10;
+
 		[Column("ban_duration", TypeName = "varchar(255)")]
 		public string BanDuration{ get; set; } = "";
 
