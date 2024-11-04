@@ -104,6 +104,20 @@ namespace Valkyrja.core
 			await this.Events.LogEntryAdded(logEntry);
 		}
 
+		public async Task LogMessageUnknown(LogType logType, guid serverId, string message)
+		{
+			LogEntry logEntry = new LogEntry(){
+				Type = logType,
+				UserId = 0,
+				MessageId = 0,
+				ChannelId = 0,
+				ServerId = serverId,
+				DateTime = DateTime.UtcNow,
+				Message = message
+			};
+			await this.Events.LogEntryAdded(logEntry);
+		}
+
 		public async Task LogException(Exception exception, CommandArguments args) =>
 			await LogException(exception, "--Command: "+ args.Command.Id + " | Parameters: " + args.TrimmedMessage, args.Server.Id);
 
