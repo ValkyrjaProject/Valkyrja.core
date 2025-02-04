@@ -145,6 +145,12 @@ namespace Valkyrja.entities
 		[Column("antispam_links_chan_ban")]
 		public bool AntispamLinksChanBan{ get; set; } = false;
 
+		[Column("antispam_links_twitter")]
+		public bool AntispamLinksTwitter{ get; set; } = false;
+
+		[Column("antispam_links_twitter_ban")]
+		public bool AntispamLinksTwitterBan{ get; set; } = false;
+
 		[Column("antispam_tolerance")]
 		public Int64 AntispamTolerance{ get; set; } = 2;
 
