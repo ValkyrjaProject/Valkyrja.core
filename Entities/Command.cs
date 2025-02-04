@@ -131,6 +131,9 @@ namespace Valkyrja.entities
 		/// <summary> Returns true if the User has permission to execute this command. </summary>
 		public bool CanExecute(IValkyrjaClient client, Server server, SocketGuildChannel channel, SocketGuildUser user)
 		{
+			if( user == null )
+				return false;
+
 			if( client.IsGlobalAdmin(user.Id) )
 				return true;
 
