@@ -195,7 +195,7 @@ namespace Valkyrja.entities
 
 		public void AddWarning(string warning)
 		{
-			warning = $"{Utils.GetDatestamp()}: {warning}";
+			warning = $"{Utils.GetDatestamp()}: {warning.Replace("|","/")}";
 			this.WarningCount++;
 			this.Notes += string.IsNullOrEmpty(this.Notes) ? warning : (" | " + warning);
 		}
