@@ -66,6 +66,7 @@ namespace Valkyrja.core
 		public Regex RegexImgurOrGifLinks;
 		public Regex RegexChanLinks;
 		public Regex RegexTwitterLinks;
+		public Regex RegexTelegramLinks;
 
 		public readonly ConcurrentDictionary<guid, Server> Servers = new ConcurrentDictionary<guid, Server>();
 		public readonly Dictionary<string, Command> Commands = new Dictionary<string, Command>();
