@@ -394,7 +394,7 @@ namespace Valkyrja.entities
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static string GetNickname(this IGuildUser self)
 		{
-			return !string.IsNullOrWhiteSpace(self.Nickname) ? self.Nickname : self.Username;
+			return (!string.IsNullOrWhiteSpace(self.Nickname) ? self.Nickname : self.Username).Replace("<@", "");
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -412,7 +412,7 @@ namespace Valkyrja.entities
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static string GetUsername(this IUser self)
 		{
-			return self.Username + "#" + self.DiscriminatorValue.ToString("0000");
+			return self.Username + (self.DiscriminatorValue == 0 ? "" : "#" + self.DiscriminatorValue.ToString("0000"));
 		}
 
 		public static async Task<IUserMessage> SendMessageSafe(this IUser self, string message, Embed embed = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed), message);
