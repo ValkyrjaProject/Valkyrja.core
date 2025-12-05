@@ -24,16 +24,19 @@ namespace Valkyrja.entities
 			try
 			{
 				TimeSpan result = TimeSpan.Zero;
+				Match weekMatch = Regex.Match(input, "\\d+w", RegexOptions.IgnoreCase);
 				Match dayMatch = Regex.Match(input, "\\d+d", RegexOptions.IgnoreCase);
 				Match hourMatch = Regex.Match(input, "\\d+h", RegexOptions.IgnoreCase);
 				Match minuteMatch = Regex.Match(input, "\\d+m", RegexOptions.IgnoreCase);
 				Match secondMatch = Regex.Match(input, "\\d+s", RegexOptions.IgnoreCase);
 
-				if( !dayMatch.Success && !hourMatch.Success && !minuteMatch.Success && !secondMatch.Success )
+				if( !weekMatch.Success && !dayMatch.Success && !hourMatch.Success && !minuteMatch.Success && !secondMatch.Success )
 				{
 					return null;
 				}
 
+				if( weekMatch.Success )
+					result += TimeSpan.FromDays(7*int.Parse(weekMatch.Value.Trim('w').Trim('W')));
 				if( dayMatch.Success )
 					result += TimeSpan.FromDays(int.Parse(dayMatch.Value.Trim('d').Trim('D')));
 				if( hourMatch.Success )
