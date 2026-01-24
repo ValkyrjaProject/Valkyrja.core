@@ -183,7 +183,7 @@ namespace Valkyrja.entities
 
 					try
 					{
-						channel.AddPermissionOverwriteAsync(role, new OverwritePermissions(sendMessages: PermValue.Deny, addReactions: PermValue.Deny)).GetAwaiter().GetResult();
+						channel.AddPermissionOverwriteAsync(role, new OverwritePermissions(sendMessages: PermValue.Deny, addReactions: PermValue.Deny, createPublicThreads: PermValue.Deny, createPrivateThreads: PermValue.Deny, sendMessagesInThreads: PermValue.Deny)).GetAwaiter().GetResult();
 					}
 					catch( HttpException e )
 					{
