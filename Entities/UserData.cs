@@ -190,7 +190,7 @@ namespace Valkyrja.entities
 				return whoisString.ToString().Replace("@everyone", "@-everyone").Replace("@here", "@-here");
 			}
 
-			return "You've been a Good boi..\n_\\*pats*_";
+			return "You've been a Good puppy..\n_\\*pats*_";
 		}
 
 		public void AddWarning(string warning)
