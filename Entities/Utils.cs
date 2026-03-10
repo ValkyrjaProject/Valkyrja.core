@@ -418,6 +418,22 @@ namespace Valkyrja.entities
 			return self.Username + (self.DiscriminatorValue == 0 ? "" : "#" + self.DiscriminatorValue.ToString("0000"));
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static string GetUsernameSanitized(this IUser self)
+		{
+			StringBuilder stringBuilder = new StringBuilder(self.Username);
+			stringBuilder.Replace("`", "\\`");
+			stringBuilder.Replace("*", "\\*");
+			stringBuilder.Replace("_", "\\_");
+			stringBuilder.Replace("|", "\\|");
+			stringBuilder.Replace("@", "\\@");
+			stringBuilder.Replace("#", "\\#");
+
+			if( self.DiscriminatorValue != 0 )
+				stringBuilder.Append("#").Append(self.DiscriminatorValue.ToString("0000"));
+			return stringBuilder.ToString();
+		}
+
 		public static async Task<IUserMessage> SendMessageSafe(this IUser self, string message, Embed embed = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed), message);
 		public static async Task<IUserMessage> SendMessageSafe(this ISocketMessageChannel self, string message, Embed embed = null, AllowedMentions allowedMentions = null, MessageReference messageReference = null) => await SendMessageSafe(async m => await self.SendMessageAsync(m, false, embed, allowedMentions: allowedMentions ?? AllowedMentions.Regular, messageReference: messageReference), message);
 
