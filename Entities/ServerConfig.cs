@@ -88,6 +88,9 @@ namespace Valkyrja.entities
 		[Column("antispam_mentions_max")]
 		public Int64 AntispamMentionsMax{ get; set; } = 0;
 
+		[Column("antispam_attachments_max")]
+		public Int64 AntispamAttachmentsMax{ get; set; } = 3;
+
 		[Column("antispam_mentions_ban")]
 		public bool AntispamMentionsBan{ get; set; } = false;
 
