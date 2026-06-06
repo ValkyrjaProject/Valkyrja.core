@@ -367,6 +367,9 @@ namespace Valkyrja.entities
 		[Column("native_gating")]
 		public bool NativeGatingEnabled{ get; set; } = false;
 
+		[Column("ban_new_accounts")]
+		public bool BanNewAccounts{ get; set; } = false;
+
 		[Column("verify_accountage")]
 		public bool VerifyAccountAge{ get; set; } = false;
 
