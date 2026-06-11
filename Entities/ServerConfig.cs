@@ -184,6 +184,9 @@ namespace Valkyrja.entities
 		[Column("antispam_joinrate_seconds")]
 		public Int64 AntispamJoinrateSeconds{ get; set; } = 0;
 
+		[Column("antispam_honeypot")]
+		public guid AntispamHoneypot{ get; set; } = 0;
+
 		[Column("operator_enforce")]
 		public bool OperatorEnforce{ get; set; } = true;
 
