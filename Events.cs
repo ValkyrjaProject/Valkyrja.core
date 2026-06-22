@@ -63,12 +63,11 @@ namespace Valkyrja.entities
 		public Func<SocketUser, SocketGuild, Task> UserUnbanned = null;
 
 		/// <summary> An event used to pass a ban instruction to the responsible module.
-		/// This will merely record the ban into the database, without actually banning them. <br />
+		/// This will merely record the ban reason into the database, without actually banning them. <br />
 		/// <see cref="T:guid" />: Server on which to ban. <br />
 		/// <see cref="T:guid" />: User to be banned. <br />
-		/// <see cref="T:TimeSpan" />: Duration of the ban. <br />
 		/// <see cref="T:string" />: Reason for the ban. </summary>
-		public Func<guid, guid, TimeSpan, string, Task> AddBan = null;
+		public Func<guid, guid, string, Task> AddBanReason = null;
 
 		/// <summary> An event used to pass a ban instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to ban. <br />
