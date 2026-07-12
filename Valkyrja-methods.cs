@@ -316,8 +316,8 @@ namespace Valkyrja.core
 			string vramUsedString = Bash.Run("nvidia-smi | grep -oP '\\d+(?=MiB\\s*/)'");
 			double vramUsed = double.Parse(vramUsedString);
 			double vramPercentage = vramUsed / 16384.0f * 100.0f;
-			string cpuTemp = Bash.Run("sensors | grep -e 'Tctl' | awk '{print $2}' | grep -oP '\\d\\d'");
-			string gpuTemp = Bash.Run("nvidia-smi | grep -oP '\\d\\dC' | grep -oP '\\d\\d'");
+			string cpuTemp = Bash.Run("sensors | grep -e 'Tctl' | awk '{print $2}' | grep -oP '\\d\\d'").Trim();
+			string gpuTemp = Bash.Run("nvidia-smi | grep -oP '\\d\\dC' | grep -oP '\\d\\d'").Trim();
 			string subscription = IsPartner(server.Id) ? "Partner   " : (IsSubscriber(server.Guild.OwnerId) ? "Subscriber" : "");
 
 			return "Service Status: <https://status.valkyrja.app>\n" +
