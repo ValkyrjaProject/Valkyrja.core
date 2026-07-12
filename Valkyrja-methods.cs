@@ -313,15 +313,20 @@ namespace Valkyrja.core
 			string cpuLoad = Bash.Run("grep 'cpu ' /proc/stat | awk '{print ($2+$4)*100/($2+$4+$5)}'");
 			string memoryUsed = Bash.Run("free | grep Mem | awk '{print $3/$2 * 100.0}'");
 			double memoryPercentage = double.Parse(memoryUsed);
-			string[] temp = Bash.Run("sensors | grep -E '(Tctl|Tccd1|Tccd2|temp1)' | awk '{print $2}'").Split('\n');
+			string vramUsedString = Bash.Run("nvidia-smi | grep -oP '\\d+(?=MiB\\s*/)'");
+			double vramUsed = double.Parse(vramUsedString);
+			double vramPercentage = vramUsed / 16384.0f * 100.0f;
+			string cpuTemp = Bash.Run("sensors | grep -e 'Tctl' | awk '{print $2}' | grep -oP '\\d\\d'");
+			string gpuTemp = Bash.Run("nvidia-smi | grep -oP '\\d\\dC' | grep -oP '\\d\\d'");
 			string subscription = IsPartner(server.Id) ? "Partner   " : (IsSubscriber(server.Guild.OwnerId) ? "Subscriber" : "");
 
 			return "Service Status: <https://status.valkyrja.app>\n" +
 			       $"```md\n" +
-			       $"[ Memory usage ][ {memoryPercentage:#00.00} % ({memoryPercentage / 100 * 128:000.00}/128 GB) ]\n" +
-			       $"[     CPU Load ][ {double.Parse(cpuLoad):#00.00} % ({temp[0]})       ]\n" +
-			       $"[     Shard ID ][ {this.CurrentShard.Id - 1:00}                      ]\n" +
-			       $"[ Subscription ][ {subscription}              ]\n" +
+			       $"[ Memory usage ][ {memoryPercentage:#00}% ({memoryPercentage / 100 * 128:#000}/128GB)        ]\n" +
+			       $"[        Tesla ][ {vramPercentage:#00}% ({vramUsed/1024:#00.0}/16GB) ({gpuTemp:#00}°C) ]\n" +
+			       $"[     CPU Load ][ {double.Parse(cpuLoad):#00}% ({cpuTemp:#00}°C)             ]\n" +
+			       $"[     Shard ID ][ {this.CurrentShard.Id - 1:#00}                     ]\n" +
+			       $"[ Subscription ][ {subscription}             ]\n" +
 			       $"```\n" +
 			       $"<:ValkThink:535541641507897354> `{latency.TotalMilliseconds:#00}`ms <:ValkyrjaNomBlob:509485197763543050>";
 		}
