@@ -45,9 +45,10 @@ namespace Valkyrja.entities
 		{
 			try
 			{
-				if( await Await(async () => await this.CommandArgs.Client.SendRawMessageToChannel(
-					this.CommandArgs.Channel,
-					string.Format(Localisation.SystemStrings.OperationQueuedString, this.CommandArgs.Client.CurrentOperations.Count, this.CommandArgs.Command.Id))) )
+				if( await Await(async () => await this.CommandArgs.Client.SendRawMessageToChannel( this.CommandArgs.Channel,
+								string.Format(Localisation.SystemStrings.OperationQueuedString, this.CommandArgs.Client.CurrentOperations.Count, this.CommandArgs.Command.Id)),
+							async () => await this.CommandArgs.Client.SendRawMessageToChannel(this.CommandArgs.Channel, Localisation.SystemStrings.OperationAlreadyRunning)
+							))
 					return;
 				this.CurrentState = State.Running;
 
@@ -96,7 +97,7 @@ namespace Valkyrja.entities
 
 		/// <summary> This is blocking call that will await til there are less than config.MaximumConcurrentOperations.
 		/// Returns true if it was canceled, false otherwise. </summary>
-		public async Task<bool> Await(Func<Task> onAwaitStarted)
+		public async Task<bool> Await(Func<Task> onAwaitStarted, Func<Task> onAlreadyRunning = null)
 		{
 			this.CommandArgs.Client.OperationsRan++;
 
@@ -111,6 +112,8 @@ namespace Valkyrja.entities
 					this.CommandArgs.Client.CurrentOperations.Remove(this);
 					this.CurrentState = State.Canceled;
 				}
+				if( onAlreadyRunning != null )
+					await onAlreadyRunning();
 				return true;
 			}
 
