@@ -22,6 +22,7 @@ namespace Valkyrja.core
 		private const string HardwareString = "I used to run on Dual Xeon server. It bork. Now it's the below!\n```md\n" +
 		                                      "|     [Mainboard][Asus PRIME x570-Pro]\n" +
 		                                      "|           [CPU][AMD Ryzen 3950X @4.2GHz 16c](32t)\n" +
+		                                      "|           [GPU][nVidia Tesla P100](16GB HBM2)\n" +
 		                                      "|     4x [Memory][G.Skill Ripjaws V 32GB DDR4-3200 CL16](128GB)\n" +
 		                                      "|    2x [Storage][Kioxia 512GB SSD](raid1|root)\n" +
 		                                      "|    4x [Storage][Corsair MP510 512GB NVMe PCIe3.0](raid5|write2.1GB/s)\n" +
@@ -29,7 +30,7 @@ namespace Valkyrja.core
 		                                      "|       [Cooling][Noctua]\n" +
 		                                      "|       [Network][2x 10gbps SFP+]\n" +
 		                                      "```\n" +
-		                                      "...running on UPS to keep all the network gear and the server running for half an hour.";
+		                                      "...connected through dual fibre 3.4gbps.";
 
 		private async Task HandleMentionResponse(Server server, SocketTextChannel channel, SocketMessage message)
 		{
