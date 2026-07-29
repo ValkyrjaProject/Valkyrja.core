@@ -47,7 +47,7 @@ namespace Valkyrja.core
 				responseString = string.IsNullOrEmpty(server.Config.CommandPrefix) ? Localisation.SystemStrings.MentionPrefixEmpty : string.Format(Localisation.SystemStrings.MentionPrefix, server.Config.CommandPrefix);
 			else if( this.RegexHardwareHelp.Match(message.Content).Success )
 				responseString = HardwareString;
-			else
+			else if( !this.RegexThink.IsMatch(message.Content) && !this.RegexThinkMod.IsMatch(message.Content) )
 				responseString = "<:ValkyrjaNomPing:509482352028942358>";
 
 			if( !string.IsNullOrEmpty(responseString) )
