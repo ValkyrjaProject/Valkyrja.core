@@ -17,7 +17,7 @@ namespace Valkyrja.core
 	public partial class ValkyrjaClient : IValkyrjaClient, IDisposable
 	{
 		public readonly Regex RegexThink = new Regex(".*(think|thoughts).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-		public readonly Regex RegexThinkMod = new Regex(".*(mod|ban|kick|warn).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+		public readonly Regex RegexThinkMod = new Regex(".*(mod|ban|kick|warn|naughty).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		private readonly Regex RegexMentionHelp = new Regex(".*(help|commands).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		private readonly Regex RegexPrefixHelp = new Regex(".*(command character|prefix).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 		private readonly Regex RegexHardwareHelp = new Regex(".*(hardware|xeon).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
