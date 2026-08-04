@@ -20,6 +20,7 @@ namespace Valkyrja.entities
 		Task SendRawMessageToChannel(SocketTextChannel channel, string message);
 		bool IsGlobalAdmin(guid id);
 		bool IsSupportTeam(guid id);
+		bool IsAiUser(guid id);
 		bool IsSubscriber(guid id);
 		bool IsPartner(guid id);
 		bool IsPremiumSubscriber(guid id);

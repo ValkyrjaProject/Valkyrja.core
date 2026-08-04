@@ -11,6 +11,7 @@ namespace Valkyrja.entities
 	{
 		public DbSet<GlobalConfig> GlobalConfigs{ get; set; }
 		public DbSet<SupportTeamMember> SupportTeam{ get; set; }
+		public DbSet<AiUser> AiUsers{ get; set; }
 		public DbSet<Subscriber> Subscribers{ get; set; }
 		public DbSet<PartneredServer> PartneredServers{ get; set; }
 		public DbSet<BlacklistEntry> Blacklist{ get; set; }
@@ -29,6 +30,9 @@ namespace Valkyrja.entities
 				.HasKey(p => p.ConfigName);
 
 			modelBuilder.Entity<SupportTeamMember>()
+				.HasKey(p => p.UserId);
+
+			modelBuilder.Entity<AiUser>()
 				.HasKey(p => p.UserId);
 
 			modelBuilder.Entity<Subscriber>()

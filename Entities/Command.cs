@@ -45,6 +45,9 @@ namespace Valkyrja.entities
 		/// <summary> True if this command can be executed by SupportTeamMembers </summary>
 		public bool IsSupportCommand{ get; set; }
 
+		/// <summary> True if this command can be executed by SupportTeamMembers </summary>
+		public bool IsAiCommand{ get; set; }
+
 		/// <summary> True if this is a custom command. </summary>
 		public bool IsCustomCommand{ get; set; }
 
@@ -115,6 +118,7 @@ namespace Valkyrja.entities
 			newCommand.IsHidden = this.IsHidden;
 			newCommand.IsCoreCommand = this.IsCoreCommand;
 			newCommand.IsSupportCommand = this.IsSupportCommand;
+			newCommand.IsAiCommand = this.IsAiCommand;
 			newCommand.IsCustomCommand = this.IsCustomCommand;
 			newCommand.Type = this.Type;
 			newCommand.IsBonusCommand = this.IsBonusCommand;
@@ -137,6 +141,8 @@ namespace Valkyrja.entities
 			if( client.IsGlobalAdmin(user.Id) )
 				return true;
 
+			if( this.IsAiCommand && client.IsAiUser(user.Id) )
+				return true;
 			if( this.IsSupportCommand && client.IsSupportTeam(user.Id) )
 				return true;
 			if( this.IsBonusAdminCommand && (client.IsBonusSubscriber(server.Guild.OwnerId) || client.IsTrialServer(server.Id)) && server.IsAdmin(user) )

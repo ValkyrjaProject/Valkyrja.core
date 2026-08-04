@@ -118,7 +118,7 @@ namespace Valkyrja.entities
 			}
 
 			if( this.CommandArgs.Client.IsGlobalAdmin(this.CommandArgs.Message.Author.Id) ||
-			    (this.CommandArgs.Client.GlobalConfig.VipSkipQueue && this.CommandArgs.Client.IsPremium(this.CommandArgs.Server)) )
+			    (!this.CommandArgs.Command.IsAiCommand && this.CommandArgs.Client.GlobalConfig.VipSkipQueue && this.CommandArgs.Client.IsPremium(this.CommandArgs.Server)) )
 			{
 				lock(this.CommandArgs.Client.OperationsLock)
 				{
@@ -132,9 +132,9 @@ namespace Valkyrja.entities
 				{
 					int index = 0;
 					lock(this.CommandArgs.Client.OperationsLock)
-						return !((index = this.CommandArgs.Client.CurrentOperations.IndexOf(this)) < this.CommandArgs.Client.GlobalConfig.OperationsMax ||
+						return !((index = this.CommandArgs.Client.CurrentOperations.IndexOf(this)) < (this.CommandArgs.Command.IsAiCommand ? 1 : this.CommandArgs.Client.GlobalConfig.OperationsMax) ||
 						         (index < this.CommandArgs.Client.GlobalConfig.OperationsMax + this.CommandArgs.Client.GlobalConfig.OperationsExtra &&
-						          this.CommandArgs.Command.Type == CommandType.Operation)); //Not a large one.
+						          this.CommandArgs.Command.Type == CommandType.Operation && !this.CommandArgs.Command.IsAiCommand)); //Not a large one.
 				}
 
 				while( this.CurrentState != State.Canceled && ShouldAwait() )

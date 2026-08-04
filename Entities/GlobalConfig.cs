@@ -13,6 +13,12 @@ namespace Valkyrja.entities
 		public guid UserId{ get; set; } = 0;
 	}
 
+	[Table("ai_users")]
+	public class AiUser
+	{
+		public guid UserId{ get; set; } = 0;
+	}
+
 	[Table("global_config")]
 	public class GlobalConfig
 	{

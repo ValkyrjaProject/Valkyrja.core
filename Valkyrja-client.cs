@@ -21,6 +21,7 @@ namespace Valkyrja.core
 		private GlobalContext GlobalDb;
 		public GlobalConfig GlobalConfig{ get; set; }
 		public List<guid> SupportTeam{ get; set; }
+		public List<guid> AiUsers{ get; set; }
 		public Shard CurrentShard{ get; set; }
 
 		public DiscordSocketClient DiscordClient;
@@ -254,6 +255,7 @@ namespace Valkyrja.core
 				}
 
 				this.SupportTeam = this.GlobalDb.SupportTeam.AsEnumerable().Select(u => u.UserId).ToList();
+				this.AiUsers = this.GlobalDb.AiUsers.AsEnumerable().Select(u => u.UserId).ToList();
 			}
 
 			Console.WriteLine("ValkyrjaClient: Configuration loaded.");

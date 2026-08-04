@@ -37,6 +37,12 @@ namespace Valkyrja.core
 			return this.SupportTeam.Contains(id);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool IsAiUser(guid id)
+		{
+			return this.AiUsers.Contains(id);
+		}
+
 
 		public bool IsSubscriber(guid id)
 		{
