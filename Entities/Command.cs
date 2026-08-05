@@ -367,6 +367,9 @@ namespace Valkyrja.entities
 				PermissionOverrides permissions = PermissionOverrides.Default;
 				switch(command.RequiredPermissions)
 				{
+					case PermissionType.OwnerOnly:
+						permissions = PermissionOverrides.Nobody;
+						break;
 					case PermissionType.ServerOwner:
 						permissions = PermissionOverrides.ServerOwner;
 						break;
