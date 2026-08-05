@@ -336,7 +336,7 @@ namespace Valkyrja.entities
 			if( command.IsAlias && !string.IsNullOrEmpty(command.ParentId) ) //Internal, not-custom alias.
 				command = this.Commands[command.ParentId.ToLower()];
 
-			if( command.ManPage == null || command.RequiredPermissions == PermissionType.OwnerOnly )
+			if( command.ManPage == null || (command.RequiredPermissions == PermissionType.OwnerOnly && !command.IsAiCommand) )
 				return null;
 
 			return command.ManPage.ToEmbed(this, command);
