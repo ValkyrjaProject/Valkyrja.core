@@ -32,7 +32,7 @@ namespace Valkyrja.core
 		                                      "|       [Cooling][Noctua]\n" +
 		                                      "|       [Network][2x 10gbps SFP+]\n" +
 		                                      "```\n" +
-		                                      "...connected through dual fibre 3.4gbps.";
+		                                      "...connected through dual fibre / unifi.";
 
 		private async Task HandleMentionResponse(Server server, SocketTextChannel channel, SocketMessage message)
 		{
