@@ -395,9 +395,9 @@ namespace Valkyrja.entities
 	public static class DiscordEx
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static string GetNickname(this IGuildUser self)
+		public static string GetNickname(this IGuildUser self, bool useId = false)
 		{
-			return (!string.IsNullOrWhiteSpace(self.Nickname) ? self.Nickname : self.Username).Replace("<@", "");
+			return (!string.IsNullOrWhiteSpace(self.Nickname) ? (useId ? self.Nickname + $"(`{self.Id}`)" : self.Nickname) : self.Username).Replace("<@", "");
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
