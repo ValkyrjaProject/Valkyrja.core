@@ -129,7 +129,7 @@ namespace Valkyrja.entities
 		/// <see cref="T:string" />: Warning message. <br />
 		/// <see cref="T:SocketGuildUser" />: User who issued the kick. 
 		/// <see cref="T:bool" />: Issued via DM. </summary>
-		public Func<Server, List<string>, List<guid>, string, SocketGuildUser, Task, bool> LogWarning = null;
+		public Func<Server, List<string>, List<guid>, string, SocketGuildUser, bool, Task> LogWarning = null;
 
 		/// <summary> An event used to pass a logMessage instruction to the responsible module. <br />
 		/// <see cref="T:Server" />: Server on which to log. <br />
